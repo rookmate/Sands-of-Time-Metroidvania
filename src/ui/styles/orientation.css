@@ -1,0 +1,158 @@
+.rotation-prompt {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 24px;
+  text-align: center;
+  background: #12272b;
+  color: #ddd0aa;
+}
+.rotation-brand {
+  position: absolute;
+  top: max(35px, env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: 3px;
+}
+.rotation-brand svg {
+  width: 23px;
+  height: 35px;
+}
+.rotation-icon {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 28px;
+  color: #cbb586;
+}
+.rotation-prompt h2 {
+  font-size: 29px;
+}
+.rotation-prompt p {
+  margin-top: 18px;
+  color: #acbdb1;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.rotation-note {
+  margin-top: 35px;
+  color: #879f95;
+  font: italic 12px Georgia;
+}
+.rotate-required > .site-header,
+.rotate-required > .game-shell,
+.rotate-required > .site-footer {
+  visibility: hidden;
+}
+.mobile-layout:not(.rotate-required) .site-header,
+.mobile-layout:not(.rotate-required) .site-footer {
+  display: none;
+}
+.mobile-layout:not(.rotate-required) .game-shell {
+  padding: 0;
+}
+.mobile-layout:not(.rotate-required) .game-stage {
+  width: min(100vw, calc(100dvh * 16 / 9));
+  height: min(100dvh, calc(100vw * 9 / 16));
+  max-width: none;
+  aspect-ratio: 16 / 9;
+  border: none;
+}
+.mobile-layout .touch-controls:not([hidden]) {
+  display: flex;
+}
+.mobile-layout .objective p {
+  display: none;
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-layout .title-content {
+    padding: 4% 0 3% 7%;
+  }
+  .mobile-layout .title-kicker {
+    font-size: 6px;
+    letter-spacing: 1.5px;
+  }
+  .mobile-layout h1 {
+    font-size: clamp(36px, 12dvh, 64px);
+    margin-top: 12px;
+  }
+  .mobile-layout .title-ornament,
+  .mobile-layout .title-footnote {
+    display: none;
+  }
+  .mobile-layout .title-description {
+    font-size: 10px;
+    line-height: 1.6;
+    margin: 14px 0;
+  }
+  .mobile-layout .title-actions {
+    width: 240px;
+    max-width: 90%;
+    gap: 2px;
+  }
+  .mobile-layout .title-actions .journey-button {
+    min-height: 33px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .mobile-layout .title-actions .menu-link {
+    min-height: 25px;
+    padding: 6px 0;
+    font-size: 10px;
+  }
+  .mobile-layout .scene-caption {
+    font-size: 7px;
+  }
+  .mobile-layout .hud-top {
+    padding: 14px 20px;
+  }
+  .mobile-layout .hud-bottom {
+    padding: 10px 20px;
+  }
+  .mobile-layout .room-hint {
+    top: 65px;
+    font-size: 9px;
+  }
+  .mobile-layout .toast {
+    bottom: 95px;
+    font-size: 10px;
+  }
+  .mobile-layout .touch-controls {
+    bottom: 70px;
+  }
+  .mobile-layout .modal-backdrop {
+    padding: 16px 24px;
+  }
+  .mobile-layout .panel-emblem {
+    display: none;
+  }
+  .mobile-layout .menu-panel h2 {
+    font-size: 28px;
+  }
+  .mobile-layout .pause-actions .menu-link {
+    min-height: 28px;
+    padding: 6px 0;
+  }
+  .mobile-layout .save-note {
+    margin-top: 12px;
+  }
+  .mobile-layout .world-map {
+    max-height: 175px;
+  }
+  .mobile-layout .map-panel h2 {
+    font-size: 22px;
+  }
+  .mobile-layout .map-objective {
+    padding: 6px 0;
+    margin-top: 4px;
+  }
+  .mobile-layout .map-bottom {
+    margin-top: 10px;
+    padding-top: 8px;
+  }
+}

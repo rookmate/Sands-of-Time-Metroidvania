@@ -1,0 +1,677 @@
+@media (min-width: 1700px) {
+  h1 {
+    font-size: 112px;
+  }
+  .title-description {
+    font-size: 19px;
+  }
+  .title-actions {
+    width: 320px;
+  }
+  .journey-button {
+    min-height: 53px;
+    font-size: 17px;
+  }
+  .title-kicker {
+    font-size: 11px;
+  }
+  .title-content {
+    padding-top: 7%;
+  }
+  .title-footnote {
+    font-size: 10px;
+  }
+  .title-description {
+    margin-bottom: 30px;
+  }
+  .hud-top {
+    padding: 34px 42px;
+  }
+  .hud-bottom {
+    padding: 28px 42px;
+  }
+  .hud-location strong {
+    font-size: 23px;
+  }
+  .objective strong {
+    font-size: 20px;
+  }
+  .objective p {
+    font-size: 14px;
+  }
+}
+@media (max-width: 1100px) {
+  .site-header {
+    padding: 0 24px;
+    height: 62px;
+  }
+  .game-shell {
+    padding: 16px;
+  }
+  .game-stage {
+    max-width: calc((100dvh - 150px) * 16 / 9);
+  }
+  .site-footer {
+    padding: 0 24px;
+    height: 56px;
+  }
+  .footer-message {
+    display: none;
+  }
+  .footer-controls {
+    gap: 15px;
+  }
+  h1 {
+    font-size: 7vw;
+  }
+  .title-content {
+    padding-top: 5%;
+  }
+  .title-kicker {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+  }
+  .title-ornament {
+    margin: 16px 0 12px;
+  }
+  .title-description {
+    margin-bottom: 17px;
+  }
+  .journey-button {
+    min-height: 39px;
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+  .menu-link {
+    font-size: 12px;
+    min-height: 30px;
+  }
+  .title-actions .menu-link {
+    padding: 8px 0;
+  }
+  .title-footnote {
+    font-size: 7px;
+  }
+  .hud-top {
+    padding: 20px;
+  }
+  .hud-bottom {
+    padding: 16px 20px;
+  }
+  .hud-location strong {
+    font-size: 15px;
+  }
+  .hud-location > span {
+    font-size: 6px;
+  }
+  .hud-buttons,
+  .vitals {
+    width: 190px;
+  }
+  .health {
+    gap: 7px;
+  }
+  .health-diamond {
+    width: 9px;
+    height: 9px;
+  }
+  .sand-grains > span {
+    width: 15px;
+  }
+  .objective strong {
+    font-size: 14px;
+  }
+  .objective p {
+    font-size: 10px;
+  }
+  .objective-label {
+    font-size: 6px;
+  }
+  .ability-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .ability {
+    width: 32px;
+  }
+  .ability-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+  .room-hint {
+    top: 80px;
+    font-size: 10px;
+  }
+  .help-columns {
+    gap: 30px;
+    margin-top: 18px;
+  }
+  .control-row {
+    margin-bottom: 10px;
+  }
+  .control-row p,
+  .help-tip {
+    font-size: 10px;
+  }
+  .help-panel h2 {
+    font-size: 26px;
+  }
+  .help-columns h3 {
+    font-size: 14px;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .help-bottom {
+    padding-top: 12px;
+  }
+  .small-label {
+    font-size: 7px;
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-size: 32px;
+  }
+  .modal-backdrop {
+    padding: 24px;
+  }
+  .map-panel h2 {
+    font-size: 27px;
+  }
+  .map-panel .small-label {
+    font-size: 6px;
+  }
+  .map-objective {
+    padding: 8px 0;
+    margin-top: 7px;
+  }
+  .world-map {
+    max-height: 270px;
+  }
+  .map-bottom {
+    margin-top: 13px;
+    padding-top: 10px;
+  }
+  .map-legend {
+    gap: 20px;
+    font-size: 8px;
+  }
+  .option-row {
+    padding: 12px 0;
+  }
+  .story-panel h2 {
+    font-size: 35px;
+  }
+  .story-narrative {
+    font-size: 14px;
+    margin: 17px 0;
+  }
+  .story-detail {
+    font-size: 10px;
+    margin-bottom: 20px;
+  }
+  .story-symbol svg {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 15px;
+  }
+  .save-note {
+    font-size: 9px;
+  }
+  .panel-emblem svg {
+    height: 39px;
+    margin-bottom: 10px;
+  }
+  .panel-subtitle {
+    margin: 13px 0 18px;
+  }
+  .pause-actions {
+    gap: 4px;
+  }
+  .pause-actions .menu-link {
+    padding: 8px 0;
+  }
+}
+@media (max-width: 760px) {
+  .header-note {
+    display: none;
+  }
+  .brand {
+    font-size: 14px;
+    letter-spacing: 2px;
+    gap: 7px;
+  }
+  .brand svg {
+    height: 31px;
+    width: 22px;
+  }
+  .site-header {
+    height: 54px;
+    padding: 0 15px;
+  }
+  .site-header nav {
+    gap: 12px;
+  }
+  .game-shell {
+    padding: 8px 0;
+    align-items: center;
+  }
+  .game-stage {
+    border-left: 0;
+    border-right: 0;
+    max-width: none;
+  }
+  .site-footer {
+    height: auto;
+    min-height: 48px;
+    padding: 10px 14px;
+  }
+  .footer-controls {
+    gap: 10px;
+    font-size: 8px;
+    flex-wrap: wrap;
+  }
+  .footer-controls > span:nth-child(n + 4) {
+    display: none;
+  }
+  .text-button {
+    font-size: 8px;
+  }
+  .title-content {
+    padding: 5% 0 3% 6%;
+    width: 49%;
+  }
+  .title-kicker {
+    font-size: 6px;
+    letter-spacing: 1px;
+    gap: 8px;
+  }
+  .title-kicker > span {
+    width: 15px;
+  }
+  h1 {
+    font-size: 7.3vw;
+    letter-spacing: 4px;
+    margin-top: 14px;
+  }
+  h1 > span {
+    letter-spacing: 3px;
+    margin-top: 6px;
+  }
+  .title-ornament {
+    margin: 12px 0 10px;
+    gap: 8px;
+    font-size: 10px;
+  }
+  .title-ornament > span {
+    width: 27px;
+  }
+  .title-description {
+    font-size: 10px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .journey-button {
+    font-size: 11px;
+    min-height: 34px;
+    padding: 8px 11px;
+  }
+  .journey-button > span:last-child {
+    font-size: 12px;
+  }
+  .title-actions {
+    width: 86%;
+    gap: 0;
+  }
+  .title-actions .menu-link {
+    padding: 6px 0;
+    font-size: 10px;
+    min-height: 24px;
+  }
+  .title-footnote {
+    display: none;
+  }
+  .scene-caption {
+    right: 5%;
+    bottom: 7%;
+    font-size: 6px;
+    letter-spacing: 1px;
+    gap: 8px;
+  }
+  .scene-caption small {
+    font-size: 9px;
+    margin-top: 5px;
+  }
+  .caption-rule {
+    height: 25px;
+  }
+  .hud-top {
+    padding: 13px;
+  }
+  .vitals {
+    width: 120px;
+  }
+  .hud-buttons {
+    width: 90px;
+    gap: 4px;
+  }
+  .hud-buttons button {
+    padding: 2px;
+  }
+  .hud-buttons button svg {
+    height: 17px;
+    width: 17px;
+  }
+  .hud-buttons kbd {
+    display: none;
+  }
+  .hud-location strong {
+    font-size: 11px;
+  }
+  .hud-location > span {
+    font-size: 5px;
+    letter-spacing: 1px;
+  }
+  .health {
+    gap: 6px;
+    padding: 3px 1px 6px;
+  }
+  .health-diamond {
+    width: 7px;
+    height: 7px;
+  }
+  .sand {
+    gap: 5px;
+  }
+  .sand-dagger svg {
+    height: 20px;
+    width: 10px;
+  }
+  .sand-grains {
+    gap: 2px;
+  }
+  .sand-grains > span {
+    width: 10px;
+    height: 4px;
+  }
+  .sand-count {
+    display: none;
+  }
+  .hud-bottom {
+    padding: 10px 13px;
+  }
+  .objective {
+    max-width: 57%;
+    gap: 5px;
+  }
+  .objective-label {
+    font-size: 5px;
+    letter-spacing: 1px;
+  }
+  .objective strong {
+    font-size: 11px;
+  }
+  .objective p {
+    font-size: 8px;
+    margin-top: 3px;
+    max-width: 230px;
+  }
+  .objective-star {
+    font-size: 17px;
+  }
+  .abilities {
+    gap: 5px;
+  }
+  .ability {
+    width: 27px;
+    gap: 3px;
+  }
+  .ability-icon {
+    width: 27px;
+    height: 27px;
+  }
+  .ability-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .ability kbd {
+    font-size: 6px;
+    height: 12px;
+  }
+  .room-hint {
+    top: 60px;
+    padding: 4px;
+    left: 15%;
+    right: 15%;
+    font-size: 8px;
+  }
+  .interact-prompt {
+    font-size: 8px;
+    padding: 4px 6px;
+    gap: 5px;
+  }
+  .interact-prompt kbd {
+    height: 15px;
+    font-size: 7px;
+  }
+  .toast {
+    font-size: 9px;
+    bottom: 85px;
+    padding: 7px 10px;
+    max-width: 85%;
+  }
+  .power-active {
+    top: 90px;
+    font-size: 7px;
+  }
+  .modal-backdrop {
+    padding: 18px;
+  }
+  .menu-panel {
+    width: 270px;
+  }
+  .small-label {
+    font-size: 6px;
+    margin-bottom: 8px;
+    letter-spacing: 1.5px;
+  }
+  h2 {
+    font-size: 24px;
+  }
+  .panel-emblem {
+    display: none;
+  }
+  .panel-subtitle {
+    font-size: 11px;
+    margin: 10px 0 14px;
+  }
+  .menu-link {
+    font-size: 11px;
+    min-height: 26px;
+  }
+  .pause-actions .menu-link {
+    padding: 5px 0;
+  }
+  .save-note {
+    font-size: 8px;
+    margin-top: 12px;
+  }
+  .outline-button {
+    font-size: 11px;
+    padding: 8px 12px;
+    min-height: 32px;
+  }
+  .help-panel h2 {
+    font-size: 21px;
+  }
+  .help-columns {
+    gap: 18px;
+    margin-top: 12px;
+  }
+  .help-columns h3 {
+    font-size: 12px;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+  .control-row {
+    gap: 9px;
+    margin-bottom: 8px;
+  }
+  .control-row > kbd {
+    min-width: 36px;
+    font-size: 6px;
+    height: 19px;
+  }
+  .control-row strong {
+    font-size: 10px;
+  }
+  .control-row p {
+    font-size: 8px;
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+  .help-tip {
+    font-size: 8px;
+    line-height: 1.5;
+  }
+  .help-bottom {
+    padding-top: 10px;
+    font-size: 8px;
+  }
+  .close-button {
+    font-size: 24px;
+    padding: 0;
+  }
+  .option-row {
+    padding: 10px 0;
+  }
+  .option-row strong {
+    font-size: 13px;
+  }
+  .option-row small {
+    font-size: 9px;
+    margin-top: 4px;
+  }
+  .options-panel {
+    width: 360px;
+  }
+  .options-panel .panel-heading {
+    margin-bottom: 10px;
+  }
+  .options-panel .outline-button {
+    margin-top: 15px;
+  }
+  .map-panel h2 {
+    font-size: 20px;
+  }
+  .map-objective {
+    gap: 8px;
+  }
+  .map-objective strong {
+    font-size: 11px;
+  }
+  .map-objective p {
+    font-size: 8px;
+    margin: 3px 0;
+  }
+  .explored {
+    font-size: 8px;
+  }
+  .map-legend {
+    gap: 10px;
+    font-size: 6px;
+  }
+  .map-legend i {
+    font-size: 11px;
+    margin-right: 2px;
+  }
+  .world-map {
+    max-height: 230px;
+  }
+  .map-bottom {
+    margin-top: 9px;
+    padding-top: 7px;
+    font-size: 7px;
+  }
+  .map-bottom kbd {
+    font-size: 7px;
+    height: 15px;
+  }
+  .story-panel {
+    max-width: 370px;
+  }
+  .story-panel h2 {
+    font-size: 28px;
+  }
+  .story-symbol svg {
+    width: 29px;
+    height: 29px;
+    margin-bottom: 10px;
+  }
+  .story-narrative {
+    font-size: 12px;
+    line-height: 1.7;
+    margin: 12px 0;
+  }
+  .story-detail {
+    font-size: 9px;
+    line-height: 1.65;
+    margin-bottom: 16px;
+  }
+  .story-panel .journey-button {
+    max-width: 240px;
+  }
+  .ending-panel h2 {
+    font-size: 27px;
+  }
+  .ending-panel .story-narrative {
+    font-size: 11px;
+    line-height: 1.6;
+    margin: 13px 0;
+  }
+  .ending-panel .story-detail {
+    margin-bottom: 12px;
+  }
+  .ending-stats {
+    margin: 14px 0 17px;
+    font-size: 17px;
+    gap: 28px;
+  }
+  .ending-stats small {
+    font-size: 7px;
+    margin-top: 5px;
+  }
+  .boss-health {
+    top: 64px;
+    left: 30%;
+    right: 30%;
+  }
+  .boss-health > span {
+    font-size: 6px;
+    letter-spacing: 1px;
+  }
+  .boss-health + .room-hint {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .touch-controls:not([hidden]) {
+    display: flex;
+  }
+  .footer-controls {
+    display: none;
+  }
+  .site-footer:before {
+    content: "Touch to explore · Rotate for a wider view";
+    font: 9px var(--mono);
+    color: #aab7a7;
+  }
+  .objective p {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,145 @@
+.title-screen {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #102526fa 0%,
+    #102526ed 23%,
+    #1025269e 43%,
+    #10252612 69%,
+    #10252600
+  );
+  position: relative;
+}
+.title-content {
+  width: 46%;
+  height: 100%;
+  padding: 6% 0 4% 7%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.title-kicker {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  font: 9px var(--mono);
+  letter-spacing: 2.5px;
+  color: #d3be8f;
+}
+.title-kicker > span {
+  width: 24px;
+  height: 1px;
+  background: #bba475;
+}
+h1 {
+  margin: 22px 0 0;
+  font-weight: 400;
+  font-size: clamp(42px, 6.6vw, 99px);
+  line-height: 0.95;
+  letter-spacing: 7px;
+  color: #eee3c9;
+  text-shadow: 0 2px 18px #152c2a25;
+}
+h1 > span {
+  display: block;
+  font-size: 0.79em;
+  letter-spacing: 6.7px;
+  margin-top: 9px;
+  color: #ddc699;
+}
+.title-ornament {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: #c8ad73;
+  margin: 23px 0 20px;
+  font-size: 14px;
+}
+.title-ornament > span {
+  height: 1px;
+  background: #b6a07070;
+  width: 48px;
+}
+.title-description {
+  font-size: clamp(12px, 1.15vw, 17px);
+  line-height: 1.8;
+  color: #c3c8b7;
+  margin: 0 0 25px;
+}
+.title-actions {
+  width: min(286px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.journey-button {
+  width: 100%;
+  min-height: 47px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 18px;
+  background: #cbb586;
+  color: #172d2e;
+  border: 1px solid #d8c599;
+  text-align: left;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+.journey-button:hover {
+  background: #e0cba0;
+  color: #112529;
+}
+.journey-button > span:last-child {
+  font-family: var(--mono);
+  font-size: 17px;
+}
+.menu-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  min-height: 38px;
+  padding: 9px 2px;
+  font-size: 14px;
+  color: #c8cdbb;
+}
+.menu-link > span {
+  font: 12px var(--mono);
+  color: #b7b79a;
+}
+.title-actions .menu-link {
+  padding: 10px 0 8px;
+}
+.title-footnote {
+  margin-top: auto;
+  padding-top: 20px;
+  font: 8px var(--mono);
+  letter-spacing: 1.65px;
+  color: #9fa995;
+}
+.scene-caption {
+  position: absolute;
+  right: 5%;
+  bottom: 6.5%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: 9px var(--mono);
+  letter-spacing: 2px;
+  color: #e0d8b6;
+  text-shadow: 0 1px 8px #102f30;
+}
+.scene-caption small {
+  display: block;
+  letter-spacing: 0.5px;
+  font: italic 13px Georgia;
+  margin-top: 8px;
+  color: #ddd8bd;
+}
+.caption-rule {
+  height: 34px;
+  width: 1px;
+  background: #cfc38b88;
+}
