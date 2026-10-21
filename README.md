@@ -35,15 +35,15 @@ Run `npm run harness`, or start `npm run dev` and open **http://localhost:5173/?
 The toolbar offers pause, single-step, restart, 1×/4×/16× playback, JSON report download, and manual takeover. **Play manually** releases automated inputs so you can practice the selected encounter. Restart to return to automation. Audio starts muted. Harness progress and options stay in memory without reading or overwriting your normal save.
 
 - `/?harness=campaign&speed=16` plays the full adaptation faster.
-- `/?harness=king` starts the Sand King encounter with test equipment.
-- `/?harness=vizier` starts the three doubles and final Vizier encounter after a fixture Grand Rewind.
+- `/?harness=king` starts the Sand King encounter with the health, sword, and powers available at that point in the campaign.
+- `/?harness=vizier` starts the three doubles and final Vizier encounter after a fixture Grand Rewind, with the final sword and twelve health. Retrying either practice fight returns to that encounter.
 - `&autoplay=0` starts paused, useful before manual takeover.
 - `&immortal=0` enables normal damage for the Prince and Farah.
 - `/?harness=legacy` retains the earlier twelve-room palace campaign for regression checks. `&explore=0` uses its shorter main route; `/?harness=guardian` retains its custom Guardian encounter.
 
 Immortality prevents combat and hazard damage and knockback. Falling out of a room still fails a run. A failure reports the current action, area, coordinates, and frame. The full report records forty ordered milestones, puzzle completion, enemy defeats, powers used, and the Dagger, Farah, and timeline state at every chapter boundary.
 
-`npm run test:harness` runs the same driver without rendering, including the full adaptation, standalone encounters, and the earlier palace route. The browser exposes `window.__sandsHarness.report()`, `.pause()`, `.resume()`, and `.step(120)`. Explicit stepping works while paused. Both browser harnesses are excluded from production builds.
+`npm run test:harness` runs the same driver without rendering, including immortal and normal-damage campaigns, standalone encounters, checkpoint reload validation, and the earlier palace route. The browser exposes `window.__sandsHarness.report()`, `.pause()`, `.resume()`, and `.step(120)`. Explicit stepping works while paused. Both browser harnesses are excluded from production builds.
 
 ## Controls
 
@@ -69,7 +69,7 @@ Touch players can use the on-screen arrows, jump, sword, and interaction buttons
 
 ## The Dagger and the palace
 
-- **Rewind** retraces up to four seconds of recorded movement and health at double playback speed, consuming one sand unit per second held. It does not restore sand or consumed collectibles. Room transitions clear the recording. After death, a safe recorded moment can be restored for one grain when available.
+- **Rewind** retraces up to four seconds of recorded movement and health at double playback speed, consuming one sand unit per second held. It restores recorded handholds but does not restore sand or consumed collectibles. Room transitions clear the recording. After death, a recorded landing or handhold can be restored for one grain if it is still supported and clear of solid obstacles.
 - **Slow Time** costs one grain and slows enemies, moving platforms, and traps to one-quarter speed for six seconds. The Prince moves normally.
 - **Sand Prison** costs two grains, freezes the room for four seconds, and doubles sword damage.
 - **Time Dash** costs one grain and grants a short, invulnerable burst across gaps. Jump first; dashing near the top of your jump gives the most clearance.

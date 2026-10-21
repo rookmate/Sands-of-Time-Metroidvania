@@ -58,8 +58,22 @@ export class CampaignHarness {
       this.game.journey.sword = this.scenario === "king" ? 1 : 3;
       this.game.journey.grandRewind = index === 39;
       this.game.journey.farah = index === 39 ? "restored" : "following";
-      this.game.abilities = new Set(["rewind", "slow", "freeze", "dash"]);
+      this.game.abilities = new Set(
+        this.scenario === "king"
+          ? ["rewind", "slow"]
+          : ["rewind", "slow", "freeze", "dash"],
+      );
+      const items = SECTIONS.slice(0, index).flatMap((s) =>
+        this.game.rooms[s.id].pickups.filter((p) => p.kind !== "sand"),
+      );
+      this.game.collected = new Set(items.map((p) => p.id));
+      this.game.player.maxHealth =
+        6 + items.filter((p) => p.kind === "heart").length;
+      this.game.player.health = this.game.player.maxHealth;
+      this.game.player.sand = this.game.player.maxSand;
       this.game.enterRoom(SECTIONS[index].id, undefined, { x: 800, y: 594 });
+      this.game.checkpoint = { room: SECTIONS[index].id, x: 800, y: 594 };
+      this.game.save(false);
     }
     this.playback = this.play();
   }

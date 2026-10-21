@@ -3,6 +3,7 @@ import type { Enemy, Options, Pickup } from "../game/types";
 import { distance } from "../game/physics";
 import { loadOptions, writeOptions } from "../game/storage";
 import { isBoss } from "../game/enemies";
+import { ABILITIES } from "../game/progression";
 import { CAMPAIGN_START, SECTIONS, SECTION_BY_ID } from "./sections";
 import { CAMPAIGN_ROOMS } from "./world";
 import {
@@ -71,6 +72,12 @@ export class CampaignGame extends Game {
     };
   }
   override get quest() {
+    if (this.room.id === "honor" && this.puzzles?.state.solved)
+      return {
+        title: "Return the Dagger to Farah",
+        text: "Farah is waiting beside her bed. Return to her and press E.",
+        room: "honor",
+      };
     const next =
       SECTIONS[Math.min(this.journey.completed.length, SECTIONS.length - 1)];
     return { title: next.title, text: next.objective, room: next.id };
@@ -85,7 +92,6 @@ export class CampaignGame extends Game {
         : freshJourney();
     this.activeRoom = "";
     super.start(continueJourney);
-    if (!this.hasDagger) this.player.sand = 0;
     this.syncRoom();
     this.notify(
       continueJourney
@@ -155,6 +161,8 @@ export class CampaignGame extends Game {
   protected override enemyDefeated(enemy: Enemy) {
     const id = `${this.room.id}:${enemy.id}`;
     if (!this.journey.defeated.includes(id)) this.journey.defeated.push(id);
+    if (enemy.kind === "vizier" && this.room.id === "honor")
+      this.notify("The Vizier has fallen. Return the Dagger to Farah.");
   }
   farahDefeatedEnemy(enemy: Enemy) {
     enemy.dead = true;
@@ -242,6 +250,7 @@ export class CampaignGame extends Game {
     if (section.id === "honor") {
       this.flags.add("victory");
       this.journey.dagger = false;
+      this.player.sand = 0;
       this.save(false);
       this.setScreen("ending");
       return true;
@@ -250,7 +259,7 @@ export class CampaignGame extends Game {
       section.title,
       section.story,
       section.reward
-        ? `A time power awakens: ${section.reward}. ${SECTIONS[index + 1].objective}`
+        ? `${ABILITIES[section.reward].name} awakens. ${SECTIONS[index + 1].objective}`
         : SECTIONS[index + 1].objective,
     );
     return true;
@@ -269,7 +278,7 @@ export class CampaignGame extends Game {
       this.puzzles.state.solved &&
       farah &&
       distance(feet, { x: farah.x + 15, y: farah.y + farah.h }) < 85;
-    if ((shapeExit && distance(feet, shapeExit) < 80) || returnDagger)
+    if ((shapeExit && distance(feet, shapeExit) <= 95) || returnDagger)
       return {
         label:
           index === 39 ? "Return the Dagger to Farah" : "Continue the story",
@@ -300,9 +309,7 @@ export class CampaignGame extends Game {
         label: interaction.label,
         action: () => {
           interaction.action();
-          if (!this.hasDagger) this.player.sand = 0;
           if (this.companion) this.companion.health = this.companion.maxHealth;
-          this.save(false);
         },
       };
     return interaction;

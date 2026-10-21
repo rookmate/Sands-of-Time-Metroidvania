@@ -45,6 +45,8 @@ interface Memory extends Vec {
   vy: number;
   health: number;
   face: number;
+  grounded: boolean;
+  grip: string | null;
 }
 export interface GameConfig {
   immortal?: boolean;
@@ -72,7 +74,7 @@ export class Game {
   particles: Particle[] = [];
   platforms: Platform[] = [];
   history: Memory[] = [];
-  ghosts: Memory[] = [];
+  ghosts: Pick<Memory, "x" | "y" | "face">[] = [];
   worldTime = 0;
   visualTime = 0;
   playTime = 0;
@@ -191,6 +193,7 @@ export class Game {
       : { ...this.startPoint };
     this.player.maxHealth = save?.maxHealth ?? 6;
     this.player.health = this.player.maxHealth;
+    this.player.sand = this.hasDagger ? this.player.maxSand : 0;
     this.enterRoom(this.checkpoint.room, undefined, this.checkpoint);
     this.setScreen("playing");
     this.notify(
@@ -318,7 +321,7 @@ export class Game {
   }
   respawn() {
     this.player.health = this.player.maxHealth;
-    this.player.sand = this.player.maxSand;
+    this.player.sand = this.hasDagger ? this.player.maxSand : 0;
     this.enterRoom(this.checkpoint.room, undefined, this.checkpoint);
     this.setScreen("playing");
     this.notify("“No, no. That is not how it happened.”");
@@ -330,12 +333,24 @@ export class Game {
       this.player.sand < 1
     )
       return undefined;
-    return [...this.history]
-      .reverse()
-      .find(
-        (m, index) =>
-          index > 90 && m.health > 0 && m.y < this.room.height - 140,
+    return [...this.history].reverse().find((m, index) => {
+      const body = { ...m, w: this.player.w, h: this.player.h - 1 };
+      const supported = m.grip
+        ? this.grips.some((grip) => grip.id === m.grip)
+        : m.grounded &&
+          this.platforms.some(
+            (p) =>
+              Math.abs(m.y + this.player.h - p.y) < 2 &&
+              m.x + body.w > p.x &&
+              m.x < p.x + p.w,
+          );
+      return (
+        index > 90 &&
+        m.health > 0 &&
+        supported &&
+        !this.platforms.some((p) => !p.oneWay && overlap(body, p))
       );
+    });
   }
   emergencyRewind() {
     const memory = this.deathMemory;
@@ -343,6 +358,13 @@ export class Game {
     Object.assign(this.player, memory);
     this.player.sand -= 1;
     this.player.invincible = 1.5;
+    this.player.vx = 0;
+    this.player.vy = 0;
+    this.player.gripCooldown = 0;
+    this.player.wallLock = 0;
+    this.player.wall = 0;
+    this.player.jumpBuffer = 0;
+    this.player.dashTime = 0;
     this.history = [];
     this.player.ledge = null;
     this.flash = 0.5;
@@ -453,9 +475,6 @@ export class Game {
         this.ghosts.push({
           x: this.player.x,
           y: this.player.y,
-          vx: 0,
-          vy: 0,
-          health: 0,
           face: this.player.face,
         });
         Object.assign(this.player, memory);
@@ -473,6 +492,8 @@ export class Game {
         vy: this.player.vy,
         health: this.player.health,
         face: this.player.face,
+        grounded: this.player.grounded,
+        grip: this.player.grip,
       });
       if (this.history.length > 480) this.history.shift();
     }
@@ -524,10 +545,11 @@ export class Game {
       if (enemy.health > 0) continue;
       enemy.dead = true;
       this.burst(enemy.x + 17, enemy.y + 20, "#7de0d0", 30);
-      player.sand = Math.min(
-        player.maxSand,
-        player.sand + enemyStats(this.tier, enemy.kind).reward,
-      );
+      if (this.hasDagger)
+        player.sand = Math.min(
+          player.maxSand,
+          player.sand + enemyStats(this.tier, enemy.kind).reward,
+        );
       this.sound.play("sand");
       this.enemyDefeated(enemy);
     }
@@ -554,6 +576,7 @@ export class Game {
     for (const pickup of this.room.pickups) {
       if (
         this.collected.has(pickup.id) ||
+        (pickup.kind === "sand" && !this.hasDagger) ||
         !hasRequirement(pickup.requires, this.abilities, this.flags)
       )
         continue;
@@ -607,7 +630,7 @@ export class Game {
         label: "Rest at the fountain",
         action: () => {
           this.player.health = this.player.maxHealth;
-          this.player.sand = this.player.maxSand;
+          this.player.sand = this.hasDagger ? this.player.maxSand : 0;
           this.checkpoint = {
             room: this.room.id,
             x: fountain.x - 15,
@@ -638,7 +661,7 @@ export class Game {
         },
       };
     for (const door of this.room.doors) {
-      if (distance(center, door) > 80) continue;
+      if (distance(center, door) > 95) continue;
       const open = hasRequirement(door.requires, this.abilities, this.flags);
       return {
         label: open ? door.label : `${door.label} · Sealed`,
