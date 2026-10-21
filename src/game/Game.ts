@@ -30,13 +30,23 @@ import {
   stepPlayer,
 } from "./physics";
 import { spawnEnemies, stepEnemies } from "./enemies";
-import { loadOptions, loadSave, writeOptions, writeSave } from "./storage";
+import {
+  defaultOptions,
+  loadOptions,
+  loadSave,
+  writeOptions,
+  writeSave,
+} from "./storage";
 import { ROOMS, START } from "./world";
 interface Memory extends Vec {
   vx: number;
   vy: number;
   health: number;
   face: number;
+}
+export interface GameConfig {
+  immortal?: boolean;
+  persist?: boolean;
 }
 export class Game {
   screen: Screen = "title";
@@ -46,7 +56,7 @@ export class Game {
   player: Player = this.createPlayer();
   input: Input;
   sound: Sound;
-  options: Options = loadOptions();
+  options: Options;
   abilities = new Set<Ability>();
   flags = new Set<StoryFlag>();
   collected = new Set<string>();
@@ -72,11 +82,14 @@ export class Game {
   toastTime = 0;
   story: Story | null = null;
   checkpoint = { room: START.room, x: START.x, y: START.y };
-  saved = loadSave();
+  saved: SaveData | null;
   attackId = 0;
   private footstep = 0;
   private sandRefill = 0;
-  constructor() {
+  constructor(readonly config: GameConfig = {}) {
+    this.options =
+      config.persist === false ? { ...defaultOptions } : loadOptions();
+    this.saved = config.persist === false ? null : loadSave();
     this.input = new Input(
       (action) => this.menuKey(action),
       () => this.screen === "playing" && !this.orientationBlocked,
@@ -201,7 +214,7 @@ export class Game {
   }
   setOption(key: keyof Options, value: boolean) {
     this.options[key] = value;
-    writeOptions(this.options);
+    if (this.config.persist !== false) writeOptions(this.options);
   }
   enterRoom(id: string, from?: string, position?: Vec) {
     const room = ROOMS[id];
@@ -261,7 +274,7 @@ export class Game {
       playTime: this.playTime,
       deaths: this.deaths,
     };
-    const success = writeSave(data);
+    const success = this.config.persist === false || writeSave(data);
     this.saved = data;
     if (!success)
       this.notify(
@@ -300,6 +313,7 @@ export class Game {
   }
   damage(amount: number, direction = -this.player.face) {
     if (
+      this.config.immortal ||
       this.player.invincible > 0 ||
       this.player.dashTime > 0 ||
       this.rewinding ||

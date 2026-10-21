@@ -1,227 +1,137 @@
-import { expect, it, vi } from "vitest";
-import { Game } from "../src/game/Game";
-import { START } from "../src/game/world";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { Harness } from "../src/harness/Harness";
 import { ORDER } from "../src/game/progression";
+import { ROOMS } from "../src/game/world";
 
-it("finishes the continuous campaign using movement, combat, powers, and interactions", () => {
+let storage: Map<string, string>;
+beforeEach(() => {
   vi.stubGlobal("window", new EventTarget());
   vi.stubGlobal(
     "document",
     Object.assign(new EventTarget(), { hidden: false }),
   );
-  const storage = new Map<string, string>();
+  storage = new Map([
+    ["sands-of-time:journey:v1", "existing player save"],
+    ["sands-of-time:options:v1", '{"music":true}'],
+  ]);
   vi.stubGlobal("localStorage", {
     getItem: (key: string) => storage.get(key) ?? null,
     setItem: (key: string, value: string) => storage.set(key, value),
   });
-  const g = new Game();
-  g.options.music = false;
-  g.options.sfx = false;
-  g.enterRoom(START.room, undefined, START);
-  g.setScreen("playing");
-  let frames = 0;
-  const step = () => {
-    if (frames++ % 54 === 0) {
-      g.input.release("attack");
-      g.input.press("attack");
-    }
-    g.update(1 / 120);
-    if (g.screen === "story") g.closeStory();
-    if (g.screen === "death") throw new Error(`Died in ${g.room.id}`);
-  };
-  const aim = (x: number) => {
-    const diff = x - g.player.x;
-    g.input.release(diff > 0 ? "left" : "right");
-    if (Math.abs(diff) > 7) g.input.press(diff > 0 ? "right" : "left");
-    else {
-      g.input.release("left");
-      g.input.release("right");
-    }
-  };
-  const walk = (x: number) => {
-    g.input.clear();
-    for (let i = 0; i < 1800; i++) {
-      aim(x);
-      step();
-      if (Math.abs(g.player.x - x) < 9 && g.player.grounded) {
-        g.input.clear();
-        return;
-      }
-    }
-    throw new Error(`Could not walk to ${x} in ${g.room.id}`);
-  };
-  const jump = (x: number, dashFrame = -1) => {
-    g.input.clear();
-    g.input.press("jump");
-    for (let i = 0; i < 240; i++) {
-      aim(x);
-      if (i === dashFrame) g.input.press("dash");
-      step();
-      if (i > 12 && g.player.grounded) {
-        g.input.clear();
-        return;
-      }
-    }
-    throw new Error(`Could not land jump to ${x} in ${g.room.id}`);
-  };
-  const use = () => {
-    const interaction = g.interaction;
-    if (!interaction)
-      throw new Error(`No interaction in ${g.room.id} at ${g.player.x}`);
-    interaction.action();
-    if (g.screen === "story") g.closeStory();
-  };
-  const waitFor = (predicate: () => boolean) => {
-    g.input.clear();
-    for (let i = 0; i < 3000; i++) {
-      if (predicate()) return;
-      step();
-    }
-    throw new Error("Moving platform did not reach its boarding position");
-  };
-  const fight = () => {
-    g.input.clear();
-    for (let i = 0; i < 2400; i++) {
-      const boss = g.boss;
-      if (!boss) return;
-      if (
-        g.freezeTime < 0.1 &&
-        g.player.sand >= 2 &&
-        Math.abs(g.player.x - boss.x) < 130
-      ) {
-        g.input.release("freeze");
-        g.input.press("freeze");
-      }
-      const target = boss.x - 55;
-      aim(target);
-      // A brief right input turns the Prince toward the boss after braking.
-      if (Math.abs(g.player.x - target) < 9 && g.player.face < 0) {
-        g.input.release("left");
-        g.input.press("right");
-      }
-      step();
-    }
-    throw new Error("Boss fight exceeded forty seconds");
-  };
+});
+afterEach(() => vi.unstubAllGlobals());
 
-  // Courtyard and the first memory.
-  walk(790);
-  jump(1040);
-  walk(1805);
-  use();
-  walk(290);
-  jump(410);
-  walk(445);
-  jump(655);
-  walk(730);
-  jump(955);
-  walk(1390);
-  walk(1235);
-  use();
-  walk(1805);
-  use();
-  expect(g.abilities.has("rewind")).toBe(true);
+function finish(harness: Harness) {
+  const report = harness.step(120000);
+  expect(report.status, report.error ?? JSON.stringify(report)).toBe("passed");
+  expect(report.deaths).toBe(0);
+  expect(report.health).toBeGreaterThan(0);
+  return report;
+}
 
-  // Tower ascent and Slow Time.
-  walk(190);
-  jump(310);
-  walk(395);
-  jump(585);
-  walk(690);
-  jump(875);
-  walk(835);
-  jump(670);
-  walk(555);
-  jump(415);
-  walk(420);
-  jump(600);
-  walk(700);
-  jump(900);
-  walk(985);
-  jump(1160);
-  use();
-  walk(310);
-  jump(435);
-  walk(485);
-  jump(750);
-  walk(1140);
-  use();
-  walk(1405);
-  use();
-  expect(g.room.id).toBe("cistern");
+it("finishes the mortal main route using movement, combat, powers, and interactions", () => {
+  const harness = new Harness({ immortal: false, explore: false });
+  const report = finish(harness);
+  expect(harness.game.screen).toBe("ending");
+  expect(report.abilities).toEqual(ORDER);
+  expect(report.flags).toEqual(["water", "guardian", "victory"]);
+  expect(report.bosses.map((b) => b.defeated)).toEqual([true, true]);
+  expect(harness.game.saved?.flags).toContain("victory");
+});
 
-  // Board the moving ferry, ride the lift, and restore the sluice.
-  walk(285);
-  use();
-  walk(430);
-  waitFor(() => g.platforms[3].x < 550);
-  g.input.press("slow");
-  step();
-  jump(g.platforms[3].x + 80);
-  jump(850);
-  walk(875);
-  jump(1030);
-  waitFor(() => g.platforms[5].y > 500 && g.platforms[5].y < 570);
-  g.input.press("slow");
-  step();
-  jump(1250);
-  waitFor(() => g.platforms[5].y < 470);
-  walk(1280);
-  jump(1580);
-  walk(1795);
-  use();
-  walk(400);
-  jump(525);
-  walk(570);
-  jump(795);
-  walk(870);
-  jump(1120);
-  use();
-  walk(1280);
-  walk(1355);
-  use();
-  walk(1595);
-  use();
-  expect(g.flags.has("water")).toBe(true);
+it("plays all twelve rooms, collects every permanent upgrade, and defeats both bosses while immortal", () => {
+  const harness = new Harness();
+  const report = finish(harness);
+  expect(report.rooms.sort()).toEqual(Object.keys(ROOMS).sort());
+  expect(report.abilities).toEqual(ORDER);
+  expect(report.powersUsed.sort()).toEqual([...ORDER].sort());
+  expect(report.collected).toEqual(
+    expect.arrayContaining(["baths-heart", "archive-heart", "palace-heart"]),
+  );
+  expect(report.bosses).toHaveLength(2);
+  for (const boss of report.bosses) {
+    expect(boss.defeated).toBe(true);
+    expect(boss.phases).toEqual([0, 1]);
+    expect(boss.telegraphs).toBeGreaterThan(0);
+  }
+  expect(harness.game.player.maxHealth).toBe(9);
+  expect(harness.game.screen).toBe("ending");
+  expect([...storage.values()]).toEqual([
+    "existing player save",
+    '{"music":true}',
+  ]);
+  console.info("Campaign harness report", JSON.stringify(report));
+});
 
-  // The last memory and the Guardian.
-  walk(320);
-  jump(455);
-  walk(530);
-  jump(740);
-  walk(850);
-  jump(1080);
-  walk(1510);
-  use();
-  walk(1795);
-  use();
-  walk(255);
-  use();
-  walk(350);
-  jump(505);
-  jump(1015, 30);
-  walk(1180);
-  fight();
-  walk(1795);
-  use();
-  expect(g.flags.has("guardian")).toBe(true);
+it.each(["guardian", "vizier"] as const)(
+  "runs the %s encounter with live attacks and both phases",
+  (scenario) => {
+    const harness = new Harness({ scenario });
+    const report = finish(harness);
+    expect(report.bosses[0].defeated).toBe(true);
+    expect(report.bosses[0].phases).toEqual([0, 1]);
+    expect(report.bosses[0].telegraphs).toBeGreaterThan(1);
+    if (scenario === "vizier")
+      expect(report.bosses[0].projectiles).toBeGreaterThan(3);
+    expect(report.health).toBe(6);
+    expect(
+      harness.game.flags.has(scenario === "vizier" ? "victory" : "guardian"),
+    ).toBe(true);
+  },
+);
 
-  // Final approach and the Vizier, with no teleports or resource overrides.
-  walk(290);
-  jump(420);
-  jump(810, 30);
-  walk(960);
-  jump(1470, 47);
-  walk(1585);
-  use();
-  walk(1795);
-  use();
-  walk(900);
-  fight();
-  expect(g.screen).toBe("ending");
-  expect([...g.abilities]).toEqual(ORDER);
-  expect(g.flags.has("victory")).toBe(true);
-  expect(g.saved?.flags).toContain("victory");
-  expect(g.deaths).toBe(0);
-  expect(g.player.health).toBeGreaterThan(0);
+it("pauses, single-steps, and resumes without advancing the simulation while paused", () => {
+  const harness = new Harness();
+  harness.pause();
+  expect(harness.status).toBe("paused");
+  expect(harness.report().frames).toBe(0);
+  harness.step();
+  expect(harness.status).toBe("paused");
+  expect(harness.report().frames).toBe(1);
+  harness.resume();
+  expect(harness.status).toBe("running");
+  harness.step(60);
+  expect(harness.report().frames).toBe(61);
+});
+
+it("ignores lethal damage and knockback in immortal mode", () => {
+  const harness = new Harness({ scenario: "vizier" });
+  const g = harness.game;
+  g.player.invincible = 0;
+  const before = { health: g.player.health, vx: g.player.vx, vy: g.player.vy };
+  g.damage(100, -1);
+  expect({ health: g.player.health, vx: g.player.vx, vy: g.player.vy }).toEqual(
+    before,
+  );
+  expect(g.screen).toBe("playing");
+});
+
+it("never reads or writes the player's persistent save or settings", () => {
+  const read = vi.spyOn(localStorage, "getItem");
+  const write = vi.spyOn(localStorage, "setItem");
+  const harness = new Harness({ scenario: "guardian" });
+  harness.game.setOption("music", true);
+  finish(harness);
+  expect(read).not.toHaveBeenCalled();
+  expect(write).not.toHaveBeenCalled();
+  expect(harness.game.saved?.flags).toContain("guardian");
+});
+
+it("fails with the route step, room, and coordinates when traversal gets stuck", () => {
+  const harness = new Harness();
+  harness.game.player.wallLock = 100;
+  const report = harness.step(2000);
+  expect(report.status).toBe("failed");
+  expect(report.error).toContain("Could not walk to 455");
+  expect(report.error).toContain("room palace");
+  expect(report.error).toContain("x=");
+  const frame = report.frames;
+  expect(harness.step().frames).toBe(frame);
+});
+
+it("treats a missed platform and falling into a pit as failures even while immortal", () => {
+  const harness = new Harness();
+  harness.game.player.y = harness.game.room.height + 100;
+  expect(harness.step().status).toBe("failed");
+  expect(harness.report().error).toContain("fell out of the room");
 });

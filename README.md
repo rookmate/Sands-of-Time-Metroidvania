@@ -17,12 +17,29 @@ Open the local URL printed by Vite, normally **http://localhost:5173**. Click **
 
 ```sh
 npm test          # Physics, traversal, progression, combat, and save checks
+npm run test:harness # Complete campaign and standalone boss runs, without a browser
+npm run harness   # Open the rendered, immortal campaign harness
 npm run build     # Type checking and production build
 npm run preview   # Serve the production build locally
 npm run format    # Format source and documentation
 ```
 
 The `dist/` directory is a standalone static site. Deploy its contents to any static web host at the site root. No backend is required. Current desktop browsers with Canvas 2D and Web Audio are supported. Mobile play is landscape-only, with touch controls. Portrait orientation displays a rotation prompt and pauses active play; turning back to landscape resumes it. Keyboard and a larger screen are recommended for the precise jumps.
+
+## Game harness
+
+Run `npm run harness`, or start `npm run dev` and open **http://localhost:5173/?harness=campaign**. The automated player visits all twelve rooms, collects all four powers and three health rubies, uses every time power, restores the sluice, defeats both bosses, and reaches the ending. It sends normal inputs through the real 120 Hz simulation. Campaign playback never teleports, grants powers, or refills resources directly.
+
+The development toolbar selects the entire game, Sand Guardian, or Vizier. It has pause, single-step, restart, 1×/4×/16× playback, and a JSON report download. **Play manually** releases the automated inputs and lets you practice the current encounter with the selected immortality setting. Restart to return to automation. Audio starts muted. Harness progress and settings stay in memory and do not read or overwrite your normal save.
+
+- `/?harness=campaign&speed=16` runs the full route faster.
+- `/?harness=guardian` or `/?harness=vizier` starts at that boss with all powers. Boss fixtures set the spawn and prerequisite flags; boss health and attack rules are unchanged.
+- `&autoplay=0` starts paused, useful for manual boss practice.
+- `&immortal=0&explore=0` runs the main route with normal damage. Omit `explore=0` to include the optional rooms and rubies.
+
+Immortality prevents combat and hazard damage and knockback. Falls out of a room still fail the run, so it cannot conceal a broken jump. Immortal boss runs keep time flowing to exercise telegraphs, projectiles, and both phases. Mortal runs use Sand Prison in boss fights.
+
+For a fast regression check, `npm run test:harness` executes the same driver without rendering, including the mortal main route, immortal full exploration, and each boss separately. A failed run reports its route step, room, coordinates, and frame. The completed campaign prints a JSON report with rooms, collected upgrades, powers used, and boss activity. The browser exposes `window.__sandsHarness.report()`, `.pause()`, `.resume()`, and `.step(120)` for inspection. Explicit stepping also works while paused. The harness and toolbar are excluded from production builds.
 
 ## Controls
 
@@ -89,8 +106,9 @@ The game uses TypeScript, Canvas 2D, the Web Audio API, and Vite. Rendering runs
 | `src/game/audio.ts`       | Synthesized score and sound effects                                                           |
 | `src/render/`             | Procedural scenery, cached terrain, animated actors, and effects                              |
 | `src/ui/`                 | Menus, HUD, SVG exploration map, controls, and styles                                         |
+| `src/harness/`            | Shared campaign input driver, boss fixtures, reports, and development playback controls       |
 | `tests/`                  | Movement and gameplay checks, plus a continuous campaign playthrough                          |
 
 To add a room, define a `Room` in `world.ts`, give it unique pickup IDs, add reciprocal door connections, and assign a map position. Set its `mapLabel` for the exploration map. Gates use typed ability or story requirements; objectives and tier rules belong in `progression.ts`. Room artwork follows its theme. Renderers read game state without changing simulation.
 
-The tests exercise real fixed-step jumps through the main terraces, tower, cistern, and final bridge, along with gate reachability, return connections, sand costs, rewind behavior, damage, saving, and the ending. A continuous campaign test reaches the ending using movement, combat, and time powers with enemies active, without teleporting or granting resources. The Vite development build exposes `window.__sands` for inspection. This inspection handle is excluded from the production build.
+The tests exercise real fixed-step jumps through the main terraces, tower, cistern, and final bridge, along with gate reachability, return connections, sand costs, rewind behavior, damage, saving, and the ending. The campaign harness reaches the ending using movement, combat, and time powers with enemies active, without teleporting or granting resources. The Vite development build exposes `window.__sands` for inspection. This inspection handle is excluded from the production build.

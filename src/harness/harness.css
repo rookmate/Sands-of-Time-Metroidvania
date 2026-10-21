@@ -1,0 +1,47 @@
+.harness-toolbar {
+  padding: 12px 24px;
+  border-top: 1px solid #c2b88b33;
+  background: #152126;
+  color: #e8e2cf;
+  font: 12px var(--mono);
+}
+.harness-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.harness-controls label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.harness-controls select,
+.harness-controls button {
+  padding: 6px 8px;
+  border: 1px solid #c2b88b66;
+  border-radius: 2px;
+  background: #101b20;
+  color: inherit;
+  font: inherit;
+}
+.harness-controls button:disabled {
+  opacity: 0.45;
+}
+.harness-toolbar output {
+  display: block;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+#app:has(.harness-toolbar) .game-stage {
+  max-width: calc((100dvh - 280px) * 16 / 9);
+}
+@media (max-width: 760px) {
+  .harness-toolbar {
+    padding: 12px;
+  }
+  #app:has(.harness-toolbar) .game-stage {
+    max-width: none;
+  }
+}
