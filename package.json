@@ -8,6 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
+    "test:harness": "vitest run tests/campaign.test.ts --reporter=verbose",
+    "harness": "vite --host 0.0.0.0 --open /?harness=campaign",
     "format": "prettier --write src tests index.html README.md package.json tsconfig.json",
     "format:check": "prettier --check src tests index.html README.md package.json tsconfig.json"
   },
