@@ -18,6 +18,20 @@ export interface Platform extends Rect {
   range?: number;
   speed?: number;
 }
+export interface Grip extends Vec {
+  id: string;
+  kind: "bar" | "rope" | "ladder";
+  length?: number;
+}
+export interface Companion extends Rect {
+  vx: number;
+  vy: number;
+  face: number;
+  health: number;
+  maxHealth: number;
+  cooldown: number;
+  holding: Vec | null;
+}
 export interface Door extends Vec {
   to: string;
   label: string;
@@ -25,14 +39,23 @@ export interface Door extends Vec {
   hint?: string;
 }
 export type PickupKind =
-  "rewind" | "slow" | "freeze" | "dash" | "sand" | "heart";
+  "rewind" | "slow" | "freeze" | "dash" | "sand" | "heart" | "dagger" | "sword";
 export interface Pickup extends Vec {
   id: string;
   kind: PickupKind;
   requires?: Requirement;
 }
 export interface EnemySpawn extends Vec {
-  kind: "guard" | "archer" | "brute" | "guardian" | "vizier";
+  kind:
+    | "guard"
+    | "archer"
+    | "brute"
+    | "guardian"
+    | "vizier"
+    | "king"
+    | "double"
+    | "bird"
+    | "scarab";
   patrol: [number, number];
   tier?: number;
 }
@@ -58,6 +81,7 @@ export interface Room {
   fountain?: Vec;
   event?: Vec & { flag: StoryFlag; label: string; requires?: Requirement };
   hint: string;
+  grips?: Grip[];
 }
 export interface Player extends Rect {
   vx: number;
@@ -81,6 +105,8 @@ export interface Player extends Rect {
   dashCooldown: number;
   ledge: Vec | null;
   wallLock: number;
+  grip: string | null;
+  gripCooldown: number;
 }
 export interface Enemy extends Rect {
   id: number;
@@ -97,6 +123,7 @@ export interface Enemy extends Rect {
   attackId: number;
   dead: boolean;
   phase: number;
+  protected?: boolean;
 }
 export interface Projectile extends Vec {
   vx: number;

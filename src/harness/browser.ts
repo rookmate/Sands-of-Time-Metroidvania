@@ -1,23 +1,35 @@
-import { HARNESS_STEP, Harness, type Scenario } from "./Harness";
+import { HARNESS_STEP, Harness } from "./Harness";
+import { CampaignHarness } from "./CampaignHarness";
 import "./harness.css";
 
 export class BrowserHarness {
-  readonly harness: Harness;
+  readonly harness: Harness | CampaignHarness;
+  private readonly selection: string;
   private speed: number;
   private manual = false;
   private toolbar: HTMLElement | null = null;
   private clock = 0;
   constructor(params: URLSearchParams) {
     const requested = params.get("harness");
-    const scenario: Scenario =
-      requested === "guardian" || requested === "vizier"
-        ? requested
-        : "campaign";
-    this.harness = new Harness({
-      scenario,
-      immortal: params.get("immortal") !== "0",
-      explore: params.get("explore") !== "0",
-    });
+    this.selection = ["king", "vizier", "guardian", "legacy"].includes(
+      requested ?? "",
+    )
+      ? requested!
+      : "campaign";
+    this.harness =
+      this.selection === "guardian" || this.selection === "legacy"
+        ? new Harness({
+            scenario: this.selection === "guardian" ? "guardian" : "campaign",
+            immortal: params.get("immortal") !== "0",
+            explore: params.get("explore") !== "0",
+          })
+        : new CampaignHarness({
+            scenario:
+              this.selection === "king" || this.selection === "vizier"
+                ? this.selection
+                : "campaign",
+            immortal: params.get("immortal") !== "0",
+          });
     const speed = Number(params.get("speed") ?? 1);
     this.speed = [1, 4, 16].includes(speed) ? speed : 1;
     if (params.get("autoplay") === "0") this.harness.pause();
@@ -29,7 +41,7 @@ export class BrowserHarness {
     bar.innerHTML = `
       <div class="harness-controls">
         <strong>Test harness</strong>
-        <label>Run <select name="scenario"><option value="campaign">Entire game</option><option value="guardian">Sand Guardian</option><option value="vizier">Vizier</option></select></label>
+        <label>Run <select name="scenario"><option value="campaign">Full adaptation · 40 sections</option><option value="king">Sand King</option><option value="vizier">Vizier and doubles</option><option value="legacy">Compact palace · 12 rooms</option><option value="guardian">Legacy Sand Guardian</option></select></label>
         <label><input name="immortal" type="checkbox"> Immortal</label>
         <label>Speed <select name="speed"><option value="1">1×</option><option value="4">4×</option><option value="16">16×</option></select></label>
         <button type="button" data-control="restart">Restart</button>
@@ -42,7 +54,7 @@ export class BrowserHarness {
     const scenario = bar.querySelector<HTMLSelectElement>('[name="scenario"]')!;
     const immortal = bar.querySelector<HTMLInputElement>('[name="immortal"]')!;
     const speed = bar.querySelector<HTMLSelectElement>('[name="speed"]')!;
-    scenario.value = this.harness.scenario;
+    scenario.value = this.selection;
     immortal.checked = this.harness.immortal;
     speed.value = String(this.speed);
     const restart = () => {
@@ -112,7 +124,7 @@ export class BrowserHarness {
     this.toolbar.querySelector("output")!.textContent = this.manual
       ? `Manual play · ${report.room} · ${report.immortal ? "immortal" : "mortal"} · restart to run automation again`
       : (report.error ??
-        `${report.status} · ${report.room} · step ${report.step}/${report.totalSteps} · ${report.seconds.toFixed(1)}s · ${report.rooms.length}/12 rooms · ${report.action}`);
+        `${report.status} · ${report.room} · step ${report.step}/${report.totalSteps} · ${report.seconds.toFixed(1)}s · ${report.rooms.length}/${Object.keys(this.harness.game.rooms).length} areas · ${report.action}`);
     const terminal = report.status === "passed" || report.status === "failed";
     for (const control of ["pause", "step", "manual"]) {
       this.toolbar.querySelector<HTMLButtonElement>(

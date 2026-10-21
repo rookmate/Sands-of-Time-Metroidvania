@@ -76,6 +76,13 @@ export class Input {
   endStep() {
     this.pressed.clear();
   }
+  snapshotHeld() {
+    return [...this.held];
+  }
+  restoreHeld(actions: Action[]) {
+    this.held = new Set(actions);
+    this.pressed.clear();
+  }
   clear() {
     this.held.clear();
     this.pressed.clear();

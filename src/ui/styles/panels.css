@@ -441,3 +441,48 @@ h2 {
 [hidden] {
   display: none !important;
 }
+
+.chapter-route {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  max-height: 300px;
+  overflow-y: auto;
+  font: 12px var(--mono);
+}
+.chapter-route li {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #c2b88b22;
+  color: var(--muted);
+}
+.chapter-route li.current {
+  color: #e8d5a5;
+}
+.chapter-route li span:last-child {
+  font-size: 10px;
+}
+.journey-status {
+  display: block;
+  margin-top: 6px;
+  font: 10px var(--mono);
+  color: #d8c8a3;
+}
+@media (max-width: 760px) {
+  .chapter-route {
+    font-size: 10px;
+    max-height: 220px;
+  }
+  .chapter-route li {
+    gap: 6px;
+    grid-template-columns: 24px 1fr;
+  }
+  .chapter-route li span:last-child {
+    grid-column: 2;
+  }
+  .journey-status {
+    font-size: 7px;
+  }
+}

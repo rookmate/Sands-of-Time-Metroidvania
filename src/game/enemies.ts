@@ -1,6 +1,20 @@
 import type { Enemy, EnemySpawn, Platform, Player, Projectile } from "./types";
 import { GRAVITY, moveBody } from "./physics";
 import { enemyStats } from "./progression";
+export const isBoss = (kind: EnemySpawn["kind"]) =>
+  ["guardian", "vizier", "king", "double"].includes(kind);
+export const enemyName = (kind: EnemySpawn["kind"]) =>
+  ({
+    guard: "Sand guard",
+    archer: "Sand archer",
+    brute: "Sand brute",
+    guardian: "Sand Guardian",
+    vizier: "The Vizier",
+    king: "King Shahraman",
+    double: "Vizier double",
+    bird: "Sand bird",
+    scarab: "Scarab",
+  })[kind];
 export function spawnEnemies(
   spawns: EnemySpawn[],
   tier: number,
@@ -15,7 +29,7 @@ export function spawnEnemies(
         !(s.kind === "vizier" && victory),
     )
     .map((s, id) => {
-      const boss = s.kind === "vizier" || s.kind === "guardian";
+      const boss = isBoss(s.kind);
       const h = boss ? 88 : s.kind === "brute" ? 64 : 52;
       const health = enemyStats(tier, s.kind).health;
       return {
@@ -53,11 +67,26 @@ export function stepEnemies(
   for (const enemy of enemies) {
     if (enemy.dead) continue;
     enemy.hitFlash = Math.max(0, enemy.hitFlash - dt);
-    if (frozen) continue;
+    if (frozen || enemy.protected) continue;
     const stats = enemyStats(tier, enemy.kind);
     const dx = player.x - enemy.x,
       dy = Math.abs(player.y + player.h - enemy.y - enemy.h);
-    const boss = enemy.kind === "guardian" || enemy.kind === "vizier";
+    const boss = isBoss(enemy.kind);
+    if (enemy.kind === "bird") {
+      enemy.cooldown -= dt;
+      enemy.face = Math.sign(dx) || 1;
+      enemy.x += enemy.face * 95 * dt;
+      enemy.y += Math.sign(player.y - 30 - enemy.y) * 60 * dt;
+      if (
+        Math.abs(dx) < 50 &&
+        Math.abs(player.y - enemy.y) < 65 &&
+        enemy.cooldown <= 0
+      ) {
+        damage(1, enemy.face);
+        enemy.cooldown = 1.2;
+      }
+      continue;
+    }
     const ranged = enemy.kind === "archer" || enemy.kind === "vizier";
     enemy.phase = boss && enemy.health < enemy.maxHealth * 0.5 ? 1 : 0;
     enemy.cooldown -= dt;
