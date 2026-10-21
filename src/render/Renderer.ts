@@ -17,6 +17,11 @@ import {
   type Context,
 } from "./shapes";
 import { drawEnemy, drawPrince } from "./actors";
+import {
+  drawCampaignObjects,
+  drawCampaignScenery,
+  drawTraversal,
+} from "./campaign";
 export class Renderer {
   private context: Context;
   private backdrops = new Map<string, HTMLCanvasElement>();
@@ -91,8 +96,11 @@ export class Renderer {
         1.2,
       );
     }
-    if (!this.backdrops.has(room.id))
+    if (!this.backdrops.has(room.id)) {
       this.backdrops.set(room.id, buildBackdrop(room));
+      if (this.backdrops.size > 4)
+        this.backdrops.delete(this.backdrops.keys().next().value!);
+    }
     c.save();
     const shakeX =
       g.options.shake && g.shake > 0 ? Math.sin(t * 110) * g.shake * 13 : 0;
@@ -137,28 +145,37 @@ export class Renderer {
       }
     }
     this.roomDetails(c);
-    if (!this.terrain.has(room.id)) {
-      const layer = document.createElement("canvas");
-      layer.width = room.width;
-      layer.height = room.height;
-      const ctx = layer.getContext("2d")!;
-      room.platforms.forEach((platform, index) => {
-        if (platform.kind !== "moving")
-          drawPlatform(ctx, platform, pal, index * 71 + room.id.length);
-      });
-      this.terrain.set(room.id, layer);
-      if (this.terrain.size > 3) {
-        const oldest = this.terrain.keys().next().value!;
-        this.terrain.delete(oldest);
-        this.backdrops.delete(oldest);
+    drawCampaignScenery(c, g);
+    if (g.campaignProgress) {
+      g.platforms.forEach((platform, index) =>
+        drawPlatform(c, platform, pal, index * 71 + room.id.length),
+      );
+    } else {
+      if (!this.terrain.has(room.id)) {
+        const layer = document.createElement("canvas");
+        layer.width = room.width;
+        layer.height = room.height;
+        const ctx = layer.getContext("2d")!;
+        room.platforms.forEach((platform, index) => {
+          if (platform.kind !== "moving")
+            drawPlatform(ctx, platform, pal, index * 71 + room.id.length);
+        });
+        this.terrain.set(room.id, layer);
+        if (this.terrain.size > 3) {
+          const oldest = this.terrain.keys().next().value!;
+          this.terrain.delete(oldest);
+          this.backdrops.delete(oldest);
+        }
       }
+      c.drawImage(this.terrain.get(room.id)!, 0, 0);
+      g.platforms.forEach((platform, index) => {
+        if (platform.kind === "moving")
+          drawPlatform(c, platform, pal, index * 71 + room.id.length);
+      });
     }
-    c.drawImage(this.terrain.get(room.id)!, 0, 0);
-    g.platforms.forEach((platform, index) => {
-      if (platform.kind === "moving")
-        drawPlatform(c, platform, pal, index * 71 + room.id.length);
-    });
     this.hazards(c);
+    drawTraversal(c, g);
+    drawCampaignObjects(c, g);
     if (room.fountain) this.fountain(c, room.fountain.x, room.fountain.y);
     for (const pickup of room.pickups) {
       if (g.collected.has(pickup.id)) continue;
@@ -171,7 +188,11 @@ export class Renderer {
           ? "#eac582"
           : pickup.kind === "heart"
             ? "#e1a296"
-            : ABILITIES[pickup.kind].color;
+            : pickup.kind === "dagger"
+              ? "#78e2d4"
+              : pickup.kind === "sword"
+                ? "#e8e2cf"
+                : ABILITIES[pickup.kind].color;
       glow(
         c,
         pickup.x,
@@ -229,7 +250,7 @@ export class Renderer {
       c.restore();
     }
     for (const ghost of g.ghosts)
-      drawPrince(c, { ...g.player, ...ghost }, t, true);
+      drawPrince(c, { ...g.player, ...ghost }, t, true, g.hasDagger);
     g.enemies.forEach((enemy) =>
       drawEnemy(c, enemy, g.worldTime, g.freezeTime > 0),
     );
@@ -243,10 +264,11 @@ export class Renderer {
           { ...g.player, x: g.player.x - g.player.face * i * 18 },
           t,
           true,
+          g.hasDagger,
         );
     }
     if (g.player.invincible <= 0 || Math.sin(t * 35) > -0.3)
-      drawPrince(c, g.player, t);
+      drawPrince(c, g.player, t, false, g.hasDagger);
     for (const projectile of g.projectiles) {
       glow(c, projectile.x, projectile.y, 23, "#ffd68b45");
       ellipse(

@@ -1,9 +1,11 @@
 import type {
   Ability,
   Enemy,
+  Companion,
   Options,
   Particle,
   Platform,
+  Pickup,
   Player,
   Projectile,
   Room,
@@ -29,7 +31,7 @@ import {
   platformPositions,
   stepPlayer,
 } from "./physics";
-import { spawnEnemies, stepEnemies } from "./enemies";
+import { isBoss, spawnEnemies, stepEnemies } from "./enemies";
 import {
   defaultOptions,
   loadOptions,
@@ -47,8 +49,12 @@ interface Memory extends Vec {
 export interface GameConfig {
   immortal?: boolean;
   persist?: boolean;
+  rooms?: Record<string, Room>;
+  start?: Vec & { room: string };
 }
 export class Game {
+  readonly rooms: Record<string, Room>;
+  readonly startPoint: Vec & { room: string };
   screen: Screen = "title";
   orientationBlocked = false;
   previousScreen: Screen = "title";
@@ -87,6 +93,8 @@ export class Game {
   private footstep = 0;
   private sandRefill = 0;
   constructor(readonly config: GameConfig = {}) {
+    this.rooms = config.rooms ?? ROOMS;
+    this.startPoint = config.start ?? START;
     this.options =
       config.persist === false ? { ...defaultOptions } : loadOptions();
     this.saved = config.persist === false ? null : loadSave();
@@ -95,7 +103,7 @@ export class Game {
       () => this.screen === "playing" && !this.orientationBlocked,
     );
     this.sound = new Sound(this.options);
-    this.enterRoom("palace", undefined, { x: 1140, y: 469 });
+    this.enterRoom(this.startPoint.room, undefined, { x: 1140, y: 469 });
     this.player.grounded = true;
     window.addEventListener("blur", () => {
       if (this.screen === "playing") this.setScreen("pause");
@@ -131,18 +139,42 @@ export class Game {
       dashCooldown: 0,
       ledge: null,
       wallLock: 0,
+      grip: null,
+      gripCooldown: 0,
     };
   }
   get tier() {
     return this.abilities.size;
   }
+  get hasDagger() {
+    return true;
+  }
+  get swordPower() {
+    return 1;
+  }
+  get companion(): Companion | null {
+    return null;
+  }
+  get campaignProgress(): {
+    completed: number;
+    total: number;
+    part: string;
+    dagger: boolean;
+    farah: string;
+  } | null {
+    return null;
+  }
+  get grips() {
+    return this.room.grips ?? [];
+  }
+  protected roomPlatforms(time: number) {
+    return platformPositions(this.room.platforms, time);
+  }
   get quest() {
     return objective(this.abilities, this.flags);
   }
   get boss() {
-    return this.enemies.find(
-      (e) => !e.dead && (e.kind === "guardian" || e.kind === "vizier"),
-    );
+    return this.enemies.find((e) => !e.dead && isBoss(e.kind));
   }
   start(continueJourney = false) {
     this.sound.start();
@@ -151,12 +183,12 @@ export class Game {
     this.abilities = new Set(save?.abilities ?? []);
     this.flags = new Set(save?.flags ?? []);
     this.collected = new Set(save?.collected ?? []);
-    this.visited = new Set(save?.visited ?? ["palace"]);
+    this.visited = new Set(save?.visited ?? [this.startPoint.room]);
     this.playTime = save?.playTime ?? 0;
     this.deaths = save?.deaths ?? 0;
     this.checkpoint = save
       ? { room: save.room, ...save.checkpoint }
-      : { room: START.room, x: START.x, y: START.y };
+      : { ...this.startPoint };
     this.player.maxHealth = save?.maxHealth ?? 6;
     this.player.health = this.player.maxHealth;
     this.enterRoom(this.checkpoint.room, undefined, this.checkpoint);
@@ -217,7 +249,7 @@ export class Game {
     if (this.config.persist !== false) writeOptions(this.options);
   }
   enterRoom(id: string, from?: string, position?: Vec) {
-    const room = ROOMS[id];
+    const room = this.rooms[id];
     if (!room) return;
     this.room = room;
     this.visited.add(id);
@@ -234,6 +266,7 @@ export class Game {
     this.player.vx = 0;
     this.player.vy = 0;
     this.player.ledge = null;
+    this.player.grip = null;
     this.player.wall = 0;
     this.player.invincible = 1;
     this.player.dashTime = 0;
@@ -253,7 +286,7 @@ export class Game {
       this.flags.has("guardian"),
       this.flags.has("victory"),
     );
-    this.platforms = platformPositions(room.platforms, this.worldTime);
+    this.platforms = this.roomPlatforms(this.worldTime);
     this.camera = {
       x: clamp(this.player.x - 460, 0, room.width - 1280),
       y: clamp(this.player.y - 400, 0, room.height - 720),
@@ -291,7 +324,12 @@ export class Game {
     this.notify("“No, no. That is not how it happened.”");
   }
   get deathMemory() {
-    if (!this.abilities.has("rewind") || this.player.sand < 1) return undefined;
+    if (
+      !this.hasDagger ||
+      !this.abilities.has("rewind") ||
+      this.player.sand < 1
+    )
+      return undefined;
     return [...this.history]
       .reverse()
       .find(
@@ -354,6 +392,12 @@ export class Game {
     }
   }
   private spend(ability: Ability): boolean {
+    if (!this.hasDagger) {
+      this.notify(
+        "The Dagger is out of your hands. Time powers are unavailable.",
+      );
+      return false;
+    }
     if (!this.abilities.has(ability)) {
       this.notify(`${ABILITIES[ability].name} has not yet awakened.`);
       return false;
@@ -399,6 +443,7 @@ export class Game {
     }
     this.rewinding =
       this.input.down("rewind") &&
+      this.hasDagger &&
       this.abilities.has("rewind") &&
       this.player.sand > dt &&
       this.history.length > 2;
@@ -455,18 +500,21 @@ export class Game {
     for (const enemy of this.enemies) {
       if (
         enemy.dead ||
+        enemy.protected ||
         enemy.attackId === this.attackId ||
         !overlap(hitbox, enemy)
       )
         continue;
       enemy.attackId = this.attackId;
       enemy.health -=
-        (player.combo === 0 ? 2 : 1) * (this.freezeTime > 0 ? 2 : 1);
+        (player.combo === 0 ? 2 : 1) *
+        (this.freezeTime > 0 ? 2 : 1) *
+        (["king", "double", "vizier"].includes(enemy.kind)
+          ? Math.min(2, this.swordPower)
+          : this.swordPower);
       enemy.hitFlash = 0.15;
-      enemy.x +=
-        player.face *
-        (enemy.kind === "vizier" || enemy.kind === "guardian" ? 4 : 15);
-      if (enemy.kind !== "guardian" && enemy.kind !== "vizier") {
+      enemy.x += player.face * (isBoss(enemy.kind) ? 4 : 15);
+      if (!isBoss(enemy.kind)) {
         enemy.telegraph = 0;
         enemy.cooldown = Math.max(enemy.cooldown, 0.45);
       }
@@ -481,23 +529,27 @@ export class Game {
         player.sand + enemyStats(this.tier, enemy.kind).reward,
       );
       this.sound.play("sand");
-      if (enemy.kind === "guardian") {
-        this.flags.add("guardian");
-        this.save(false);
-        this.showStory(
-          "An oath released",
-          "The Guardian lowers his broken blade. For a moment, a man stands where the monster fell. Then he is only sand.",
-          "The Bridge of the Hour is open. The Vizier waits beyond it.",
-        );
-      }
-      if (enemy.kind === "vizier") {
-        this.flags.add("victory");
-        this.save(false);
-        this.setScreen("ending");
-        this.sound.play("save");
-      }
+      this.enemyDefeated(enemy);
     }
   }
+  protected enemyDefeated(enemy: Enemy) {
+    if (enemy.kind === "guardian") {
+      this.flags.add("guardian");
+      this.save(false);
+      this.showStory(
+        "An oath released",
+        "The Guardian lowers his broken blade. For a moment, a man stands where the monster fell. Then he is only sand.",
+        "The Bridge of the Hour is open. The Vizier waits beyond it.",
+      );
+    }
+    if (enemy.kind === "vizier") {
+      this.flags.add("victory");
+      this.save(false);
+      this.setScreen("ending");
+      this.sound.play("save");
+    }
+  }
+  protected claimItem(_pickup: Pickup) {}
   private collect() {
     for (const pickup of this.room.pickups) {
       if (
@@ -512,7 +564,9 @@ export class Game {
       this.collected.add(pickup.id);
       this.burst(pickup.x, pickup.y, "#edd293", 35);
       this.sound.play("sand");
-      if (pickup.kind === "sand")
+      if (pickup.kind === "dagger" || pickup.kind === "sword") {
+        this.claimItem(pickup);
+      } else if (pickup.kind === "sand")
         this.player.sand = Math.min(
           this.player.maxSand,
           this.player.sand + Math.max(1, 3 - this.tier * 0.4),
@@ -617,7 +671,7 @@ export class Game {
       dt * (this.freezeTime > 0 ? 0 : this.slowTime > 0 ? 0.25 : 1);
     const previousPlatforms = this.platforms;
     this.worldTime += worldDt;
-    this.platforms = platformPositions(this.room.platforms, this.worldTime);
+    this.platforms = this.roomPlatforms(this.worldTime);
     if (!this.rewinding) {
       if (this.player.grounded) {
         previousPlatforms.forEach((p, i) => {
@@ -633,7 +687,14 @@ export class Game {
         });
       }
       const wasGrounded = this.player.grounded;
-      stepPlayer(this.player, this.input, this.platforms, dt, this.room.width);
+      stepPlayer(
+        this.player,
+        this.input,
+        this.platforms,
+        dt,
+        this.room.width,
+        this.grips,
+      );
       if (wasGrounded && this.player.vy < -400) {
         this.sound.play("jump");
         this.burst(this.player.x + 15, this.player.y + 56, "#baab85", 5);
@@ -679,13 +740,18 @@ export class Game {
         this.die();
       if (this.input.consume("interact")) this.interaction?.action();
     }
-    if (this.options.assist)
+    if (this.options.assist && this.hasDagger)
       this.player.sand = Math.min(
         this.player.maxSand,
         this.player.sand + dt * 0.12,
       );
     // A spent dagger can always recover one grain by waiting, preventing a traversal softlock.
-    if (this.player.sand < 1 && !this.rewinding && this.player.dashTime <= 0) {
+    if (
+      this.hasDagger &&
+      this.player.sand < 1 &&
+      !this.rewinding &&
+      this.player.dashTime <= 0
+    ) {
       this.sandRefill += dt;
       if (this.sandRefill > 7) {
         this.player.sand = 1;

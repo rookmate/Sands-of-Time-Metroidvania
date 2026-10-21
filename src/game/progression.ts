@@ -55,13 +55,17 @@ export function hasRequirement(
   );
 }
 export function enemyStats(tier: number, kind: string) {
-  const boss = kind === "vizier" || kind === "guardian";
+  const boss = ["vizier", "guardian", "king", "double"].includes(kind);
   return {
     health: boss
       ? kind === "vizier"
         ? 34
-        : 20
-      : (kind === "brute" ? 6 : 3) + tier,
+        : kind === "double"
+          ? 12
+          : 20
+      : kind === "bird" || kind === "scarab"
+        ? 2
+        : (kind === "brute" ? 6 : 3) + tier,
     speed: boss ? 60 : 56 + tier * 12,
     damage: tier >= 3 ? 2 : 1,
     cooldown: Math.max(0.65, 1.6 - tier * 0.18),

@@ -1,10 +1,12 @@
 import type { Enemy, Player } from "../game/types";
 import { ellipse, line, polygon, type Context } from "./shapes";
+import { isBoss } from "../game/enemies";
 export function drawPrince(
   c: Context,
   player: Player,
   time: number,
   ghost = false,
+  hasDagger = true,
 ) {
   const moving = Math.abs(player.vx) > 25 && player.grounded;
   const stride = moving ? Math.sin(time * 15) : 0;
@@ -224,16 +226,17 @@ export function drawPrince(
     );
   }
   // Dagger at the sash, head, black hair, and tied headband.
-  polygon(
-    c,
-    [
-      [-8, 6],
-      [-3, 8],
-      [-8, 25],
-      [-11, 29],
-    ],
-    "#9ed4c9",
-  );
+  if (hasDagger)
+    polygon(
+      c,
+      [
+        [-8, 6],
+        [-3, 8],
+        [-8, 25],
+        [-11, 29],
+      ],
+      "#9ed4c9",
+    );
   c.fillStyle = "#c3956b";
   c.fillRect(-5, -26, 12, 12);
   ellipse(c, 2, -26, 9, 10, "#bf8b61");
@@ -281,7 +284,29 @@ export function drawEnemy(
   frozen: boolean,
 ) {
   if (enemy.dead) return;
-  const boss = enemy.kind === "guardian" || enemy.kind === "vizier";
+  if (enemy.kind === "bird") {
+    c.save();
+    c.translate(enemy.x + 15, enemy.y + 15);
+    const flap = Math.sin(time * 12) * 15;
+    polygon(
+      c,
+      [
+        [-32, -8 - flap],
+        [0, 4],
+        [32, -8 - flap],
+        [12, 15],
+        [0, 9],
+        [-12, 15],
+      ],
+      frozen ? "#a1d6de" : "#6b645a",
+    );
+    ellipse(c, 0, 0, 8, 12, "#a89b76");
+    c.fillStyle = "#ebc777";
+    c.fillRect(2, -5, 3, 2);
+    c.restore();
+    return;
+  }
+  const boss = isBoss(enemy.kind);
   const scale = boss ? 1.5 : enemy.kind === "brute" ? 1.17 : 1;
   c.save();
   c.translate(enemy.x + enemy.w / 2, enemy.y + enemy.h - 29 * scale);
@@ -434,5 +459,20 @@ export function drawEnemy(
     c.strokeStyle = "#a1e5e890";
     c.lineWidth = 1;
     c.strokeRect(enemy.x - 7, enemy.y - 7, enemy.w + 14, enemy.h + 12);
+  }
+  if (enemy.protected) {
+    c.strokeStyle = "#e2c77d";
+    c.lineWidth = 2;
+    c.beginPath();
+    c.ellipse(
+      enemy.x + enemy.w / 2,
+      enemy.y + enemy.h / 2,
+      enemy.w,
+      enemy.h * 0.65,
+      0,
+      0,
+      Math.PI * 2,
+    );
+    c.stroke();
   }
 }

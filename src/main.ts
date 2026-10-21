@@ -1,5 +1,6 @@
 import "./style.css";
 import { Game } from "./game/Game";
+import { CampaignGame } from "./campaign/CampaignGame";
 import { Renderer } from "./render/Renderer";
 import { UI } from "./ui/UI";
 const params = new URLSearchParams(location.search);
@@ -7,7 +8,7 @@ const playback =
   import.meta.env.DEV && params.has("harness")
     ? new (await import("./harness/browser")).BrowserHarness(params)
     : null;
-const game = playback?.harness.game ?? new Game();
+const game: Game = playback?.harness.game ?? new CampaignGame();
 const root = document.querySelector<HTMLElement>("#app")!;
 const ui = new UI(root, game);
 playback?.mount(root);

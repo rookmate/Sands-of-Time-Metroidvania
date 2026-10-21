@@ -3,6 +3,7 @@ import { ORDER } from "../game/progression";
 import type { Ability, Projectile, StoryFlag } from "../game/types";
 import { ROOMS, START } from "../game/world";
 import { campaignRoute, type RouteStep } from "./route";
+import type { Action } from "../game/input";
 
 export const HARNESS_STEP = 1 / 120;
 export type Scenario = "campaign" | "guardian" | "vizier";
@@ -56,6 +57,7 @@ export class Harness {
   private readonly powersUsed = new Set<Ability>();
   private readonly route: RouteStep[];
   private readonly playback: Generator<void>;
+  private held: Action[] = [];
 
   constructor(options: HarnessOptions = {}) {
     this.scenario = options.scenario ?? "campaign";
@@ -96,6 +98,11 @@ export class Harness {
       throw new Error("Step count must be an integer between 1 and 120000");
     for (let i = 0; i < count; i++) {
       if (this.status === "passed" || this.status === "failed") break;
+      if (this.game.screen === "pause") {
+        this.game.setScreen("playing");
+        this.game.input.restoreHeld(this.held);
+      } else if (this.held.length && !this.game.input.snapshotHeld().length)
+        this.game.input.restoreHeld(this.held);
       try {
         if (this.playback.next().done) {
           this.status = "passed";
@@ -168,6 +175,7 @@ export class Harness {
     if (g.rewinding) this.powersUsed.add("rewind");
     this.frames++;
     if (g.screen === "story") g.closeStory();
+    this.held = g.input.snapshotHeld();
     this.require(g.screen !== "death", "Player died or fell out of the room");
     yield;
   }

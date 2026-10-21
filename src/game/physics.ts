@@ -1,4 +1,4 @@
-import type { Player, Rect, Platform, Vec } from "./types";
+import type { Grip, Player, Rect, Platform, Vec } from "./types";
 import type { Input } from "./input";
 export const GRAVITY = 1750;
 export const JUMP_SPEED = 725;
@@ -17,7 +17,7 @@ export function moveBody(
     grounded = false;
   body.x += body.vx * dt;
   for (const p of platforms) {
-    if (p.oneWay || !overlap(body, p)) continue;
+    if (p.oneWay || body.y + body.h <= p.y + 1 || !overlap(body, p)) continue;
     if (body.vx > 0) {
       body.x = p.x - body.w;
       wall = 1;
@@ -46,7 +46,60 @@ export function stepPlayer(
   platforms: Platform[],
   dt: number,
   width: number,
+  grips: Grip[] = [],
 ) {
+  if (
+    player.grounded &&
+    input.down("down") &&
+    platforms.some(
+      (p) =>
+        p.oneWay &&
+        Math.abs(player.y + player.h - p.y) < 2 &&
+        player.x + player.w > p.x &&
+        player.x < p.x + p.w,
+    )
+  ) {
+    player.y += 3;
+    player.grounded = false;
+    player.coyote = 0;
+  }
+  player.gripCooldown = Math.max(0, player.gripCooldown - dt);
+  const grip = grips.find((g) => g.id === player.grip);
+  if (grip) {
+    const axis = Number(input.down("right")) - Number(input.down("left"));
+    player.grounded = false;
+    player.vx = 0;
+    player.vy = 0;
+    if (grip.kind === "ladder") {
+      player.y = clamp(
+        player.y +
+          (Number(input.down("down")) - Number(input.down("jump"))) * 180 * dt,
+        grip.y - player.h,
+        grip.y + (grip.length ?? 200) - player.h,
+      );
+      if (axis) {
+        player.grip = null;
+        player.gripCooldown = 0.2;
+        player.vx = axis * RUN_SPEED;
+        player.vy = -200;
+      } else return;
+    } else if (input.consume("jump")) {
+      player.grip = null;
+      player.gripCooldown = 0.2;
+      player.vx = (axis || player.face) * RUN_SPEED;
+      player.vy = -JUMP_SPEED;
+      player.face = axis || player.face;
+      player.coyote = 0;
+    } else if (input.down("down")) {
+      player.grip = null;
+      player.gripCooldown = 0.3;
+    } else {
+      player.x = grip.x - player.w / 2;
+      player.y = grip.y + 5;
+      if (axis) player.face = axis;
+      return;
+    }
+  }
   if (input.consume("jump")) player.jumpBuffer = 0.14;
   else player.jumpBuffer = Math.max(0, player.jumpBuffer - dt);
   player.coyote = player.grounded ? 0.11 : Math.max(0, player.coyote - dt);
@@ -111,7 +164,33 @@ export function stepPlayer(
   player.grounded = result.grounded;
   player.wall = result.wall;
   player.x = clamp(player.x, 0, width - player.w);
-  if (result.wall && player.vy >= 0 && player.wallLock <= 0) {
+  if (!player.grounded && player.gripCooldown === 0 && !input.down("down")) {
+    for (const g of grips) {
+      const catches =
+        g.kind === "ladder"
+          ? Math.abs(player.x + player.w / 2 - g.x) < 28 &&
+            player.y + player.h >= g.y &&
+            player.y <= g.y + (g.length ?? 200)
+          : player.vy >= 0 &&
+            distance({ x: player.x + player.w / 2, y: player.y + 5 }, g) < 42;
+      if (catches) {
+        player.grip = g.id;
+        player.vx = 0;
+        player.vy = 0;
+        if (g.kind !== "ladder") {
+          player.x = g.x - player.w / 2;
+          player.y = g.y + 5;
+        }
+        break;
+      }
+    }
+  }
+  if (
+    result.wall &&
+    !result.grounded &&
+    player.vy >= 0 &&
+    player.wallLock <= 0
+  ) {
     for (const p of platforms) {
       const edge = result.wall > 0 ? p.x : p.x + p.w;
       const hand = result.wall > 0 ? player.x + player.w : player.x;
