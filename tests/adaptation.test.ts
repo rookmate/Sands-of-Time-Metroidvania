@@ -76,7 +76,7 @@ it("plays the entire adaptation with real inputs, puzzles, Farah, Dagger loss, a
   console.info("Expanded campaign", JSON.stringify(report));
   expect(report.status, report.error ?? JSON.stringify(report)).toBe("passed");
   expect(report.milestones).toEqual(EXPECTED);
-  expect(report.rooms).toHaveLength(45);
+  expect(report.rooms).toHaveLength(54);
   expect(report.deaths).toBe(0);
   for (const id of ["tomb", "pursuit", "dawn-climb"])
     expect(report.scenes.find((s) => s.id === id)?.dagger).toBe(false);
@@ -171,7 +171,7 @@ it("rejects saves that skip original story milestones", () => {
 
 it("reloads the tomb with learned powers retained and the Dagger unavailable", () => {
   const harness = new CampaignHarness();
-  for (let i = 0; i < 40000 && harness.game.room.id !== "tomb"; i++)
+  for (let i = 0; i < 120000 && harness.game.room.id !== "tomb"; i++)
     harness.step();
   expect(harness.status, harness.error ?? "").not.toBe("failed");
   expect(harness.game.room.id).toBe("tomb");

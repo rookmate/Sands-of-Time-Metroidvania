@@ -56,6 +56,7 @@ it.skipIf(!!replayPath).each(seeds)(
     const h = new CampaignHarness({
       immortal: false,
       resilienceSeed: seed,
+      regionOrder: seed === 42 ? "sky-first" : "gardens-first",
       optionalRewards: seed === 42 ? "stillness" : false,
     });
 
@@ -85,7 +86,7 @@ it.skipIf(!!replayPath).each(seeds)(
     expect(report.milestones).toEqual(SECTIONS.map((s) => s.id));
     expect(
       report.disruptions.filter((d) => d.kind === "backtrack"),
-    ).toHaveLength(38);
+    ).toHaveLength(37);
     expect(report.disruptions.map((d) => d.kind)).toEqual(
       expect.arrayContaining([
         "timed",
@@ -100,6 +101,12 @@ it.skipIf(!!replayPath).each(seeds)(
         "grip-reload",
         "lift-reload",
         "cooperation-recovery",
+        "point-of-no-return",
+        "garden-recovery",
+        "lens-recovery",
+        "shutter-expiry",
+        "counterweight-recovery",
+        "prison-release-recovery",
       ]),
     );
     expect(h.trace.events.some((e) => e.kind === "reload")).toBe(true);

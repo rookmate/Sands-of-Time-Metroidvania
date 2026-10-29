@@ -1,10 +1,7 @@
-import {
-  cooperationApproach,
-  cooperationClimb,
-  cooperationFinish,
-} from "./cooperationRoute";
-import { cisternRoute, galleryRoute, type RewardStep } from "./rewardsRoute";
-import { VESSEL_ID, type Attunement } from "../campaign/rewards";
+import { BathsRoutes } from "./BathsRoutes";
+import { PalaceRoutes } from "./PalaceRoutes";
+import { type RewardStep } from "./rewardsRoute";
+import { type Attunement } from "../campaign/rewards";
 import { CampaignGame } from "../campaign/CampaignGame";
 import { SECTIONS, SECTION_BY_ID } from "../campaign/sections";
 import { CAMPAIGN_ROOMS } from "../campaign/world";
@@ -22,6 +19,7 @@ export class CampaignHarness {
   readonly immortal: boolean;
   readonly exploreBaths: boolean;
   readonly cooperate: boolean;
+  readonly regionOrder: "gardens-first" | "sky-first";
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
   frames = 0;
@@ -60,9 +58,11 @@ export class CampaignHarness {
       resilienceSeed?: number;
       exploreBaths?: boolean;
       cooperate?: boolean;
+      regionOrder?: "gardens-first" | "sky-first";
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.regionOrder = options.regionOrder ?? "gardens-first";
     this.cooperate = options.cooperate ?? true;
     this.optionalRewards = options.optionalRewards ?? false;
     this.exploreBaths = options.exploreBaths ?? true;
@@ -169,6 +169,8 @@ export class CampaignHarness {
       flags: [...g.flags],
       collected: [...g.collected],
       baths: { ...g.journey.baths },
+      palace: { ...g.journey.palace },
+      regionOrder: this.regionOrder,
       cooperation: { ...g.journey.cooperation },
       rewards: { ...g.journey.rewards, maxSand: g.player.maxSand },
       milestones: [...g.journey.completed],
@@ -192,7 +194,7 @@ export class CampaignHarness {
       (Math.imul(this.randomState, 1664525) + 1013904223) >>> 0;
     return this.randomState % max;
   }
-  private require(value: boolean, message: string) {
+  require(value: boolean, message: string) {
     if (!value) throw new Error(message);
   }
   private pulse(action: Action) {
@@ -209,7 +211,7 @@ export class CampaignHarness {
       g.input.release("right");
     }
   }
-  private *tick() {
+  *tick() {
     const g = this.game;
     if (g.screen === "pause") g.setScreen("playing");
     this.require(g.screen === "playing", "Unexpected screen " + g.screen);
@@ -259,14 +261,14 @@ export class CampaignHarness {
     this.require(g.screen !== "death", "Player or Farah died");
     yield;
   }
-  private *until(predicate: () => boolean, limit = 3600) {
+  *until(predicate: () => boolean, limit = 3600) {
     for (let i = 0; i < limit; i++) {
       if (predicate()) return;
       yield* this.tick();
     }
     throw new Error("Timed out waiting for " + this.action);
   }
-  private *walk(x: number) {
+  *walk(x: number) {
     this.action = `Walk to ${x.toFixed(0)}`;
     this.game.input.clear();
     for (let i = 0; i < 1800; i++) {
@@ -277,7 +279,7 @@ export class CampaignHarness {
     }
     throw new Error("Walk did not reach its destination");
   }
-  private *jump(x: number, floor: number, dashFrame = -1) {
+  *jump(x: number, floor: number, dashFrame = -1) {
     const g = this.game;
     this.action = `Jump to ${x.toFixed(0)} / floor ${floor}`;
     g.input.clear();
@@ -303,14 +305,14 @@ export class CampaignHarness {
     }
     throw new Error("Jump did not land");
   }
-  private *use() {
+  *use() {
     this.game.input.clear();
     this.require(!!this.game.interaction, "Expected an interaction");
     this.action = this.game.interaction!.label;
     this.pulse("interact");
     yield* this.tick();
   }
-  private *drop(x: number, floor: number) {
+  *drop(x: number, floor: number) {
     const g = this.game;
     this.action = `Drop to ${x} / floor ${floor}`;
     g.input.clear();
@@ -620,7 +622,7 @@ export class CampaignHarness {
         break;
     }
   }
-  private recover(kind: "respawn" | "reload") {
+  recover(kind: "respawn" | "reload") {
     this.trace.events.push({ kind });
     this.disruptions.push({ room: this.game.room.id, kind });
     if (kind === "respawn") {
@@ -641,7 +643,7 @@ export class CampaignHarness {
   private *disturb(index: number) {
     let g = this.game;
     // A return passage enters the completed section at its exit. No teleporting.
-    if (index > 0 && index < 39) {
+    if (index > 0 && index < 39 && index !== 35) {
       const previous = CAMPAIGN_ROOMS[g.room.id].doors[0].to;
       const entry = CAMPAIGN_ROOMS[g.room.id].doors[0];
       yield* this.walk(entry.x - 65);
@@ -654,6 +656,13 @@ export class CampaignHarness {
       yield* this.use();
       this.require(g.room.id === SECTIONS[index].id, "Revisited exit failed");
       this.disruptions.push({ room: g.room.id, kind: "backtrack" });
+    }
+    if (index === 35) {
+      this.require(
+        !!g.doorBlock(CAMPAIGN_ROOMS.tomb.doors[0]),
+        "Hourglass return must be sealed",
+      );
+      this.disruptions.push({ room: g.room.id, kind: "point-of-no-return" });
     }
     const p = g.puzzles.definition;
     if (!p) return;
@@ -746,163 +755,16 @@ export class CampaignHarness {
       "Recovery entered the wrong section",
     );
   }
-  private *bathsApproach() {
-    yield* this.walk(1305);
-    yield* this.use(); // Baths narrative anchor. Exploration below changes no story.
-    yield* this.walk(260);
-    yield* this.jump(360, 530);
-    yield* this.walk(420);
-    yield* this.jump(650, 420);
-    yield* this.walk(690);
-    yield* this.jump(940, 310);
-    yield* this.walk(1155);
-    yield* this.use();
-    yield* this.walk(255);
-    yield* this.use(); // Intake on reservoir balcony.
-    yield* this.walk(290);
-    yield* this.drop(430, 430);
-    yield* this.walk(500);
-    yield* this.drop(720, 530);
-    yield* this.walk(840);
-    yield* this.walk(1145);
-    yield* this.use();
-    this.require(
-      this.game.room.id === "bathworks",
-      "Did not follow reservoir pipe",
-    );
-  }
-  private *bathsSluice() {
-    yield* this.walk(235);
-    yield* this.use(); // Fountain checkpoint before changing regional state.
-    yield* this.walk(525);
-    yield* this.use();
-    this.require(this.game.journey.baths.drained, "Sluice did not drain Baths");
-    if (this.resilienceSeed !== null) {
-      this.recover("respawn");
-      this.require(
-        this.game.journey.baths.drained,
-        "Retry lost regional drainage",
-      );
-      this.recover("reload");
-      this.require(
-        this.game.journey.baths.drained,
-        "Reload lost regional drainage",
-      );
-      this.disruptions.push({ room: "bathworks", kind: "sluice" });
-    }
-    if (this.cooperate) {
-      yield* this.rewardRoute(cooperationApproach);
-      if (this.resilienceSeed !== null) {
-        this.recover("respawn");
-        this.recover("reload");
-        this.require(
-          this.game.journey.cooperation.phase === "primed",
-          "Lost Farah's raised step",
-        );
-      }
-      yield* this.rewardRoute(cooperationClimb);
-      if (this.resilienceSeed !== null) {
-        this.game.input.clear();
-        for (let i = 0; i < 1000; i++) yield* this.tick();
-        yield* this.jump(860, 650); // Expired span: miss onto the safe floor.
-        yield* this.rewardRoute(cooperationClimb);
-        this.disruptions.push({
-          room: "spillway",
-          kind: "cooperation-recovery",
-        });
-      }
-      yield* this.rewardRoute(cooperationFinish);
-      this.require(
-        this.game.journey.cooperation.phase === "reunited",
-        "Farah did not reunite",
-      );
-    }
-    // Use the permanent drained stair, then climb through the changed pool.
-    yield* this.walk(855);
-    yield* this.use();
-    this.require(this.game.room.id === "baths-main", "Drained stair failed");
-    yield* this.walk(820);
-    yield* this.drop(810, 540);
-    yield* this.jump(550, 530);
-    yield* this.walk(650);
-    yield* this.jump(835, 420);
-    yield* this.walk(885);
-    yield* this.use();
-    // From the stair landing the wheel remains below; upper pools are above.
-    yield* this.walk(440);
-    yield* this.jump(540, 530);
-    yield* this.walk(630);
-    yield* this.jump(840, 420);
-  }
-  private *rewardRoute(steps: RewardStep[]) {
+  *rewardRoute(steps: RewardStep[]) {
     for (const step of steps) {
       if (step === "use") yield* this.use();
       else if (step[1] === undefined) yield* this.walk(step[0]);
       else yield* this.jump(step[0], step[1], step[2]);
     }
   }
-  private *bathsReturn() {
-    // Upper Baths reward is awarded at its story exit, before this optional return.
-    yield* this.walk(35);
-    yield* this.use();
-    yield* this.walk(1435);
-    yield* this.use();
-    this.require(
-      this.game.room.id === "maintenance",
-      "Sword/Dash return gate failed",
-    );
-    yield* this.walk(260);
-    yield* this.jump(370, 520);
-    yield* this.jump(920, 650, 40);
-    if (this.optionalRewards)
-      yield* this.rewardRoute(galleryRoute(this.optionalRewards));
-    yield* this.walk(1015);
-    yield* this.use();
-    yield* this.walk(1145);
-    yield* this.use();
-    this.require(
-      this.game.room.id === "baths-main",
-      "Maintenance shortcut failed",
-    );
-    // The unlocked grate works from the previously visited rotunda too.
-    yield* this.walk(585);
-    yield* this.use();
-    this.require(
-      this.game.room.id === "maintenance",
-      "Shortcut was not permanent",
-    );
-    yield* this.walk(1145);
-    yield* this.use();
-    yield* this.walk(455);
-    yield* this.jump(550, 530);
-    yield* this.walk(650);
-    yield* this.jump(835, 420);
-    yield* this.walk(885);
-    yield* this.use();
-    yield* this.walk(440);
-    yield* this.jump(540, 530);
-    yield* this.walk(630);
-    yield* this.jump(840, 420);
-    if (this.optionalRewards) {
-      yield* this.rewardRoute(cisternRoute);
-      this.require(this.game.collected.has(VESSEL_ID), "Missed cistern vessel");
-    }
-    yield* this.walk(1125);
-    yield* this.use();
-    yield* this.walk(310);
-    yield* this.jump(435, 520);
-    yield* this.walk(485);
-    yield* this.jump(700, 400);
-    yield* this.walk(745);
-    yield* this.jump(1050, 300);
-    yield* this.walk(2085);
-    yield* this.use();
-    this.require(
-      this.game.room.id === "daybreak",
-      "Return changed story route",
-    );
-  }
   private *play() {
+    const baths = new BathsRoutes(this),
+      palace = new PalaceRoutes(this);
     let g = this.game;
     const first =
       this.scenario === "campaign" ? 0 : this.scenario === "king" ? 7 : 39;
@@ -938,7 +800,7 @@ export class CampaignHarness {
         g = this.game;
       }
       if (index === 14) {
-        yield* this.bathsApproach();
+        yield* baths.bathsApproach();
         this.scenes.push({
           id: section.id,
           dagger: g.hasDagger,
@@ -947,9 +809,16 @@ export class CampaignHarness {
         });
         continue;
       }
-      if (index === 17 && this.exploreBaths) yield* this.bathsReturn();
-      if (index === 15) yield* this.bathsSluice();
+      if (index === 17 && this.exploreBaths) yield* baths.bathsReturn();
+      if (index === 15) yield* baths.bathsSluice();
+      if (index === 28 && this.regionOrder === "gardens-first")
+        yield* palace.gardens();
+      if (index === 32) yield* palace.prison();
       yield* this.solve();
+      if (index === 28) {
+        yield* palace.sky();
+        if (this.regionOrder === "sky-first") yield* palace.gardens();
+      }
       if (
         index !== 15 &&
         section.puzzle?.kind !== "columns" &&

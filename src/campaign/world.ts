@@ -1,3 +1,4 @@
+import { buildPalace } from "./palace";
 import type { EnemySpawn, Pickup } from "../game/types";
 import { geometry } from "./layouts";
 import type { CampaignRoom } from "./types";
@@ -116,3 +117,5 @@ buildBaths(CAMPAIGN_ROOMS);
 buildRewardRooms(CAMPAIGN_ROOMS);
 
 buildCooperation(CAMPAIGN_ROOMS);
+
+buildPalace(CAMPAIGN_ROOMS);

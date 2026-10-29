@@ -1,3 +1,4 @@
+import { freshPalace } from "./palace";
 import { parseSave } from "../game/storage";
 import type { CampaignSave, CampaignState, Puzzle, PuzzleState } from "./types";
 import { CAMPAIGN_ROOMS } from "./world";
@@ -6,7 +7,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 4,
+  version: 5,
+  palace: freshPalace(),
   cooperation: freshCooperation(),
   rewards: { attunement: null, inscription: false },
   baths: { intake: false, drained: false, shortcut: false },
@@ -79,11 +81,35 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 4;
       data.journey.cooperation = freshCooperation();
     }
+    if (data?.journey?.version === 4) {
+      data.journey.version = 5;
+      // Earlier saves have already passed these new regional gates.
+      const learningDone = data.journey.completed?.length >= 29;
+      const prisonDone = data.journey.completed?.length >= 33;
+      data.journey.palace = {
+        irrigated: learningDone,
+        sky: learningDone,
+        winch: prisonDone,
+        prisonOpen: prisonDone,
+      };
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 4 ||
+      state.version !== 5 ||
+      !state.palace ||
+      ![
+        state.palace.irrigated,
+        state.palace.sky,
+        state.palace.winch,
+        state.palace.prisonOpen,
+      ].every((v) => typeof v === "boolean") ||
+      (state.palace.prisonOpen && !state.palace.winch) ||
+      ((state.palace.winch || state.palace.prisonOpen) &&
+        state.completed.length < 32) ||
+      (state.palace.sky && state.completed.length < 28) ||
+      (state.palace.irrigated && state.completed.length < 17) ||
       !state.cooperation ||
       !["idle", "scouting", "ready", "primed", "crossed", "reunited"].includes(
         state.cooperation.phase,

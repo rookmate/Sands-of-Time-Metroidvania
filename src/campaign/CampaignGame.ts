@@ -1,3 +1,4 @@
+import { palaceBlock, palaceControls, palacePlatforms } from "./palace";
 import {
   cooperationActive,
   cooperationControls,
@@ -100,6 +101,27 @@ export class CampaignGame extends Game {
             ? "valve-loft"
             : "spillway",
       };
+    if (
+      this.journey.completed.length === 28 &&
+      (!this.journey.palace.irrigated || !this.journey.palace.sky)
+    )
+      return {
+        title: "Learning's two routes",
+        text: `${this.journey.palace.irrigated ? "Garden irrigation restored" : "Restore irrigation in the root conduit beyond the Hall terraces"}. ${this.journey.palace.sky ? "Roof lens pinned" : "Light the Hall mirrors, climb the archive ladder and pin the shutter bridge lens"}. Choose either order; both routes return to this Hall.`,
+        room: "learning",
+      };
+    if (this.journey.completed.length === 32 && !this.journey.palace.prisonOpen)
+      return {
+        title: "Escape the prison foundations",
+        text: "Take the lower cell drain to the counterweight shaft. Wind the winch, climb to the warden and release the locks. Then climb the prison columns toward Farah and the Tower.",
+        room: "prison",
+      };
+    if (this.room.id === "hourglass")
+      return {
+        title: "The Hourglass",
+        text: "Finish exploration before descending. The descent seals all returns to the old palace and takes the Dagger from you.",
+        room: "hourglass",
+      };
     if (this.room.id === "honor" && this.puzzles?.state.solved)
       return {
         title: "Return the Dagger to Farah",
@@ -167,9 +189,12 @@ export class CampaignGame extends Game {
     const base = super.roomPlatforms(time);
     return this.puzzles
       ? this.puzzles.platforms(
-          cooperationPlatforms(
+          palacePlatforms(
             this,
-            bathsPlatforms(this.room.id, this.journey.baths, base),
+            cooperationPlatforms(
+              this,
+              bathsPlatforms(this.room.id, this.journey.baths, base),
+            ),
           ),
         )
       : base;
@@ -319,6 +344,8 @@ export class CampaignGame extends Game {
     return true;
   }
   doorBlock(door: CampaignDoor): string | null {
+    const palace = palaceBlock(this, door);
+    if (palace) return palace;
     if (door.milestone === "upper-baths" && cooperationActive(this))
       return "Reunite with Farah in the valve loft before leaving the Baths";
     if (
@@ -361,6 +388,8 @@ export class CampaignGame extends Game {
     if (cooperative) return cooperative;
     const reward = rewardControls(this).find((c) => distance(feet, c) < 85);
     if (reward) return reward;
+    const palace = palaceControls(this).find((c) => distance(feet, c) < 70);
+    if (palace) return palace;
     const regional = this.regionalControl;
     if (regional && distance(feet, regional) < 85) return regional;
     const index = SECTIONS.findIndex((s) => s.id === this.room.id);
@@ -390,9 +419,11 @@ export class CampaignGame extends Game {
         return {
           label: reason
             ? `${door.label} · ${reason}`
-            : door.milestone && this.room.region !== "Baths and Waterworks"
-              ? "Continue the story"
-              : door.label,
+            : door.milestone === "hourglass"
+              ? "Point of no return · descend from the Hourglass, leaving the old palace behind"
+              : door.milestone && this.room.region !== "Baths and Waterworks"
+                ? "Continue the story"
+                : door.label,
           action: () => {
             if (reason) {
               this.notify(reason);

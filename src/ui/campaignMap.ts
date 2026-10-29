@@ -1,3 +1,4 @@
+import { palaceMap } from "./palaceMap";
 import { COOP_ROOMS, cooperationStatus } from "../campaign/cooperation";
 import type { CampaignGame } from "../campaign/CampaignGame";
 import { CAMPAIGN_ROOMS } from "../campaign/world";
@@ -53,5 +54,5 @@ export function campaignMap(game: CampaignGame) {
   const discoveries = regional
     ? `<p class="regional-state">Optional discoveries · ${rewards.attunement ? ATTUNEMENTS[rewards.attunement].name + ": " + ATTUNEMENTS[rewards.attunement].effect : "Time seal unchosen"} · ${game.collected.has(VESSEL_ID) ? "Sand capacity 8" : "Sand vessel unfound"} · ${rewards.inscription ? "Keepers' names remembered" : "Inscription unread"}</p>`
     : "";
-  return `${regional}${regional ? `<p class="regional-state">${cooperationStatus(game)}</p>` : ""}${discoveries}<p>Story milestones · ${game.journey.completed.length}/40</p><ol class="chapter-route">${SECTIONS.map((s, i) => `<li class="${game.room.id === s.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(s.id) ? s.title : "Unexplored"}</span><span>${game.journey.completed.includes(s.id) ? "Complete" : s.id === game.quest.room ? "Next objective" : ""}</span></li>`).join("")}</ol>`;
+  return `${palaceMap(game)}${regional}${regional ? `<p class="regional-state">${cooperationStatus(game)}</p>` : ""}${discoveries}<p>Story milestones · ${game.journey.completed.length}/40</p><ol class="chapter-route">${SECTIONS.map((s, i) => `<li class="${game.room.id === s.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(s.id) ? s.title : "Unexplored"}</span><span>${game.journey.completed.includes(s.id) ? "Complete" : s.id === game.quest.room ? "Next objective" : ""}</span></li>`).join("")}</ol>`;
 }

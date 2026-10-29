@@ -58,7 +58,17 @@ export interface Section {
 }
 export interface CampaignDoor extends Door {
   milestone?: string;
-  gate?: "drained" | "sword-dash" | "shortcut" | "spillway" | "loft-shortcut";
+  gate?:
+    | "drained"
+    | "sword-dash"
+    | "shortcut"
+    | "spillway"
+    | "loft-shortcut"
+    | "garden-water"
+    | "hall-light"
+    | "sky-lens"
+    | "prison-winch"
+    | "prison-release";
 }
 export interface CampaignRoom extends Room {
   content: Section;
@@ -86,8 +96,15 @@ export interface CooperationState {
   travel: number;
   remaining: number;
 }
+export interface PalaceState {
+  irrigated: boolean;
+  sky: boolean;
+  winch: boolean;
+  prisonOpen: boolean;
+}
 export interface CampaignState {
-  version: 4;
+  version: 5;
+  palace: PalaceState;
   cooperation: CooperationState;
   rewards: {
     attunement: import("./rewards").Attunement | null;
