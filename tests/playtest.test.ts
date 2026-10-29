@@ -219,3 +219,21 @@ it.each(["king", "vizier"] as const)(
     expect(report.status, report.error ?? "").toBe("passed");
   },
 );
+
+it("lets an expired prison column drop its rider onto the floor instead of carrying them below it", () => {
+  const g = new CampaignGame({ persist: false });
+  g.begin();
+  g.enterRoom("prison", undefined, { x: 730, y: 479 });
+  g.puzzles.state.values = [1, 1];
+  g.puzzles.state.remaining = 0.1;
+  advance(g, 4);
+  expect(g.player.grounded).toBe(true);
+  expect(g.player.y + g.player.h).toBe(535);
+  advance(g, 120);
+  expect(g.puzzles.state.remaining).toBe(0);
+  expect(g.screen).toBe("playing");
+  expect(g.player.grounded).toBe(true);
+  expect(g.player.y + g.player.h).toBe(650);
+  advance(g, 15, "left", "jump");
+  expect(g.player.vy).toBeLessThan(0);
+});

@@ -5,16 +5,22 @@ import type { CampaignSave } from "../campaign/types";
 import type { Ability } from "../game/types";
 import type { Action } from "../game/input";
 import { isBoss } from "../game/enemies";
+import { CampaignTrace, reloadCampaign } from "./CampaignTrace";
 import { HARNESS_STEP, type HarnessStatus } from "./Harness";
 
 export class CampaignHarness {
-  readonly game: CampaignGame;
+  game: CampaignGame;
   readonly scenario: "campaign" | "king" | "vizier";
   readonly immortal: boolean;
   status: HarnessStatus = "running";
   frames = 0;
   action = "Starting";
   error: string | null = null;
+  readonly trace: CampaignTrace;
+  readonly resilienceSeed: number | null;
+  private randomState: number;
+  readonly disruptions: { room: string; kind: string }[] = [];
+  private readonly interruptedTraversal = new Set<string>();
   private readonly powers = new Set<Ability>();
   private readonly playback: Generator<void>;
   private held: Action[] = [];
@@ -40,10 +46,25 @@ export class CampaignHarness {
     options: {
       scenario?: "campaign" | "king" | "vizier";
       immortal?: boolean;
+      resilienceSeed?: number;
     } = {},
   ) {
+    this.resilienceSeed = options.resilienceSeed ?? null;
+    this.randomState = this.resilienceSeed ?? 0;
+    this.trace = new CampaignTrace();
     this.scenario = options.scenario ?? "campaign";
-    this.immortal = options.immortal ?? true;
+    this.immortal = options.immortal ?? this.resilienceSeed === null;
+    if (
+      this.resilienceSeed !== null &&
+      (!Number.isInteger(this.resilienceSeed) ||
+        this.resilienceSeed < 0 ||
+        this.resilienceSeed > 0xffffffff ||
+        this.scenario !== "campaign" ||
+        this.immortal)
+    )
+      throw new Error(
+        "Resilience requires a uint32 seed and a mortal campaign",
+      );
     this.game = new CampaignGame({ persist: false, immortal: this.immortal });
     Object.assign(this.game.options, {
       music: false,
@@ -140,8 +161,16 @@ export class CampaignHarness {
         ...b,
         phases: [...b.phases],
       })),
+      disruptions: [...this.disruptions],
+      resilienceSeed: this.resilienceSeed,
+      replay: this.status === "failed" ? this.trace.events : undefined,
       error: this.error,
     };
+  }
+  private random(max: number) {
+    this.randomState =
+      (Math.imul(this.randomState, 1664525) + 1013904223) >>> 0;
+    return this.randomState % max;
   }
   private require(value: boolean, message: string) {
     if (!value) throw new Error(message);
@@ -165,10 +194,16 @@ export class CampaignHarness {
     if (g.screen === "pause") g.setScreen("playing");
     this.require(g.screen === "playing", "Unexpected screen " + g.screen);
     this.require(!g.orientationBlocked, "Landscape orientation is required");
-    if (this.frames % 42 === 0) this.pulse("attack");
+    if (
+      this.frames %
+        (this.resilienceSeed === null ? 42 : 38 + (this.resilienceSeed % 9)) ===
+      0
+    )
+      this.pulse("attack");
     const slow = g.slowTime,
       freeze = g.freezeTime,
       dash = g.player.dashTime;
+    this.trace.input(g.input);
     g.update(HARNESS_STEP);
     this.frames++;
     if (g.slowTime > slow) this.powers.add("slow");
@@ -226,8 +261,14 @@ export class CampaignHarness {
     const g = this.game;
     this.action = `Jump to ${x.toFixed(0)} / floor ${floor}`;
     g.input.clear();
+    if (this.resilienceSeed !== null) {
+      for (let i = this.random(10); i > 0; i--) yield* this.tick();
+      if (dashFrame >= 0) dashFrame += this.random(5) - 2;
+    }
     g.input.press("jump");
+    const release = this.resilienceSeed === null ? 300 : 44 + this.random(24);
     for (let i = 0; i < 300; i++) {
+      if (i === release) g.input.release("jump");
       this.aim(x);
       if (i === dashFrame) this.pulse("dash");
       yield* this.tick();
@@ -367,12 +408,12 @@ export class CampaignHarness {
     }
     this.require(s.solved, "Puzzle was not solved");
   }
-  private *fight() {
+  private *fight(stopAtWave = Infinity) {
     const g = this.game;
     this.action = "Fight through the encounter";
     g.input.clear();
     for (let i = 0; i < 18000; i++) {
-      if (g.puzzles.state.solved) return;
+      if (g.puzzles.state.solved || g.puzzles.state.wave >= stopAtWave) return;
       const target = g.enemies
         .filter((e) => !e.dead && !e.protected)
         .sort(
@@ -402,7 +443,7 @@ export class CampaignHarness {
     }
     throw new Error("Encounter exceeded 150 seconds");
   }
-  private *traverse() {
+  private *traverse(): Generator<void> {
     const g = this.game;
     switch (g.section.layout) {
       case "courtyard":
@@ -494,6 +535,15 @@ export class CampaignHarness {
           Math.abs(g.player.y + g.player.h - g.platforms[5].y) < 3,
           "Missed the water lift",
         );
+        if (
+          this.resilienceSeed !== null &&
+          !this.interruptedTraversal.has(g.room.id)
+        ) {
+          this.interruptedTraversal.add(g.room.id);
+          this.disruptions.push({ room: g.room.id, kind: "lift-reload" });
+          this.recover("reload");
+          return yield* this.traverse();
+        }
         g.input.clear();
         yield* this.until(() => g.platforms[5].y < 470);
         yield* this.walk(1280);
@@ -511,6 +561,15 @@ export class CampaignHarness {
             if (g.player.grip === grip.id) break;
           }
           this.require(g.player.grip === grip.id, "Missed grip " + grip.id);
+          if (
+            this.resilienceSeed !== null &&
+            !this.interruptedTraversal.has(g.room.id)
+          ) {
+            this.interruptedTraversal.add(g.room.id);
+            this.disruptions.push({ room: g.room.id, kind: "grip-reload" });
+            this.recover("reload");
+            return yield* this.traverse();
+          }
         }
         yield* this.jump(1850, 650);
         break;
@@ -541,8 +600,134 @@ export class CampaignHarness {
         break;
     }
   }
+  private recover(kind: "respawn" | "reload") {
+    this.trace.events.push({ kind });
+    this.disruptions.push({ room: this.game.room.id, kind });
+    if (kind === "respawn") {
+      // Fault injection uses the same damage/death/Retry path as a lethal hit.
+      this.game.player.invincible = 0;
+      this.game.damage(100);
+      this.require(
+        this.game.screen === "death",
+        "Expected a lethal interruption",
+      );
+      this.game.respawn();
+    } else {
+      this.require(!!this.game.saved, "Expected a checkpoint to reload");
+      this.game = reloadCampaign(this.game);
+    }
+    this.held = [];
+  }
+  private *disturb(index: number) {
+    let g = this.game;
+    // A return passage enters the completed section at its exit. No teleporting.
+    if (index > 0 && index < 39) {
+      const entry = geometry(g.section.layout).entry;
+      yield* this.walk(entry.x - 65);
+      yield* this.use();
+      this.require(
+        g.room.id === SECTIONS[index - 1].id,
+        "Return passage failed",
+      );
+      const exit = geometry(g.section.layout).exit;
+      yield* this.walk(exit.x - 15);
+      yield* this.use();
+      this.require(g.room.id === SECTIONS[index].id, "Revisited exit failed");
+      this.disruptions.push({ room: g.room.id, kind: "backtrack" });
+    }
+    const p = g.puzzles.definition;
+    if (!p) return;
+    switch (p.kind) {
+      case "crank":
+        yield* this.walk(p.controls[0].x - 15);
+        yield* this.use();
+        break;
+      case "timed":
+        yield* this.walk(p.lever.x - 15);
+        yield* this.use();
+        yield* this.walk(p.gate.x - 75);
+        g.input.clear();
+        this.action = "Let the timed gate close, then return to its lever";
+        yield* this.until(() => g.puzzles.state.remaining === 0, 3000);
+        break;
+      case "crate":
+        yield* this.walk(g.puzzles.state.crateX - 65);
+        g.input.clear();
+        g.input.press("interact");
+        g.input.press("right");
+        for (let i = 45 + this.random(30); i > 0; i--) yield* this.tick();
+        break;
+      case "paired":
+        yield* this.walk(p.prince.x - 15);
+        yield* this.use();
+        yield* this.walk(p.prince.x - 180);
+        break;
+      case "mirror":
+        yield* this.walk(p.controls[0].x - 15);
+        yield* this.use();
+        break;
+      case "columns":
+        for (const lever of p.levers) {
+          yield* this.walk(lever.x - 15);
+          yield* this.use();
+        }
+        yield* this.walk(600);
+        yield* this.jump(730, 535);
+        g.input.clear();
+        this.action = "Wait on a retracting prison column";
+        yield* this.until(() => g.puzzles.state.remaining === 0, 3000);
+        yield* this.until(() => g.player.grounded, 300);
+        this.require(
+          g.player.y + g.player.h <= 650,
+          "Column carried player through the floor",
+        );
+        break;
+      case "illusion":
+        yield* this.walk(p.doors[(p.sequence[0] + 1) % p.doors.length].x - 15);
+        yield* this.use();
+        break;
+      case "battle":
+        if (p.recovery) {
+          yield* this.traverse();
+          yield* this.walk(p.recovery.x - 15);
+          yield* this.use();
+        } else yield* this.walk(800);
+        g.input.clear();
+        this.action = "Interrupt an active combat wave";
+        for (let i = 30 + this.random(30); i > 0; i--) yield* this.tick();
+        if (p.waves > 1) yield* this.fight(2);
+        break;
+      case "vizier":
+        yield* this.fight(2);
+        break;
+      case "wall":
+        return;
+    }
+    this.disruptions.push({ room: g.room.id, kind: p.kind });
+    // Even seeds retry expired mechanisms in place, without resetting their state.
+    if (
+      (p.kind === "timed" || p.kind === "columns") &&
+      this.resilienceSeed !== null &&
+      this.resilienceSeed % 2 === 0
+    )
+      return;
+    const recovery = this.random(2) ? "reload" : "respawn";
+    if (
+      recovery === "reload" &&
+      (p.kind === "crank" || p.kind === "mirror" || p.kind === "crate")
+    ) {
+      yield* this.walk(g.room.fountain!.x - 15);
+      yield* this.use();
+    }
+    this.recover(recovery);
+    g = this.game;
+    this.require(
+      g.room.id === SECTIONS[index].id,
+      "Recovery entered the wrong section",
+    );
+  }
   private *play() {
-    const g = this.game;
+    let g = this.game;
     const first =
       this.scenario === "campaign" ? 0 : this.scenario === "king" ? 7 : 39;
     const last = this.scenario === "campaign" ? 40 : first + 1;
@@ -572,6 +757,10 @@ export class CampaignHarness {
           g.input.press(power);
           yield* this.tick();
         }
+      if (this.resilienceSeed !== null) {
+        yield* this.disturb(index);
+        g = this.game;
+      }
       yield* this.solve();
       if (
         section.puzzle?.kind !== "columns" &&
@@ -579,6 +768,7 @@ export class CampaignHarness {
         !(section.puzzle?.kind === "wall" && section.layout === "courtyard")
       )
         yield* this.traverse();
+      g = this.game;
       const exit = geometry(section.layout).exit;
       yield* this.walk(
         index === 39 && g.companion ? g.companion.x : exit.x - 15,
