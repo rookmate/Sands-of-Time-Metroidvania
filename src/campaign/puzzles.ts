@@ -63,7 +63,7 @@ export class Puzzles {
           {
             x: s.crateX + 24,
             y: p.plate.y,
-            label: "Hold E + move to push or pull the crate",
+            label: "Hold {interact} + move to push or pull the crate",
             action: () => {},
           },
         ];
@@ -89,7 +89,7 @@ export class Puzzles {
           x: i === p.movable ? s.crateX : v.x,
           label:
             i === p.movable
-              ? "Rotate mirror · hold down + E + move to slide"
+              ? "Rotate mirror · hold down + {interact} + move to slide"
               : "Rotate mirror",
           action: () => {
             if (!g.input.down("down")) s.values[i] = 1 - (s.values[i] ?? 0);

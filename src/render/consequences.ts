@@ -118,7 +118,7 @@ export function drawConsequences(c: Context, g: CampaignGame) {
     c.fillText(
       s.nimaRescued
         ? "Grille secured · Nima went to the refuge"
-        : "Grille release · E",
+        : "Grille release · Interact",
       970,
       375,
     );
@@ -135,7 +135,7 @@ export function drawConsequences(c: Context, g: CampaignGame) {
     if (!s.nimaRescued) {
       nima(c, 890);
       c.fillStyle = "#f0dcae";
-      c.fillText("Nima · E to speak", 680, 565);
+      c.fillText("Nima · Interact to speak", 680, 565);
       for (let x = STORE_BAR.x; x <= STORE_BAR.x + STORE_BAR.w; x += 7)
         line(
           c,
@@ -167,7 +167,7 @@ export function drawConsequences(c: Context, g: CampaignGame) {
         "#f0dcae",
         3,
       );
-      c.fillText("Nima's chalk arrow · E", 680, 575);
+      c.fillText("Nima's chalk arrow · Interact", 680, 575);
     }
   } else {
     polygon(
@@ -186,7 +186,9 @@ export function drawConsequences(c: Context, g: CampaignGame) {
       ellipse(c, x, 638, 12, 5, s.nimaRescued ? "#d8c4a1" : "#514f3d");
     c.fillStyle = "#f0dcae";
     c.fillText(
-      s.nimaRescued ? "Nima kept a light · E" : "Unlit refuge · E",
+      s.nimaRescued
+        ? "Nima kept a light · Interact"
+        : "Unlit refuge · Interact",
       450,
       570,
     );
@@ -265,7 +267,9 @@ export function drawConsequences(c: Context, g: CampaignGame) {
     );
     c.fillStyle = "#f0dcae";
     c.fillText(
-      s.liftRepaired ? "Drive pinned · E" : "Fallen drive pin · E",
+      s.liftRepaired
+        ? "Drive pinned · Interact"
+        : "Fallen drive pin · Interact",
       975,
       350,
     );
@@ -273,7 +277,7 @@ export function drawConsequences(c: Context, g: CampaignGame) {
     c.fillText(
       s.liftRepaired
         ? g.journey.palace.prisonOpen
-          ? "Warden lift · E"
+          ? "Warden lift · Interact"
           : "Cage held by prison locks"
         : "Broken lift drive",
       1100,

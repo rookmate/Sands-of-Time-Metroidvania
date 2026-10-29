@@ -179,6 +179,8 @@ export interface Options {
   sfx: boolean;
   shake: boolean;
   assist: boolean;
+  reducedMotion: boolean;
+  largeText: boolean;
 }
 export type Screen =
   | "title"

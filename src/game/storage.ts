@@ -8,6 +8,8 @@ export const defaultOptions: Options = {
   sfx: true,
   shake: true,
   assist: false,
+  reducedMotion: false,
+  largeText: false,
 };
 const stringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((x) => typeof x === "string");

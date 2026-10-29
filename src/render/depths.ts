@@ -175,7 +175,7 @@ export function drawDepthsScenery(c: Context, g: CampaignGame) {
       text(c, `${Math.round((y - 210) / 15)} cubits`, 1110, y - 12);
     }
     text(c, "Three knocks below the tide line", 600, 260);
-    text(c, "E · The keeper's depth marks", 530, 735);
+    text(c, "Interact · The keeper's depth marks", 530, 735);
   }
   if (g.room.id === "depths-race") {
     polygon(
@@ -198,7 +198,7 @@ export function drawDepthsScenery(c: Context, g: CampaignGame) {
         g.journey.depths.diverted ? "#8ecfbe66" : "#554a4999",
         10,
       );
-    wheel(c, 1090, 420, g.journey.depths.diverted, "E · Filter bypass");
+    wheel(c, 1090, 420, g.journey.depths.diverted, "Interact · Filter bypass");
     text(c, "Jump + Time Dash →", 350, 230);
     text(c, "Catch floor · ladder west", 650, 660);
   }
@@ -231,7 +231,7 @@ export function drawDepths(c: Context, g: CampaignGame) {
       9,
     );
     for (let i = 0; i < 3; i++) ellipse(c, 570 + i * 12, 568, 3, 3, "#e6c78b");
-    text(c, "E · Three knocks", 580, 542);
+    text(c, "Interact · Three knocks", 580, 542);
     text(c, "Cracked hatch ↓", 740, 620);
     return;
   }
@@ -334,15 +334,15 @@ export function drawDepths(c: Context, g: CampaignGame) {
       2,
     );
   }
-  wheel(c, 320, 750, g.depths.active || s.resolved, "E · Clean inlet");
-  wheel(c, 600, 500, s.seals > 0, "E · West relief");
-  wheel(c, 1340, 500, s.seals > 1, "E · East relief");
+  wheel(c, 320, 750, g.depths.active || s.resolved, "Interact · Clean inlet");
+  wheel(c, 600, 500, s.seals > 0, "Interact · West relief");
+  wheel(c, 1340, 500, s.seals > 1, "Interact · East relief");
   text(
     c,
     s.resolved
       ? "The keeper rests"
       : s.seals === 2
-        ? "Both reliefs hold · E at the hand"
+        ? "Both reliefs hold · Interact at the hand"
         : s.seals === 1
           ? "East relief · watch alternating pipes"
           : "West relief · watch the approach pipe",
@@ -351,7 +351,7 @@ export function drawDepths(c: Context, g: CampaignGame) {
   );
   text(
     c,
-    s.resolved ? "A cup for the next traveler" : "E · The cupped hand",
+    s.resolved ? "A cup for the next traveler" : "Interact · The cupped hand",
     800,
     790,
   );

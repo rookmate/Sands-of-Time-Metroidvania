@@ -24,6 +24,7 @@ let previous = performance.now(),
 function frame(now: number) {
   const elapsed = Math.min((now - previous) / 1000, 0.1);
   previous = now;
+  if (!playback) game.input.pollGamepad();
   accumulator += elapsed;
   while (accumulator >= STEP) {
     if (playback) playback.advance();

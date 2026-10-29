@@ -3,7 +3,6 @@ export const ABILITIES: Record<
   Ability,
   {
     name: string;
-    key: string;
     cost: number;
     color: string;
     description: string;
@@ -11,35 +10,31 @@ export const ABILITIES: Record<
 > = {
   rewind: {
     name: "Rewind",
-    key: "R",
     cost: 1,
     color: "#78e2d4",
     description:
-      "Hold R to retrace up to four seconds of your movement and recover lost health. Each second consumes sand.",
+      "Hold {rewind} to retrace up to four seconds of your movement and recover lost health. Each second consumes sand.",
   },
   slow: {
     name: "Slow time",
-    key: "Q",
     cost: 1,
     color: "#e9c778",
     description:
-      "Press Q to slow enemies, blades, and moving platforms for six seconds. You alone move freely.",
+      "Press {slow} to slow enemies, blades, and moving platforms for six seconds. You alone move freely.",
   },
   freeze: {
     name: "Sand prison",
-    key: "F",
     cost: 2,
     color: "#9ac5f6",
     description:
-      "Press F to freeze the room for four seconds. Your blade deals double damage to imprisoned enemies.",
+      "Press {freeze} to freeze the room for four seconds. Your blade deals double damage to imprisoned enemies.",
   },
   dash: {
     name: "Time dash",
-    key: "Shift",
     cost: 1,
     color: "#b2a4ee",
     description:
-      "Press Shift to surge through the air, cross wide gaps, and pass through enemies unharmed.",
+      "Press {dash} to surge through the air, cross wide gaps, and pass through enemies unharmed.",
   },
 };
 export const ORDER: Ability[] = ["rewind", "slow", "freeze", "dash"];

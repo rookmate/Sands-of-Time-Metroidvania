@@ -52,6 +52,7 @@ interface Memory extends Vec {
   grip: string | null;
 }
 export interface GameConfig {
+  controlsPersist?: boolean;
   immortal?: boolean;
   persist?: boolean;
   rooms?: Record<string, Room>;
@@ -107,6 +108,7 @@ export class Game {
     this.input = new Input(
       (action) => this.menuKey(action),
       () => this.screen === "playing" && !this.orientationBlocked,
+      config.controlsPersist ?? config.persist !== false,
     );
     this.sound = new Sound(this.options);
     this.enterRoom(this.startPoint.room, undefined, { x: 1140, y: 469 });
@@ -115,7 +117,10 @@ export class Game {
       if (this.screen === "playing") this.setScreen("pause");
     });
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden && this.screen === "playing") this.setScreen("pause");
+      if (document.hidden) {
+        this.input.clear();
+        if (this.screen === "playing") this.setScreen("pause");
+      }
       this.syncAudio();
     });
   }

@@ -136,7 +136,9 @@ it("examines the threshold without opening it on ordinary E and keeps evidence r
   g.closeStory();
   run(h.walk(765));
   input(g, "interact");
-  expect(g.story?.detail).toContain("hold Down and press E");
+  expect(g.input.describe(g.story?.detail ?? "")).toContain(
+    "hold S and press E",
+  );
   expect(g.journey.history.opened).toBe(false);
   g.closeStory();
   h.game = reloadCampaign(g);

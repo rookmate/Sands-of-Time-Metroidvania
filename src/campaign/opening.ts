@@ -88,26 +88,25 @@ export class Opening {
     if (!this.enabled || g.journey.completed.length > 3) return null;
     const x = g.player.x;
     if (g.room.id === "siege" && !g.hasDagger) {
-      if (!this.moved)
-        return "A / D or ← / → · Move toward the palace. Touch: use the arrow buttons.";
+      if (!this.moved) return "{left} / {right} · Move toward the palace.";
       if (!this.jumped && x > 360 && x < 1000)
-        return "Space / ↑ or Jump · Hold to jump higher. Try the terrace, or cross the broken floor.";
+        return "{jump} · Hold to jump higher. Try the terrace, or cross the broken floor.";
       if (x > 1000)
-        return "E / Interact · Enter the palace at the right-hand arch. Fountains save and heal.";
+        return "{interact} · Enter the palace at the right-hand arch. Fountains save and heal.";
     }
     if (g.room.id === "treasury") {
       if (!g.hasDagger)
-        return "Hold Jump to climb the terraces toward the shining Dagger.";
+        return "Hold {jump} to climb the terraces toward the shining Dagger.";
       if (g.player.health < g.player.maxHealth && this.rewound < 0.35)
-        return "Hold R / tap rewind · Undo your movement and lost health. Sand stays spent.";
+        return "Hold {rewind} · Undo your movement and lost health. Sand stays spent.";
       if (x > 1120 && x < 1660 && this.rewound < 0.35)
-        return "Blade ahead · Jump across. Hold R / tap rewind to undo a mistake; release R to move again.";
+        return "Blade ahead · Jump across. Hold {rewind} to undo a mistake; release {rewind} to move again.";
       return "Your choice: continue right, or return left to the sun-marked vault above the siege fountain.";
     }
     if (g.room.id === "release" && !this.struck)
-      return "J / K or Sword · Press again to chain strikes. Keep a blade's reach from the guards.";
+      return "{attack} · Press again to chain strikes. Keep a blade's reach from the guards.";
     if (g.room.id === SUN_VAULT && !g.collected.has(SUN_HEART))
-      return "Hold Jump for the high shelves. Release, then jump again. A missed jump lands on the safe floor.";
+      return "Hold {jump} for the high shelves. Release, then jump again. A missed jump lands on the safe floor.";
     return null;
   }
 }

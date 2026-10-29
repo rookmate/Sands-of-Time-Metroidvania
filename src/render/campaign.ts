@@ -131,7 +131,7 @@ export function drawCampaignObjects(c: Context, game: Game, time: number) {
   if (!(game instanceof CampaignGame)) return;
   drawOpening(c, game);
   drawEraWing(c, game);
-  drawEchoes(c, game);
+  drawEchoes(c, game, time);
   drawBaths(c, game, time);
   drawPalace(c, game);
   drawCooperation(c, game, time);

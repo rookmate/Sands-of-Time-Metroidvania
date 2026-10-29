@@ -43,7 +43,7 @@ export function buildRival(rooms: Record<string, CampaignRoom>) {
   RIVAL_SITES.forEach((site, i) => {
     const id = RIVAL_IDS[i];
     const hint =
-      "Sahir of the split crest waits at the gold standard. E accepts a duel. His raised glaive marks a committed thrust; jump clear, then strike during recovery. On high ground his white crest warns of a high sand cast; shelter below. Fountains and the west exit remain usable. Farah waits outside. Unfinished duels reset on exit or Retry.";
+      "Sahir of the split crest waits at the gold standard. {interact} accepts a duel. His raised glaive marks a committed thrust; jump clear, then strike during recovery. On high ground his white crest warns of a high sand cast; shelter below. Fountains and the west exit remain usable. Farah waits outside. Unfinished duels reset on exit or Retry.";
     rooms[id] = {
       ...rooms[site.parent],
       id,

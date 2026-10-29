@@ -31,7 +31,9 @@ export class Renderer {
     "(prefers-reduced-motion: reduce)",
   );
   private get ambientTime() {
-    return this.motion?.matches ? 0 : this.game.worldTime;
+    return this.motion?.matches || this.game.options.reducedMotion
+      ? 0
+      : this.game.worldTime;
   }
   private backdrops = new Map<string, HTMLCanvasElement>();
   private terrain = new Map<string, HTMLCanvasElement>();
@@ -121,6 +123,7 @@ export class Renderer {
       g.screen === "playing" &&
       g.options.shake &&
       !this.motion?.matches &&
+      !g.options.reducedMotion &&
       g.shake > 0
         ? Math.sin(g.visualTime * 110) * g.shake * 13
         : 0;
@@ -347,7 +350,12 @@ export class Renderer {
           g.hasDagger,
         );
     }
-    if (g.player.invincible <= 0 || Math.sin(g.visualTime * 35) > -0.3)
+    if (
+      g.options.reducedMotion ||
+      this.motion?.matches ||
+      g.player.invincible <= 0 ||
+      Math.sin(g.visualTime * 35) > -0.3
+    )
       drawPrince(c, g.player, g.visualTime, false, g.hasDagger);
     for (const projectile of g.projectiles) {
       glow(c, projectile.x, projectile.y, 23, "#ffd68b45");

@@ -70,6 +70,7 @@ export class CampaignGame extends Game {
     super({
       ...config,
       persist: false,
+      controlsPersist: config.persist !== false,
       rooms: CAMPAIGN_ROOMS,
       start: CAMPAIGN_START,
     });
@@ -170,7 +171,7 @@ export class CampaignGame extends Game {
     if (this.room.id === "honor" && this.puzzles?.state.solved)
       return {
         title: "Return the Dagger to Farah",
-        text: "Farah is waiting beside her bed. Return to her and press E.",
+        text: "Farah is waiting beside her bed. Return to her and press {interact}.",
         room: "honor",
       };
     const next =
@@ -283,7 +284,7 @@ export class CampaignGame extends Game {
       this.player.sand = this.player.maxSand;
       this.showStory(
         "The Dagger of Time",
-        "A moment unravels, then returns. Hold R to rewind your movement and health.",
+        "A moment unravels, then returns. Hold {rewind} to rewind your movement and health.",
         "The Dagger can undo a mistake, but the sand it spends stays spent.",
         "ability",
       );
@@ -521,42 +522,43 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
-    const final = finaleControls(this).find((c) => distance(feet, c) < 45);
-    if (final) return final;
-    const depth = this.depths.controls().find((c) => distance(feet, c) < 45);
-    if (depth) return depth;
-    const consequence = consequenceControls(this).find(
-      (c) => distance(feet, c) < 45,
-    );
-    if (consequence) return consequence;
-    const practice = this.mastery
-      .controls()
-      .find((c) => distance(feet, c) < 45);
-    if (practice) return practice;
-    const rival = rivalControls(this).find((c) => distance(feet, c) < 45);
-    if (rival) return rival;
-    const creature = traversalControls(this).find(
-      (c) => distance(feet, c) < 45,
-    );
-    if (creature) return creature;
-    const evidence = historyControls(this).find((c) => distance(feet, c) < 45);
-    if (evidence) return evidence;
-    const mirror = wingControls(this).find((c) => distance(feet, c) < 45);
-    if (mirror) return mirror;
-    const echo = this.echoes.controls().find((c) => distance(feet, c) < 45);
-    if (echo) return echo;
-    const control = this.puzzles?.controls.find((c) => distance(feet, c) < 85);
-    if (control) return control;
-    const cooperative = cooperationControls(this).find(
-      (c) => distance(feet, c) < 70,
-    );
-    if (cooperative) return cooperative;
-    const reward = rewardControls(this).find((c) => distance(feet, c) < 85);
-    if (reward) return reward;
-    const palace = palaceControls(this).find((c) => distance(feet, c) < 70);
-    if (palace) return palace;
-    const regional = this.regionalControl;
-    if (regional && distance(feet, regional) < 85) return regional;
+    // Specific mechanisms win over broad doorway/fountain zones. Within those
+    // mechanisms the closest one wins, rather than array or system order.
+    const groups = [
+      {
+        controls: [
+          ...finaleControls(this),
+          ...this.depths.controls(),
+          ...consequenceControls(this),
+          ...this.mastery.controls(),
+          ...rivalControls(this),
+          ...traversalControls(this),
+          ...historyControls(this),
+          ...wingControls(this),
+          ...this.echoes.controls(),
+        ],
+        radius: 45,
+      },
+      { controls: this.puzzles?.controls ?? [], radius: 85 },
+      { controls: cooperationControls(this), radius: 70 },
+      { controls: rewardControls(this), radius: 85 },
+      { controls: palaceControls(this), radius: 70 },
+      {
+        controls: this.regionalControl ? [this.regionalControl] : [],
+        radius: 85,
+      },
+    ];
+    const nearest = groups
+      .flatMap(({ controls, radius }) =>
+        controls.map((control) => ({
+          control,
+          distance: distance(feet, control),
+          radius,
+        })),
+      )
+      .filter((c) => c.distance < c.radius)
+      .sort((a, b) => a.distance - b.distance)[0];
+    if (nearest) return nearest.control;
     const index = SECTIONS.findIndex((s) => s.id === this.room.id);
     const farah = this.companion;
     if (
@@ -576,9 +578,9 @@ export class CampaignGame extends Game {
       const fountain = this.room.fountain;
       if (!fountain || distance(feet, fountain) >= 95) return null;
     } else {
-      const door = CAMPAIGN_ROOMS[this.room.id].doors.find(
-        (d) => distance(feet, d) <= 95,
-      );
+      const door = CAMPAIGN_ROOMS[this.room.id].doors
+        .filter((d) => distance(feet, d) <= 95)
+        .sort((a, b) => distance(feet, a) - distance(feet, b))[0];
       if (door) {
         const reason = this.doorBlock(door);
         return {

@@ -160,6 +160,10 @@ it("honors live reduced motion while retaining authoritative hazard timing", () 
   reduced = false;
   r.draw();
   expect(motion.mock.lastCall?.[3]).toBe(0.5);
+  g.options.reducedMotion = true;
+  r.draw();
+  expect(motion.mock.lastCall?.[3]).toBe(0);
+  expect(g.worldTime).toBe(0.5);
 });
 
 it("bounds animated machinery to the viewport even in a very wide room", () => {
@@ -233,6 +237,9 @@ it("bounds impact shake during Freeze and suppresses it for menus and motion set
   reduced = true;
   expect(cameraX()).toBeCloseTo(-g.camera.x);
   reduced = false;
+  g.options.reducedMotion = true;
+  expect(cameraX()).toBeCloseTo(-g.camera.x);
+  g.options.reducedMotion = false;
   g.options.shake = false;
   expect(cameraX()).toBeCloseTo(-g.camera.x);
   g.options.shake = true;
