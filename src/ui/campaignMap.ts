@@ -165,6 +165,6 @@ export function campaignMap(g: CampaignGame, selection = g.room.id) {
           `<li>${escape(s.title)} · ${g.journey.completed.includes(s.id) ? "Complete" : "Explored"}</li>`,
       )
       .join("")}</ol></details>
-    <p class="atlas-help">Choose a charted room or a connected passage. Tab moves between controls; Enter selects. Markers save at your existing fountain checkpoint. M or Esc returns to play.</p>
+    <p class="atlas-help">Choose a charted room or a connected passage. Tab moves between controls; Enter selects. Markers save at your existing fountain checkpoint. ${g.input.prompt("map")} or ${g.input.prompt("pause")} returns to play.</p>
   </div>`;
 }

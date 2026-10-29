@@ -49,9 +49,9 @@ const p = (x: number, y: number, w: number, h = 24): Platform => ({
 });
 export function buildEchoRooms(rooms: Record<string, CampaignRoom>) {
   const hints = [
-    "Stand on the striped plate. C records a wait; C again replays it. Leave your echo holding the gate while you latch the far side. X cancels. Each recording costs 1 sand.",
-    "Record a run from the plate to the marked bell and press E there. During replay, hold the plate yourself. The echo rings the bell for a four-second gate. Latch the far side.",
-    "Climb to the striped shelf. Record a wait, then ring E at its bell before ending. Your echo holds the span and repeats the bell. Climb above it and jump the raised span to the latch. The floor catches misses.",
+    "Stand on the striped plate. {echo} records a wait; {echo} again replays it. Leave your echo holding the gate while you latch the far side. {cancelEcho} cancels. Each recording costs 1 sand.",
+    "Record a run from the plate to the marked bell and press {interact} there. During replay, hold the plate yourself. The echo rings the bell for a four-second gate. Latch the far side.",
+    "Climb to the striped shelf. Record a wait, then ring {interact} at its bell before ending. Your echo holds the span and repeats the bell. Climb above it and jump the raised span to the latch. The floor catches misses.",
   ];
   CORE_ECHO_IDS.forEach((id, i) => {
     const name = ["Echo threshold", "Answering bells", "Divided ascent"][i];

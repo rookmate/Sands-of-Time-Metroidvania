@@ -58,9 +58,9 @@ export function wingPlatforms(g: CampaignGame, base: Platform[]) {
 export function buildEraWing(rooms: Record<string, CampaignRoom>) {
   const names = ["Mirror reception", "Fallen arcade", "The unsent gift"];
   const hints = [
-    "E at a twin mirror changes only this wing. The intact reception wall seals the east passage; its rubble leaves a way through. Mirrors cost no sand. R rewinds you, C records an echo; neither changes the wing.",
+    "{interact} at a twin mirror changes only this wing. The intact reception wall seals the east passage; its rubble leaves a way through. Mirrors cost no sand. {rewind} rewinds you, {echo} records an echo; neither changes the wing.",
     "The fallen columns form a stair only in ruin. Climb to the upper mirror, then restore the intact arch. Missed jumps land on the safe lower floor. You can always return west below.",
-    "The intact moment opens the bell corridor. Record a run from the striped plate to the bell, ring E, then replay while you hold the plate. Cross and secure the far latch. Mirrors erase tapes; earned latches and gifts remain.",
+    "The intact moment opens the bell corridor. Record a run from the striped plate to the bell, ring {interact}, then replay while you hold the plate. Cross and secure the far latch. Mirrors erase tapes; earned latches and gifts remain.",
   ];
   WING_IDS.forEach((id, i) => {
     rooms[id] = {
@@ -124,7 +124,7 @@ export function wingControls(g: CampaignGame) {
   return [
     ...wing.mirrors.map((mirror) => ({
       ...mirror,
-      label: `Twin mirror · ${g.journey.wing.era} → ${g.journey.wing.era === "intact" ? "ruined" : "intact"} · E`,
+      label: `Twin mirror · ${g.journey.wing.era} → ${g.journey.wing.era === "intact" ? "ruined" : "intact"} · {interact}`,
       action: () => {
         if (
           !g.hasDagger ||

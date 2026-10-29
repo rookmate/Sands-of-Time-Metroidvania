@@ -51,7 +51,7 @@ export function drawFinale(c: Context, g: CampaignGame) {
     c.fillStyle = "#e5d1ac";
     c.fillText(
       g.journey.consequences.liftRepaired
-        ? "Refuge drive repaired · E to ride"
+        ? "Refuge drive repaired · Interact to ride"
         : "Silent refuge drive · shelves remain open",
       185,
       590,
@@ -76,7 +76,8 @@ export function drawFinale(c: Context, g: CampaignGame) {
         3,
       );
       c.fillText("Nima's lamp · the keepers reached shelter", 390, 555);
-    } else c.fillText("Keeper's niche · E to read the dry route", 450, 605);
+    } else
+      c.fillText("Keeper's niche · Interact to read the dry route", 450, 605);
   } else if (id === "crown-hall") {
     for (let x = 430; x < 1200; x += 130)
       arch(c, x, 170, 65, 160, "#6f6046", "#b89e71");
@@ -121,7 +122,7 @@ export function drawFinale(c: Context, g: CampaignGame) {
       390,
       570,
     );
-    c.fillText("Pin the east receiver · E", 950, 310);
+    c.fillText("Pin the east receiver · Interact", 950, 310);
     c.fillText(
       g.journey.history.read.includes("witness")
         ? "The witnesses' names, signed in daylight"
@@ -228,7 +229,7 @@ export function drawFinale(c: Context, g: CampaignGame) {
   c.textAlign = "center";
   for (const control of finaleControls(g)) {
     ellipse(c, control.x, control.y - 12, 6, 6, "#f2dfb8");
-    c.fillText("E", control.x, control.y - 27);
+    c.fillText("Interact", control.x, control.y - 27);
   }
   c.restore();
 }

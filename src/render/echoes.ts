@@ -2,7 +2,7 @@ import type { CampaignGame } from "../campaign/CampaignGame";
 import { drawPrince } from "./actors";
 import { ellipse, line, type Context } from "./shapes";
 
-export function drawEchoes(c: Context, g: CampaignGame) {
+export function drawEchoes(c: Context, g: CampaignGame, time = g.visualTime) {
   const e = g.echoes,
     chamber = e.chamber;
   if (!chamber) return;
@@ -76,11 +76,11 @@ export function drawEchoes(c: Context, g: CampaignGame) {
       "#eff6df",
       4,
     );
-    text("E · Echo bell", bell.x, bell.y - 110);
+    text("Interact · Echo bell", bell.x, bell.y - 110);
   }
   c.fillStyle = e.solved ? "#adebd8" : "#d7b676";
   c.fillRect(latch.x - 15, latch.y - 60, 30, 60);
-  text(e.solved ? "Secured" : "E · Latch", latch.x, latch.y - 82);
+  text(e.solved ? "Secured" : "Interact · Latch", latch.x, latch.y - 82);
   if (chamber.bridge) {
     const b = chamber.bridge;
     c.setLineDash([8, 6]);
@@ -94,7 +94,7 @@ export function drawEchoes(c: Context, g: CampaignGame) {
   }
   if (e.actor) {
     c.save();
-    drawPrince(c, e.actor, g.options.shake ? g.visualTime : 0, true, false);
+    drawPrince(c, e.actor, g.options.reducedMotion ? 0 : time, true, false);
     c.strokeStyle = "#b9f7ea";
     c.lineWidth = 2;
     c.strokeRect(e.actor.x - 3, e.actor.y - 3, e.actor.w + 6, e.actor.h + 6);

@@ -24,9 +24,9 @@ export function buildMastery(rooms: Record<string, CampaignRoom>) {
     "The patient crossing",
   ];
   const hints = [
-    "Hold Jump toward the striped wall. Release and press Jump again against it to kick left onto the high ledge. Jump climbs a caught ledge. E secures the upper seal. The round stone retries; the west door leaves.",
-    "Jump from the shelf to the bright rope knot; catch it while falling. Release Jump, then Jump + Right to transfer to the bar and far seal. Down lets go. R rewinds a miss; the striped catch mat retries without harm.",
-    "Climb the solid ledge, then catch the rope. Jump right and Time Dash (Shift) near the jump's top. R can recover a fall before the catch mat retries. E at the round stone restores practice sand, which stays here. No timer.",
+    "Hold {jump} toward the striped wall. Release and press {jump} again against it to kick left onto the high ledge. Jump climbs a caught ledge. {interact} secures the upper seal. The round stone retries; the west door leaves.",
+    "Jump from the shelf to the bright rope knot; catch it while falling. Release {jump}, then {jump} + {right} to transfer to the bar and far seal. {down} lets go. {rewind} rewinds a miss; the striped catch mat retries without harm.",
+    "Climb the solid ledge, then catch the rope. Jump right and Time Dash ({dash}) near the jump's top. {rewind} can recover a fall before the catch mat retries. {interact} at the round stone restores practice sand, which stays here. No timer.",
   ];
   MASTERY_IDS.forEach((id, i) => {
     const width = i === 2 ? 1600 : 1280;
@@ -200,8 +200,8 @@ export class Mastery {
             g.room.name,
             "A worn handprint joins yours on the stone. Those who practised here learned to come home as carefully as they learned to leap.",
             g.room.id === "mastery-dash"
-              ? "All three seals secured. A life memory waits on this landing. E at the seal returns to the launch mat; the west doors lead home."
-              : "Seal saved. The next chamber opens beside this landing. E at this seal returns to the launch mat. Your main fountain remains your checkpoint.",
+              ? "All three seals secured. A life memory waits on this landing. {interact} at the seal returns to the launch mat; the west doors lead home."
+              : "Seal saved. The next chamber opens beside this landing. {interact} at this seal returns to the launch mat. Your main fountain remains your checkpoint.",
           );
         },
       },

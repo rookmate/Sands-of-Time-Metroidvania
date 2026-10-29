@@ -13,7 +13,7 @@ export function drawEnemyTraversal(c: Context, g: CampaignGame) {
     c.save();
     c.fillStyle = "#efd6a0";
     c.font = "16px Georgia";
-    label(c, "Hollow creatures · service pens · E", 280, 475);
+    label(c, "Hollow creatures · service pens · Interact", 280, 475);
     c.restore();
   }
   if (!TRAVERSAL_IDS.includes(g.room.id)) return;
@@ -21,7 +21,7 @@ export function drawEnemyTraversal(c: Context, g: CampaignGame) {
   c.textAlign = "center";
   c.font = "16px Georgia";
   c.fillStyle = "#f5dfb3";
-  label(c, "Recall bell · E", 300, 570);
+  label(c, "Recall bell · Interact", 300, 570);
   label(c, "Hollow sand: no combat sand reward", 300, 300);
   c.fillStyle = "#d8b77b";
   c.fillRect(296, 600, 8, 50);
@@ -91,7 +91,7 @@ export function drawEnemyTraversal(c: Context, g: CampaignGame) {
         2,
       );
     label(c, "Freeze scarab on stripes · F", 650, 285);
-    label(c, "Jump stones. Secure far latch · E", 1090, 225);
+    label(c, "Jump stones. Secure far latch · Interact", 1090, 225);
     label(
       c,
       "Missed? Safe floor returns west to fountain and recall.",
@@ -117,7 +117,7 @@ export function drawEnemyTraversal(c: Context, g: CampaignGame) {
     }
     c.fillStyle = latched ? "#a4e4d3" : "#e1bb74";
     c.fillRect(1384, 365, 12, 55);
-    label(c, latched ? "Stones latched" : "Far latch · E", 1400, 345);
+    label(c, latched ? "Stones latched" : "Far latch · Interact", 1400, 345);
   }
   c.restore();
 }

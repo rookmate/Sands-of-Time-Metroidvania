@@ -26,9 +26,9 @@ export function buildDepths(rooms: Record<string, CampaignRoom>) {
   ];
   const hints = [
     "The reservoir's three-knock pipe continues down this well. Descend the staggered landings; the west ladder always climbs back. Farah waits above the narrow shaft.",
-    "The keeper's lock needs two hands. C records a wait on the striped lower plate; C replays it. Climb the opposite shelves while the echo holds the grille, then latch it above. X cancels; the fountain restores sand.",
+    "The keeper's lock needs two hands. {echo} records a wait on the striped lower plate; {echo} replays it. Climb the opposite shelves while the echo holds the grille, then latch it above. {cancelEcho} cancels; the fountain restores sand.",
     "The upper race is broken. Jump then Time Dash from the west lip to the far bank. A lower catch floor and west ladder recover misses. Turn the filter bypass on the far bank; the keeper below is still sealing foul water.",
-    "The bronze keeper guards the spring with pressure, not a blade. E at the inlet starts its test after the filter bypass is open. Outlined pipes warn before jets: climb to the west relief, then the east. Safe floor below each shelf and the west exit allow retreat. Slow and Freeze affect the pressure cycle; R only rewinds you.",
+    "The bronze keeper guards the spring with pressure, not a blade. {interact} at the inlet starts its test after the filter bypass is open. Outlined pipes warn before jets: climb to the west relief, then the east. Safe floor below each shelf and the west exit allow retreat. Slow and Freeze affect the pressure cycle; {rewind} only rewinds you.",
     "The spring was sealed against poisoned runoff, not hidden for a king. A fresh channel lets the keeper rest. Its service lift now links the reservoir depths to the Baths rotunda. The heart on the high bank is optional.",
   ];
   DEPTHS_IDS.forEach((id, i) => {

@@ -63,7 +63,7 @@ export function drawMastery(c: Context, g: CampaignGame) {
     "#e8e2cf",
     3,
   );
-  label(c, "E · retry", 310, 590);
+  label(c, "Interact · retry", 310, 590);
   ellipse(c, goal.x, goal.y - 22, 18, 18, solved ? "#9ed8ba" : "#b69d6b");
   if (solved)
     line(
@@ -89,7 +89,7 @@ export function drawMastery(c: Context, g: CampaignGame) {
       );
   label(
     c,
-    solved ? "Seal secured · E return" : "E · secure seal",
+    solved ? "Seal secured · Interact return" : "Interact · secure seal",
     goal.x,
     goal.y - 67,
   );

@@ -621,3 +621,54 @@ and muted intervals are silent. They do not establish subjective listening
 quality, physical speaker/headphone loudness or a blind player's response. This
 agent environment rejected audio input as unsupported, so no listening approval
 is claimed. Gameplay duration remains unmeasured.
+
+### Controls and accessibility
+
+Keyboard, touch and standard-mapped Gamepad API controllers share the action
+contract in `src/game/actions.ts`. Keyboard defaults remain A/D or arrows, Space
+or W/Up, S/Down, J/K, E, R, Q, F, Shift, C/X, M and Escape. Options lists every
+binding and can replace keyboard keys and controller buttons, reject conflicts,
+cancel capture or reset defaults. Escape and controller Menu/Start stay reserved
+for pause/back. Bindings use a separate local settings slot and do not change
+campaign saves or the v14 journey schema. Storage failures retain session use.
+
+The left stick and D-pad move; down drops or slides. Controller defaults are
+A/Cross jump, B/Circle sword, X/Square interact, Y/Triangle echo, left shoulder
+Slow, right shoulder Dash, left trigger held rewind, right trigger Freeze,
+View/Select map and left-stick click cancel echo. Menus use stick/D-pad focus,
+A/Cross select, B/Circle or Menu/Start back. In the atlas, left/right changes the
+focused room selector. Keyboard Tab/Shift-Tab wraps within every menu; up/down
+also moves focus outside native selectors. Native checkboxes keep Space and
+selectors keep their keyboard behavior. Menu focus returns to the parent action;
+background controls are inert and gameplay actions cannot run behind menus.
+
+A newly connected or reconnected controller must become neutral before it can
+act. Disconnect pauses play; it never auto-resumes. Screen changes, blur, hidden
+tabs and portrait blocking clear held actions. Keys held across a menu must be
+released and pressed again. Touch rewind is a real hold with pointer capture and
+release/cancel handling, including HUD redraws; it no longer runs on a timer.
+Pause and Options remain accessible in landscape through the game menu even when
+the compact header is hidden. Browser audio may need a screen tap or keyboard
+gesture before controller-only play can produce sound.
+
+HUD/onboarding prompts follow the last active device and current remaps. Scenery
+uses the action name Interact. Specific mechanisms take priority over broad door
+and fountain zones; nearby mechanisms and doorways select the closest candidate.
+The existing echo, mirror-era, challenge and finale actions use these same rules.
+Reduced motion adds an explicit saved option alongside the system preference,
+stopping ambient motion, camera shake and player invincibility flashing while
+retaining gameplay movement and danger tells. Larger text increases hints,
+story text and menu instructions. Long panels scroll. Narrative text remains
+visible until dismissed; there is no recorded voice track requiring subtitles.
+Canvas gameplay has no screen-reader navigation; this is not a claim of full
+assistive-technology support.
+
+Stage 20 verification includes focused action/source/remap/lifecycle regressions,
+rendered keyboard and desktop Chromium touch emulation, and simulated standard
+Gamepad API events for movement, menus, remapping, echoes, both mirror eras,
+challenge retry and the finale mirror. Local `artifacts/controls/` holds reports,
+screenshots, videos, two rendered mortal optional-heavy campaign routes and their
+exact-input replays. Both routes complete forty milestones and replay to identical
+player, journey and save states. These checks establish software behavior, not
+physical controller/mobile compatibility, screen-reader usability, a blind human
+response or hours of content. Those limitations remain for the next playtest.

@@ -147,7 +147,8 @@ export const SECTIONS: Section[] = [
     layout: "hall",
     theme: "palace",
     puzzle: crate,
-    objective: "Hold E and move to drag the crate onto the pressure plate.",
+    objective:
+      "Hold {interact} and move to drag the crate onto the pressure plate.",
     story:
       "We shifted the palace stores to hold the gate. Farah watched the crack beyond it, already planning another way through.",
   },
@@ -360,7 +361,7 @@ export const SECTIONS: Section[] = [
       movable: 2,
     },
     objective:
-      "Rotate the mirrors. Hold down + E and move to slide the last mirror beneath the receiver.",
+      "Rotate the mirrors. Hold down + {interact} and move to slide the last mirror beneath the receiver.",
     story:
       "A thread of sunlight unlocked the library. We guided it between mirrors, and the great machinery answered with a slow turning of stone.",
   },

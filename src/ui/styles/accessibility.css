@@ -1,0 +1,156 @@
+/* Preserve the palace palette; controls and reading text stay usable at small sizes. */
+#overlay button:focus-visible,
+#overlay select:focus-visible,
+#overlay summary:focus-visible {
+  outline: 2px solid #ead49d;
+  outline-offset: 3px;
+}
+[data-control-settings] {
+  margin-top: 24px;
+  border-top: 1px solid #a6b6a54a;
+}
+[data-control-settings] h3 {
+  font-size: 18px;
+  font-weight: normal;
+  color: #e0dbc1;
+}
+[data-control-settings] p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #c2cebc;
+}
+.binding-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid #a6b6a523;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.binding-row button,
+[data-reset-bind],
+[data-cancel-bind] {
+  border: 1px solid #c8b58488;
+  padding: 8px;
+  min-height: 40px;
+}
+.binding-row button:disabled {
+  opacity: 0.65;
+}
+.options-panel {
+  width: 620px;
+}
+.options-panel .option-row small,
+.save-note,
+.help-tip,
+.control-row p {
+  font-size: 13px;
+}
+.options-panel .option-row strong,
+.control-row strong {
+  font-size: 15px;
+}
+.story-narrative {
+  font-size: max(16px, 1em);
+}
+.story-detail {
+  font-size: 14px;
+}
+.help-columns {
+  gap: 24px;
+}
+.help-bottom {
+  font-size: 12px;
+}
+#app .room-hint {
+  font-size: 14px;
+  background: #10262aee;
+  line-height: 1.5;
+}
+#app .interact-prompt {
+  font-size: 14px;
+  min-height: 40px;
+  background: #10262af2;
+}
+.interact-prompt kbd,
+.ability kbd {
+  font-size: 11px;
+}
+.ability kbd {
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#app .ability {
+  width: 52px;
+  touch-action: manipulation;
+  min-height: 44px;
+  min-width: 36px;
+}
+.toast {
+  font-size: 14px;
+}
+.power-active {
+  font-size: 12px;
+}
+.touch-controls button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.hud-buttons button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.large-text .room-hint,
+.large-text .toast,
+.large-text .interact-prompt {
+  font-size: 17px;
+}
+.large-text .story-narrative {
+  font-size: 20px;
+}
+.large-text .story-detail,
+.large-text .control-row p,
+.large-text .help-tip,
+.large-text .option-row small {
+  font-size: 16px;
+}
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+@media (max-height: 550px) {
+  .modal-backdrop {
+    align-items: flex-start;
+  }
+  .help-panel,
+  .options-panel,
+  .story-panel,
+  .ending-panel,
+  .menu-panel {
+    margin: 0 auto;
+  }
+  .help-columns {
+    grid-template-columns: 1fr;
+  }
+  .touch-controls {
+    bottom: 76px;
+  }
+  .room-hint {
+    left: 20%;
+    right: 20%;
+    top: 65px;
+    max-height: 80px;
+    overflow-y: auto;
+  }
+}
+
+#app.large-text .room-hint,
+#app.large-text .interact-prompt {
+  font-size: 17px;
+}

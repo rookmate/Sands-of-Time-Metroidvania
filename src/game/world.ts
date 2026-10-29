@@ -71,7 +71,7 @@ export const ROOMS: Record<string, Room> = {
       guard(1600, 650, 1430, 1750, "archer", 2),
     ],
     hazards: [],
-    hint: "A / D to move · Space to jump · J to strike · E to interact",
+    hint: "{left} / {right} to move · {jump} to jump · {attack} to strike · {interact} to interact",
   },
   gardens: {
     id: "gardens",
@@ -187,7 +187,7 @@ export const ROOMS: Record<string, Room> = {
       guard(880, 460, 830, 1000, "archer", 2),
     ],
     hazards: [],
-    hint: "Hold toward a wall to run up it. Press Space against a wall to leap away.",
+    hint: "Hold toward a wall to run up it. Press {jump} against a wall to leap away.",
   },
   observatory: {
     id: "observatory",
@@ -275,7 +275,7 @@ export const ROOMS: Record<string, Room> = {
       { x: 660, y: 610, w: 34, h: 100, kind: "blade", period: 1.7 },
       { x: 1250, y: 860, w: 120, h: 40, kind: "spikes" },
     ],
-    hint: "Q slows the waterworks. Moving platforms carry you across the cistern.",
+    hint: "{slow} slows the waterworks. Moving platforms carry you across the cistern.",
   },
   "water-gardens": {
     id: "water-gardens",
@@ -420,7 +420,7 @@ export const ROOMS: Record<string, Room> = {
     pickups: [item("corrupt-sand", "sand", 1030, 450)],
     enemies: [guard(1390, 650, 1120, 1720, "guardian")],
     hazards: [{ x: 510, y: 790, w: 380, h: 40, kind: "spikes" }],
-    hint: "Jump, then Shift to cross the broken causeway. F imprisons the Guardian.",
+    hint: "Jump, then {dash} to cross the broken causeway. {freeze} imprisons the Guardian.",
   },
   bridge: {
     id: "bridge",

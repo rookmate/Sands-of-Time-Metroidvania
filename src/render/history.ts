@@ -35,7 +35,7 @@ export function drawHistory(c: Context, g: CampaignGame) {
       c.fillStyle = "#514f3d";
       c.fillRect(624, 642, 12, 5);
       c.fillStyle = "#f4dfb2";
-      c.fillText("Worn freight sill · E", 605, 600);
+      c.fillText("Worn freight sill · Interact", 605, 600);
     }
     for (const x of [687, 873]) {
       line(
@@ -72,7 +72,7 @@ export function drawHistory(c: Context, g: CampaignGame) {
     c.fillText(
       g.journey.history.opened
         ? "The cypress facing is open"
-        : "Twin cypresses · worn sill · E",
+        : "Twin cypresses · worn sill · Interact",
       780,
       415,
     );
@@ -145,7 +145,7 @@ export function drawHistory(c: Context, g: CampaignGame) {
     }
     c.fillStyle = "#f4dfb2";
     c.fillText(
-      `${id === "decree" ? "Court tablet" : id === "bowls" ? "Gardener's ledger" : id === "plan" ? "Old court plan" : "Names by the door"} · E${read ? " · reread" : ""}`,
+      `${id === "decree" ? "Court tablet" : id === "bowls" ? "Gardener's ledger" : id === "plan" ? "Old court plan" : "Names by the door"} · Interact${read ? " · reread" : ""}`,
       e.x,
       e.y - 115,
     );

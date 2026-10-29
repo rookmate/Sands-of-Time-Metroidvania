@@ -138,7 +138,7 @@ export function drawRivalRooms(c: Context, g: CampaignGame) {
   const site = RIVAL_SITES.find((s) => s.parent === g.room.id);
   if (site) {
     crest(c, site.x, 550, "#a36352");
-    label(c, "Split-crest passage · E", site.x, 505);
+    label(c, "Split-crest passage · Interact", site.x, 505);
   }
   const stage = RIVAL_IDS.indexOf(g.room.id);
   if (stage < 0) {
@@ -191,19 +191,24 @@ export function drawRivalRooms(c: Context, g: CampaignGame) {
       "#dec394",
       2,
     );
-  label(c, stage ? "Muster roll · E" : "Weapon rack · E", 295, 545);
+  label(
+    c,
+    stage ? "Muster roll · Interact" : "Weapon rack · Interact",
+    295,
+    545,
+  );
   label(
     c,
     s.outcome || stage < s.bouts
       ? "The gold standard is quiet"
-      : "Gold standard · duel · E",
+      : "Gold standard · duel · Interact",
     460,
     458,
   );
   if (stage === 2)
     label(
       c,
-      s.outcome ? "The vigil is over" : "Blue standard · release · E",
+      s.outcome ? "The vigil is over" : "Blue standard · release · Interact",
       655,
       690,
     );

@@ -33,24 +33,6 @@ export class ExplorerMap {
       )
         this.select(target.value);
     });
-    panel.addEventListener("keydown", (event) => {
-      if (event.key !== "Tab") return;
-      const controls = [
-        ...Array.from(
-          panel.querySelectorAll<HTMLElement>(
-            "button:not(:disabled), select, summary",
-          ),
-        ),
-      ].filter((e) => e.getClientRects().length);
-      const index = controls.indexOf(document.activeElement as HTMLElement);
-      if (event.shiftKey && index <= 0) {
-        event.preventDefault();
-        controls.at(-1)?.focus();
-      } else if (!event.shiftKey && index === controls.length - 1) {
-        event.preventDefault();
-        controls[0]?.focus();
-      }
-    });
   }
   select(room: string) {
     this.selected = room;

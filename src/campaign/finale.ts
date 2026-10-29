@@ -22,7 +22,7 @@ export function buildFinale(rooms: Record<string, CampaignRoom>) {
   const hints = [
     "The Tower's inner stair has fallen. Follow the service crown above the Baths, Hall and prison to the Hourglass. The dry overflow shelves climb to the wheel; a lower floor catches misses. A repaired refuge lift also reaches the wheel.",
     "The Hall's roof shutter fell across the service stair. Turn the west mirror toward the high receiver, then climb the familiar shelves and pin the light at the east receiver. The lower floor and west ladder let you retry.",
-    "The prison winch still holds. Climb the counterweight shelves, catch the hanging bar with Space, then jump to the east landing. The floor below catches misses. The Hourglass is ahead; finish exploration before its descent.",
+    "The prison winch still holds. Climb the counterweight shelves, catch the hanging bar with {jump}, then jump to the east landing. The floor below catches misses. The Hourglass is ahead; finish exploration before its descent.",
   ];
   FINALE_IDS.forEach((id, i) => {
     rooms[id] = {
@@ -156,7 +156,7 @@ export function finaleControls(g: CampaignGame) {
             g.farah.atMirror({ x: 1025, y: 420 });
           } else
             g.notify(
-              "This drive shares the refuge lift's broken coupling. The dry overflow shelves still climb east; jump then Dash across the last gap. R recovers a miss, or use the floor below.",
+              "This drive shares the refuge lift's broken coupling. The dry overflow shelves still climb east; jump then Dash across the last gap. {rewind} recovers a miss, or use the floor below.",
             );
         },
       },
@@ -244,7 +244,7 @@ export function finaleControls(g: CampaignGame) {
             ? "Sahir's last watch is over. His released counterweight holds a level crossing where the chain used to swing. Farah: Someone left us a way home."
             : g.journey.rival.outcome === "defeated"
               ? "Sahir's split crest rests against the winch. His last rematch is finished. The hanging bar still crosses the chain."
-              : "A split-crest standard marks the old watch. The winch holds the hanging bar over a safe lower landing. Climb the shelves, hold Space to catch, then jump east.",
+              : "A split-crest standard marks the old watch. The winch holds the hanging bar over a safe lower landing. Climb the shelves, hold {jump} to catch, then jump east.",
         ),
     },
   ];

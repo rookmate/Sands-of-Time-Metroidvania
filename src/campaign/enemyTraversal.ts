@@ -13,8 +13,8 @@ export const CROSSING_STONES: Platform[] = [
 ];
 export function buildEnemyTraversal(rooms: Record<string, CampaignRoom>) {
   const hints = [
-    "A hollow sand ram paws, sights you, then charges straight. Bait it toward the pale cracked wall and jump clear after it sights you. Swords cannot break this wall. E at the recall bell returns the creature without sand rewards. Farah waits outside the service pens.",
-    "The scarab's weight raises the crossing stones only while it stands on the striped plate. Freeze (F) it on the plate, then cross the raised stones and secure the far latch (E). Misses land on a safe floor. Recall at the west bell if the creature dies or strays; the fountain refills sand. No time seal is needed.",
+    "A hollow sand ram paws, sights you, then charges straight. Bait it toward the pale cracked wall and jump clear after it sights you. Swords cannot break this wall. {interact} at the recall bell returns the creature without sand rewards. Farah waits outside the service pens.",
+    "The scarab's weight raises the crossing stones only while it stands on the striped plate. Freeze ({freeze}) it on the plate, then cross the raised stones and secure the far latch ({interact}). Misses land on a safe floor. Recall at the west bell if the creature dies or strays; the fountain refills sand. No time seal is needed.",
   ];
   TRAVERSAL_IDS.forEach((id, i) => {
     const name = i === 0 ? "The ram's run" : "Scarab counterweights";

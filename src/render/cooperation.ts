@@ -23,7 +23,7 @@ export function drawCooperation(c: Context, g: CampaignGame, time: number) {
     c.fillText("Farah's narrow service stair → valve loft", 660, 235);
     c.fillText(
       s.phase === "idle"
-        ? "E: ask Farah here"
+        ? "Interact: ask Farah here"
         : "Service stair to the valve loft",
       660,
       560,
@@ -92,7 +92,7 @@ export function drawCooperation(c: Context, g: CampaignGame, time: number) {
       "#d1b881",
       5,
     );
-    c.fillText("E: latch", 1020, 310);
+    c.fillText("Interact: latch", 1020, 310);
     if (["primed", "crossed", "reunited"].includes(s.phase))
       line(
         c,

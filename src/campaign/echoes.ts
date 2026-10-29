@@ -45,10 +45,10 @@ export class Echoes {
   }
   get status() {
     if (this.phase === "recording")
-      return `Recording ${Math.floor(this.frames / 120)} / 8s · C replay · X cancel`;
+      return `Recording ${Math.floor(this.frames / 120)} / 8s · {echo} replay · {cancelEcho} cancel`;
     if (this.phase === "playing")
-      return `Echo ${Math.ceil((LIFE_FRAMES - this.life) / 120)}s · loop ${Math.floor(this.cursor / 120)} / ${(this.frames / 120).toFixed(1)}s · C replace · X cancel`;
-    return "C record · 1 sand · up to 8s · X cancel";
+      return `Echo ${Math.ceil((LIFE_FRAMES - this.life) / 120)}s · loop ${Math.floor(this.cursor / 120)} / ${(this.frames / 120).toFixed(1)}s · {echo} replace · {cancelEcho} cancel`;
+    return "{echo} record · 1 sand · up to 8s · {cancelEcho} cancel";
   }
   clear() {
     this.phase = "idle";
@@ -138,7 +138,7 @@ export class Echoes {
     };
     this.phase = "recording";
     g.notify(
-      "Recording movement and marked bells. C replays; X cancels. Other time powers cancel the tape.",
+      "Recording movement and marked bells. {echo} replays; {cancelEcho} cancels. Other time powers cancel the tape.",
     );
   }
   // Called before the player's ordinary fixed step; never invokes game commands.

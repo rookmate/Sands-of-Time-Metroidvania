@@ -29,7 +29,7 @@ export function drawEraWing(c: Context, g: CampaignGame) {
     c.font = "15px Georgia";
     c.textAlign = "center";
     c.fillStyle = "#fff1c9";
-    c.fillText(`E · ${g.journey.wing.era} ↔`, m.x, m.y - 125);
+    c.fillText(`Interact · ${g.journey.wing.era} ↔`, m.x, m.y - 125);
   }
   c.textAlign = "left";
   if (g.room.id === "mirror-vault") {
@@ -41,6 +41,6 @@ export function drawEraWing(c: Context, g: CampaignGame) {
     c.fill();
     c.fillStyle = "#e2ce91";
     c.font = "14px Georgia";
-    c.fillText("A gift never sent · E", 1090, 565);
+    c.fillText("A gift never sent · Interact", 1090, 565);
   }
 }

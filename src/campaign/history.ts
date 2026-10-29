@@ -31,7 +31,7 @@ export const HISTORY_EVIDENCE = {
     title: "A plan older than the tablet",
     text: 'An ink plan shows a small room behind the Cypress court. Its opening is drawn between two cypress reliefs. A builder wrote: "Freight sill. Weight on the worn heel lowers the facing. No key. Keep clear for bread carts."',
     detail:
-      "The court's blind arch was a working entrance. Stand in its worn sill, hold Down and press E to put your weight on the heel stone. A royal seal was never its lock.",
+      "The court's blind arch was a working entrance. Stand in its worn sill, hold {down} and press {interact} to put your weight on the heel stone. A royal seal was never its lock.",
   },
   sill: {
     room: "garden-court",
@@ -40,7 +40,7 @@ export const HISTORY_EVIDENCE = {
     title: "The worn heel stone",
     text: "The twin cypress reliefs frame a blank wall. Cart grooves run through its sill; soot survives inside the joints. In the middle, a heel-shaped hollow moves a little under your foot.",
     detail:
-      "This was a doorway before someone faced it with stone. Stand on the sill, hold Down and press E to bear down on the hollow. The mechanism needs weight, not the Dagger.",
+      "This was a doorway before someone faced it with stone. Stand on the sill, hold {down} and press {interact} to bear down on the hollow. The mechanism needs weight, not the Dagger.",
   },
   witness: {
     room: HISTORY_ROOM,
@@ -119,7 +119,7 @@ export function historyControls(g: CampaignGame) {
           g.showStory(
             "The facing lowers",
             "Under your heel, a counterweight wakes. The facing sinks into the sill. Soot and the smell of old bread lie behind it.",
-            "The opening stays clear. Press E again to enter; you can return to the court at any time.",
+            "The opening stays clear. Press {interact} again to enter; you can return to the court at any time.",
           );
           return;
         }
