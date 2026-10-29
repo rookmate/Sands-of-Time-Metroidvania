@@ -1,3 +1,4 @@
+import { HISTORY_ROOM } from "../campaign/history";
 import { PALACE_IDS } from "../campaign/palace";
 import { CAMPAIGN_ROOMS } from "../campaign/world";
 import type { CampaignGame } from "../campaign/CampaignGame";
@@ -5,6 +6,7 @@ import type { CampaignGame } from "../campaign/CampaignGame";
 const IDS = [
   "upper-baths",
   ...PALACE_IDS,
+  HISTORY_ROOM,
   "reunion",
   "learning",
   "orrery",
@@ -18,7 +20,9 @@ export function palaceMap(g: CampaignGame) {
   if (!PALACE_IDS.some((id) => g.visited.has(id))) return "";
   const visible = new Set(g.visited);
   for (const id of g.visited)
-    for (const d of CAMPAIGN_ROOMS[id].doors) visible.add(d.to);
+    for (const d of CAMPAIGN_ROOMS[id].doors)
+      if (d.gate !== "history-sill" || g.journey.history.opened)
+        visible.add(d.to);
   const point = (id: string) => ({
     x: CAMPAIGN_ROOMS[id].map.x * 165 + 80,
     y: CAMPAIGN_ROOMS[id].map.y * 85 + 30,

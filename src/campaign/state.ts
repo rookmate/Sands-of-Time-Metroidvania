@@ -1,3 +1,4 @@
+import { HISTORY_IDS } from "./history";
 import { ECHO_CHAMBERS } from "./echoRooms";
 import { freshPalace } from "./palace";
 import { parseSave } from "../game/storage";
@@ -8,7 +9,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 7,
+  version: 8,
+  history: { read: [], opened: false },
   wing: { era: "intact", discovered: false },
   echoes: { solved: [] },
   palace: freshPalace(),
@@ -104,11 +106,24 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 7;
       data.journey.wing = { era: "intact", discovered: false };
     }
+    if (data?.journey?.version === 7) {
+      data.journey.version = 8;
+      data.journey.history = { read: [], opened: false };
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 7 ||
+      state.version !== 8 ||
+      !state.history ||
+      typeof state.history.opened !== "boolean" ||
+      !Array.isArray(state.history.read) ||
+      state.history.read.length > HISTORY_IDS.length ||
+      new Set(state.history.read).size !== state.history.read.length ||
+      !state.history.read.every((id) => HISTORY_IDS.includes(id)) ||
+      (state.history.read.includes("witness") && !state.history.opened) ||
+      ((state.history.opened || state.history.read.length > 0) &&
+        state.completed.length < 17) ||
       !state.wing ||
       !["intact", "ruined"].includes(state.wing.era) ||
       typeof state.wing.discovered !== "boolean" ||

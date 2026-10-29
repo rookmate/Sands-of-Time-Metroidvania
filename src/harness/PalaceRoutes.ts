@@ -31,6 +31,7 @@ export class PalaceRoutes {
     h.game.input.clear();
   }
   private *crownToLearning() {
+    if (this.h.investigateHistory) yield* this.route([[485], "use"]);
     yield* this.route([
       [260],
       [360, 530],
@@ -50,17 +51,9 @@ export class PalaceRoutes {
   }
   *gardens() {
     const h = this.h;
-    yield* this.route([
-      [85],
-      "use",
-      [1715],
-      "use",
-      [85],
-      "use",
-      [500],
-      [1135],
-      "use",
-    ]);
+    yield* this.route([[85], "use", [1715], "use", [85], "use"]);
+    if (h.investigateHistory) yield* this.route([[195], "use"]);
+    yield* this.route([[500], [1135], "use"]);
     h.require(
       h.game.room.id === "root-conduit",
       "Garden descent missed root conduit",
@@ -115,7 +108,9 @@ export class PalaceRoutes {
   }
   *sky() {
     const h = this.h;
-    yield* this.route([[885], "use", [235]]);
+    yield* this.route([[885], "use"]);
+    if (h.investigateHistory) yield* this.route([[505], "use"]);
+    yield* h.walk(235);
     yield* this.climb("archive-ladder", 310);
     if (h.resilienceSeed !== null) {
       yield* this.route([[85], "use", [185], "use"]);

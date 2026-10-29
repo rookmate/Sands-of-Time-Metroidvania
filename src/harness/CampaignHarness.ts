@@ -1,3 +1,4 @@
+import { HistoryRoute } from "./HistoryRoute";
 import { BathsRoutes } from "./BathsRoutes";
 import { PalaceRoutes } from "./PalaceRoutes";
 import { type RewardStep } from "./rewardsRoute";
@@ -22,6 +23,7 @@ export class CampaignHarness {
   readonly regionOrder: "gardens-first" | "sky-first";
   readonly exploreEchoes: boolean;
   readonly exploreEraWing: boolean;
+  readonly investigateHistory: boolean;
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
   frames = 0;
@@ -63,9 +65,11 @@ export class CampaignHarness {
       regionOrder?: "gardens-first" | "sky-first";
       exploreEchoes?: boolean;
       exploreEraWing?: boolean;
+      investigateHistory?: boolean;
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.investigateHistory = options.investigateHistory ?? false;
     this.exploreEraWing = options.exploreEraWing ?? false;
     this.exploreEchoes = options.exploreEchoes ?? false;
     this.regionOrder = options.regionOrder ?? "gardens-first";
@@ -824,6 +828,7 @@ export class CampaignHarness {
       if (index === 28) {
         yield* palace.sky();
         if (this.regionOrder === "sky-first") yield* palace.gardens();
+        if (this.investigateHistory) yield* new HistoryRoute(this).reveal();
       }
       if (
         index !== 15 &&

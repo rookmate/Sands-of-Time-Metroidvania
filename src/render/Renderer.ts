@@ -120,6 +120,13 @@ export class Renderer {
       drawPalm(c, 1700, 650, 1.1, pal.foliage + "aa");
     }
     for (const door of room.doors) {
+      if (
+        g instanceof CampaignGame &&
+        "gate" in door &&
+        door.gate === "history-sill" &&
+        !g.journey.history.opened
+      )
+        continue;
       if (g instanceof CampaignGame) {
         c.save();
         c.fillStyle = "#e4d1a4";

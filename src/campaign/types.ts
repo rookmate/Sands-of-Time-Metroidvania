@@ -59,6 +59,7 @@ export interface Section {
 export interface CampaignDoor extends Door {
   milestone?: string;
   gate?:
+    | "history-sill"
     | "wing-wall"
     | "wing-arch"
     | "echo-step"
@@ -108,7 +109,8 @@ export interface PalaceState {
   prisonOpen: boolean;
 }
 export interface CampaignState {
-  version: 7;
+  version: 8;
+  history: { read: import("./history").HistoryEvidence[]; opened: boolean };
   wing: { era: import("./eraWing").WingEra; discovered: boolean };
   echoes: { solved: string[] };
   palace: PalaceState;
