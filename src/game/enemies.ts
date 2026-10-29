@@ -35,6 +35,7 @@ export function spawnEnemies(
       return {
         id,
         kind: s.kind,
+        behavior: s.behavior,
         x: s.x,
         y: s.y - h,
         w: boss ? 50 : 34,
@@ -65,9 +66,14 @@ export function stepEnemies(
   damage: (amount: number, direction: number) => void,
 ) {
   for (const enemy of enemies) {
+    enemy.chargeImpact = 0;
     if (enemy.dead) continue;
     enemy.hitFlash = Math.max(0, enemy.hitFlash - dt);
     if (frozen || enemy.protected) continue;
+    if (enemy.behavior === "ram") {
+      stepRam(enemy, player, platforms, tier, dt, damage);
+      continue;
+    }
     const stats = enemyStats(tier, enemy.kind);
     const dx = player.x - enemy.x,
       dy = Math.abs(player.y + player.h - enemy.y - enemy.h);
@@ -139,5 +145,61 @@ export function stepEnemies(
     }
     enemy.vy += GRAVITY * dt;
     moveBody(enemy, platforms, dt);
+  }
+}
+
+// A ram commits its direction when the long pawing telegraph begins. It uses
+// the same body collision and sword damage as other ground enemies.
+function stepRam(
+  e: Enemy,
+  player: Player,
+  platforms: Platform[],
+  tier: number,
+  dt: number,
+  damage: (amount: number, direction: number) => void,
+) {
+  e.cooldown -= dt;
+  const dx = player.x - e.x;
+  if (e.charge) {
+    if (e.telegraph > 0) {
+      e.telegraph = Math.max(0, e.telegraph - dt);
+      e.vx = 0;
+    } else {
+      e.vx = e.charge.direction * 620;
+      e.charge.remaining -= dt;
+    }
+  } else {
+    if (
+      Math.abs(dx) < 410 &&
+      Math.abs(player.y + player.h - e.y - e.h) < 100 &&
+      e.cooldown <= 0
+    ) {
+      e.face = Math.sign(dx) || e.face;
+      e.charge = { direction: e.face, remaining: 1.3 };
+      e.telegraph = 0.85;
+      e.vx = 0;
+    } else {
+      if (e.x <= e.patrol[0]) e.face = 1;
+      if (e.x + e.w >= e.patrol[1]) e.face = -1;
+      e.vx = e.face * 48;
+    }
+  }
+  e.vy += GRAVITY * dt;
+  const result = moveBody(e, platforms, dt);
+  if (e.charge && e.telegraph === 0) {
+    if (
+      Math.abs(e.vx) > 0 &&
+      e.x < player.x + player.w &&
+      e.x + e.w > player.x &&
+      e.y < player.y + player.h &&
+      e.y + e.h > player.y
+    )
+      damage(enemyStats(tier, e.kind).damage, e.charge.direction);
+    if (result.wall || e.charge.remaining <= 0) {
+      e.chargeImpact = result.wall;
+      e.charge = undefined;
+      e.vx = 0;
+      e.cooldown = 1.4;
+    }
   }
 }

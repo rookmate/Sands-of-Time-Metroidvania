@@ -555,11 +555,14 @@ export class Game {
       if (this.hasDagger)
         player.sand = Math.min(
           player.maxSand,
-          player.sand + enemyStats(this.tier, enemy.kind).reward,
+          player.sand + this.enemySandReward(enemy),
         );
       this.sound.play("sand");
       this.enemyDefeated(enemy);
     }
+  }
+  protected enemySandReward(enemy: Enemy) {
+    return enemyStats(this.tier, enemy.kind).reward;
   }
   protected enemyDefeated(enemy: Enemy) {
     if (enemy.kind === "guardian") {

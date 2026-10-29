@@ -306,6 +306,11 @@ export function drawEnemy(
     c.restore();
     return;
   }
+  if (enemy.kind === "scarab" || enemy.behavior === "ram") {
+    drawSandCreature(c, enemy, time, frozen);
+    drawEnemyStatus(c, enemy, frozen);
+    return;
+  }
   const boss = isBoss(enemy.kind);
   const scale = boss ? 1.5 : enemy.kind === "brute" ? 1.17 : 1;
   c.save();
@@ -444,7 +449,10 @@ export function drawEnemy(
     c.fillText("!", -3, -58);
   }
   c.restore();
-  if (enemy.health < enemy.maxHealth && !boss) {
+  drawEnemyStatus(c, enemy, frozen);
+}
+function drawEnemyStatus(c: Context, enemy: Enemy, frozen: boolean) {
+  if (enemy.health < enemy.maxHealth && !isBoss(enemy.kind)) {
     c.fillStyle = "#182b2a";
     c.fillRect(enemy.x - 6, enemy.y - 13, enemy.w + 12, 3);
     c.fillStyle = "#d4b585";
@@ -475,4 +483,79 @@ export function drawEnemy(
     );
     c.stroke();
   }
+}
+
+function drawSandCreature(c: Context, e: Enemy, time: number, frozen: boolean) {
+  const scarab = e.kind === "scarab";
+  c.save();
+  c.translate(e.x + e.w / 2, e.y + e.h);
+  c.scale(e.face, 1);
+  if (e.hitFlash > 0) c.filter = "brightness(2.5)";
+  const stride = frozen
+    ? 0
+    : Math.sin(time * 12) * (Math.abs(e.vx) > 0 ? 4 : 0);
+  for (const side of [-1, 1])
+    for (let i = 0; i < (scarab ? 3 : 2); i++)
+      line(
+        c,
+        [
+          [side * 9, -20],
+          [side * (20 + i * 2), -12],
+          [side * (23 + i * 2) + stride, 0],
+        ],
+        frozen ? "#9acbd9" : "#635d43",
+        3,
+      );
+  ellipse(
+    c,
+    0,
+    -27,
+    scarab ? 20 : 22,
+    scarab ? 22 : 25,
+    frozen ? "#83b9ce" : "#aa9869",
+  );
+  ellipse(
+    c,
+    scarab ? 0 : 15,
+    scarab ? -45 : -37,
+    scarab ? 11 : 13,
+    scarab ? 9 : 15,
+    frozen ? "#b2dce6" : "#d1b57d",
+  );
+  if (scarab) {
+    line(
+      c,
+      [
+        [0, -48],
+        [0, -8],
+      ],
+      "#594e38",
+      2,
+    );
+    for (const x of [-7, 7])
+      line(
+        c,
+        [
+          [x, -48],
+          [x * 2, -57],
+        ],
+        "#ead49c",
+        3,
+      );
+  } else {
+    for (const y of [-38, -51])
+      line(
+        c,
+        [
+          [15, y],
+          [27, y - 8],
+          [30, y - 19],
+          [21, y - 22],
+        ],
+        "#f2d396",
+        4,
+      );
+  }
+  ellipse(c, scarab ? 7 : 22, scarab ? -46 : -42, 3, 2, "#ffe9a4");
+  c.restore();
 }
