@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "vitest run",
+    "test": "vitest run --maxWorkers=2",
     "test:harness": "vitest run tests/adaptation.test.ts tests/campaign.test.ts tests/playtest.test.ts --reporter=verbose",
     "test:resilience": "vitest run tests/resilience.test.ts --reporter=verbose",
     "harness": "vite --host 0.0.0.0 --open /?harness=campaign",

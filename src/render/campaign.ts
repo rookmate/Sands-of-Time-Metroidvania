@@ -1,3 +1,4 @@
+import { drawOpening } from "./opening";
 import { drawFinale } from "./finale";
 import { drawDepths, drawDepthsScenery } from "./depths";
 import { drawConsequences } from "./consequences";
@@ -128,6 +129,7 @@ function gate(c: Context, x: number, y: number, w: number, h: number) {
 }
 export function drawCampaignObjects(c: Context, game: Game) {
   if (!(game instanceof CampaignGame)) return;
+  drawOpening(c, game);
   drawEraWing(c, game);
   drawEchoes(c, game);
   drawBaths(c, game);

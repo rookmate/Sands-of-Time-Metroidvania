@@ -59,6 +59,7 @@ export interface Section {
 export interface CampaignDoor extends Door {
   milestone?: string;
   gate?:
+    | "sun-seal"
     | "crown-wheel"
     | "crown-light"
     | "depths-entry"
