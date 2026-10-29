@@ -1,3 +1,4 @@
+import { wingPlatforms, wingControls, wingDoorBlock } from "./eraWing";
 import { ECHO_CHAMBERS } from "./echoRooms";
 import { Echoes } from "./echoes";
 import { palaceBlock, palaceControls, palacePlatforms } from "./palace";
@@ -193,7 +194,7 @@ export class CampaignGame extends Game {
     super.enterRoom(...args);
   }
   protected override roomPlatforms(time: number) {
-    const base = super.roomPlatforms(time);
+    const base = wingPlatforms(this, super.roomPlatforms(time));
     return this.puzzles
       ? this.echoes.platforms(
           this.puzzles.platforms(
@@ -361,6 +362,8 @@ export class CampaignGame extends Game {
       !this.journey.echoes.solved.includes(door.gate)
     )
       return "Secure the far-side echo latch first";
+    const wing = wingDoorBlock(this, door);
+    if (wing) return wing;
     const palace = palaceBlock(this, door);
     if (palace) return palace;
     if (door.milestone === "upper-baths" && cooperationActive(this))
@@ -397,6 +400,8 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
+    const mirror = wingControls(this).find((c) => distance(feet, c) < 45);
+    if (mirror) return mirror;
     const echo = this.echoes.controls().find((c) => distance(feet, c) < 45);
     if (echo) return echo;
     const control = this.puzzles?.controls.find((c) => distance(feet, c) < 85);

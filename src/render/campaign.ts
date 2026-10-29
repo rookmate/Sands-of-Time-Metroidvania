@@ -1,3 +1,4 @@
+import { drawEraWing } from "./eraWing";
 import { drawEchoes } from "./echoes";
 import { drawPalace } from "./palace";
 import { drawCooperation } from "./cooperation";
@@ -120,6 +121,7 @@ function gate(c: Context, x: number, y: number, w: number, h: number) {
 }
 export function drawCampaignObjects(c: Context, game: Game) {
   if (!(game instanceof CampaignGame)) return;
+  drawEraWing(c, game);
   drawEchoes(c, game);
   drawBaths(c, game);
   drawPalace(c, game);

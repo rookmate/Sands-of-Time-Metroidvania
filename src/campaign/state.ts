@@ -8,7 +8,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 6,
+  version: 7,
+  wing: { era: "intact", discovered: false },
   echoes: { solved: [] },
   palace: freshPalace(),
   cooperation: freshCooperation(),
@@ -99,14 +100,23 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 6;
       data.journey.echoes = { solved: [] };
     }
+    if (data?.journey?.version === 6) {
+      data.journey.version = 7;
+      data.journey.wing = { era: "intact", discovered: false };
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 6 ||
+      state.version !== 7 ||
+      !state.wing ||
+      !["intact", "ruined"].includes(state.wing.era) ||
+      typeof state.wing.discovered !== "boolean" ||
+      ((state.wing.discovered || state.wing.era === "ruined") &&
+        state.completed.length < 17) ||
       !state.echoes ||
       !Array.isArray(state.echoes.solved) ||
-      state.echoes.solved.length > 3 ||
+      state.echoes.solved.length > Object.keys(ECHO_CHAMBERS).length ||
       new Set(state.echoes.solved).size !== state.echoes.solved.length ||
       !state.echoes.solved.every((id) => Object.hasOwn(ECHO_CHAMBERS, id)) ||
       (state.echoes.solved.length > 0 && state.completed.length < 17) ||

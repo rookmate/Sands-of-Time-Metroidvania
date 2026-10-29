@@ -8,7 +8,14 @@ export interface EchoChamber {
   latch: Vec;
   bridge?: Platform;
 }
+export const CORE_ECHO_IDS = ["echo-step", "echo-bell", "echo-span"];
 export const ECHO_CHAMBERS: Record<string, EchoChamber> = {
+  "mirror-vault": {
+    plate: { x: 350, y: 650 },
+    bell: { x: 760, y: 650 },
+    gate: { x: 940, y: 0, w: 30, h: 650 },
+    latch: { x: 1060, y: 650 },
+  },
   "echo-step": {
     plate: { x: 320, y: 650 },
     gate: { x: 620, y: 0, w: 30, h: 650 },
@@ -41,7 +48,7 @@ export function buildEchoRooms(rooms: Record<string, CampaignRoom>) {
     "Record a run from the plate to the marked bell and press E there. During replay, hold the plate yourself. The echo rings the bell for a four-second gate. Latch the far side.",
     "Climb to the striped shelf. Record a wait, then ring E at its bell before ending. Your echo holds the span and repeats the bell. Climb above it and jump the raised span to the latch. The floor catches misses.",
   ];
-  Object.keys(ECHO_CHAMBERS).forEach((id, i) => {
+  CORE_ECHO_IDS.forEach((id, i) => {
     const name = ["Echo threshold", "Answering bells", "Divided ascent"][i];
     rooms[id] = {
       ...rooms["echo-gallery"],
