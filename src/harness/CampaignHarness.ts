@@ -1,3 +1,4 @@
+import { OpeningRoute } from "./OpeningRoute";
 import { FinaleRoute } from "./FinaleRoute";
 import { RivalRoute } from "./RivalRoute";
 import { RIVAL_IDS, type RivalOutcome } from "../campaign/rival";
@@ -23,6 +24,7 @@ export class CampaignHarness {
   game: CampaignGame;
   readonly scenario: "campaign" | "king" | "vizier";
   readonly immortal: boolean;
+  readonly exploreOpening: boolean;
   readonly exploreBaths: boolean;
   readonly cooperate: boolean;
   readonly regionOrder: "gardens-first" | "sky-first";
@@ -70,6 +72,7 @@ export class CampaignHarness {
       scenario?: "campaign" | "king" | "vizier";
       immortal?: boolean;
       resilienceSeed?: number;
+      exploreOpening?: boolean;
       exploreBaths?: boolean;
       cooperate?: boolean;
       regionOrder?: "gardens-first" | "sky-first";
@@ -84,6 +87,7 @@ export class CampaignHarness {
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.exploreOpening = options.exploreOpening ?? false;
     this.exploreDepths = options.exploreDepths ?? false;
     this.exploreConsequences = options.exploreConsequences ?? false;
     this.exploreMastery = options.exploreMastery ?? false;
@@ -849,6 +853,8 @@ export class CampaignHarness {
       if (index === 28 && this.regionOrder === "gardens-first")
         yield* palace.gardens();
       if (index === 32) yield* palace.prison();
+      if (index === 0 && this.exploreOpening)
+        yield* new OpeningRoute(this).notice();
       yield* this.solve();
       if (index === 28) {
         yield* palace.sky();
@@ -863,6 +869,8 @@ export class CampaignHarness {
         !(section.puzzle?.kind === "wall" && section.layout === "courtyard")
       )
         yield* this.traverse();
+      if (index === 1 && this.exploreOpening)
+        yield* new OpeningRoute(this).return();
       g = this.game;
       const exit =
         CAMPAIGN_ROOMS[section.id].doors.find(

@@ -1,3 +1,4 @@
+import { Opening, SUN_VAULT } from "./opening";
 import {
   FINALE_IDS,
   finaleBlock,
@@ -53,6 +54,7 @@ import type { CampaignDoor, CampaignSave } from "./types";
 
 export class CampaignGame extends Game {
   journey = freshJourney();
+  readonly opening = new Opening();
   readonly depths = new Depths(this);
   readonly mastery = new Mastery(this);
   readonly echoes = new Echoes(this);
@@ -120,7 +122,11 @@ export class CampaignGame extends Game {
     };
   }
   override get quest() {
-    if ([...FINALE_IDS, ...MASTERY_IDS, ...DEPTHS_IDS].includes(this.room.id))
+    if (
+      [SUN_VAULT, ...FINALE_IDS, ...MASTERY_IDS, ...DEPTHS_IDS].includes(
+        this.room.id,
+      )
+    )
       return {
         title: this.room.name,
         text: this.section.objective,
@@ -170,6 +176,7 @@ export class CampaignGame extends Game {
     return this.companion?.health === 0 ? undefined : super.deathMemory;
   }
   override start(continueJourney = false) {
+    this.opening.reset(!continueJourney);
     this.mastery.leave();
     this.journey =
       continueJourney && this.campaignSave
@@ -189,6 +196,7 @@ export class CampaignGame extends Game {
   }
   // Headless tests start through normal world entry without creating an AudioContext.
   begin() {
+    this.opening.reset(true);
     this.player.sand = 0;
     this.enterRoom(CAMPAIGN_START.room, undefined, CAMPAIGN_START);
     this.setScreen("playing");
@@ -345,6 +353,7 @@ export class CampaignGame extends Game {
       this.depths.leave();
     }
     if (active && this.screen === "playing") {
+      this.opening.observe(this, dt);
       this.depths.step(dt);
       this.mastery.step();
       stepEnemyTraversal(this);
@@ -424,6 +433,8 @@ export class CampaignGame extends Game {
     return true;
   }
   doorBlock(door: CampaignDoor): string | null {
+    if (door.gate === "sun-seal" && !this.hasDagger)
+      return "Dagger-shaped seal · return with the treasury Dagger";
     const finale = finaleBlock(this, door);
     if (finale) return finale;
     if (
