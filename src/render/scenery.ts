@@ -1,3 +1,6 @@
+import { drawDepthsBackdrop } from "./depths";
+import { drawRegionArchitecture, regionArt } from "./regions";
+import type { WingEra } from "../campaign/eraWing";
 import type { Room, Platform } from "../game/types";
 import { arch, ellipse, line, polygon, seeded, type Context } from "./shapes";
 export interface Palette {
@@ -295,13 +298,22 @@ function arcade(c: Context, room: Room, palette: Palette) {
       "#d0b78666",
     );
 }
-export function buildBackdrop(room: Room): HTMLCanvasElement {
+export function buildBackdrop(
+  room: Room,
+  era: WingEra = "intact",
+): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   canvas.width = room.width;
   canvas.height = room.height;
   const c = canvas.getContext("2d")!;
   const palette = PALETTES[room.theme];
+  if (regionArt(room) !== "palace") {
+    drawRegionArchitecture(c, room, era);
+    drawDepthsBackdrop(c, room);
+    return canvas;
+  }
   arcade(c, room, palette);
+  drawRegionArchitecture(c, room, era);
   // Silk standards, ropes, lamps, and tiled screens.
   for (let x = 200; x < room.width; x += 500) {
     const top = room.height > 1000 ? 80 : 70;
@@ -361,25 +373,6 @@ export function buildBackdrop(room: Room): HTMLCanvasElement {
           3,
         );
     }
-  }
-  if (room.id === "observatory") {
-    c.strokeStyle = "#ccb986";
-    c.lineWidth = 3;
-    for (let i = 0; i < 4; i++) {
-      c.beginPath();
-      c.ellipse(760, 240, 100, 100 - i * 22, i * 0.5, 0, Math.PI * 2);
-      c.stroke();
-    }
-    ellipse(c, 760, 240, 20, 20, "#bca66d");
-    line(
-      c,
-      [
-        [760, 120],
-        [760, 365],
-      ],
-      "#bca66d",
-      5,
-    );
   }
   if (room.id === "throne") {
     arch(c, 1070, 90, 330, 560, "#b5a184", "#e6c98e");

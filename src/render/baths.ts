@@ -2,7 +2,7 @@ import type { CampaignGame } from "../campaign/CampaignGame";
 import { BATHS_IDS } from "../campaign/baths";
 import { ellipse, line, type Context } from "./shapes";
 
-export function drawBaths(c: Context, g: CampaignGame) {
+export function drawBaths(c: Context, g: CampaignGame, time: number) {
   const id = g.room.id,
     b = g.journey.baths;
   if (!BATHS_IDS.includes(id)) return;
@@ -16,7 +16,7 @@ export function drawBaths(c: Context, g: CampaignGame) {
       line(
         c,
         [
-          [x + n * 60, y + Math.sin(g.visualTime * 2 + n) * 3],
+          [x + n * 60, y + Math.sin(time * 2 + n) * 3],
           [x + n * 60 + 65, y],
         ],
         "#a9dbca",
@@ -60,7 +60,7 @@ export function drawBaths(c: Context, g: CampaignGame) {
       for (let n = 0; n < 5; n++)
         ellipse(
           c,
-          vent.x + 25 + Math.sin(g.visualTime * 2 + n) * 12,
+          vent.x + 25 + Math.sin(time * 2 + n) * 12,
           620 - n * 15,
           25,
           12,

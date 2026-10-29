@@ -479,3 +479,43 @@ position/health/sand/clocks at 1440×960, 932×430 and 667×375. Chromium report
 page errors. Local ignored `artifacts/explorer-map/` contains scripts, reports,
 screenshots and route videos. These are source-informed software checks, not a
 blind human playtest, physical-device certification or a measured play duration.
+
+### Regional scenery and motion
+
+The Baths now have glazed tile walls, round roof lights, reflected streaks and
+quiet steam behind the traversal surfaces. Prison rooms use iron ribs, grilles,
+suspended chains and slow overhead machinery. The Observatory, archive stair and
+lens roof share a dark celestial dome and moving brass orbits. The local era wing
+keeps the same mural motifs in intact plaster and broken ribs, with cloth only in
+the intact moment. Its decorative floor-level columns and rubble were removed;
+the actual era platforms remain the collision authority. The main palace keeps
+its open sandstone arcade with sun-cut plaster motifs. The finale's Baths, Hall
+and warden route repeat their corresponding materials and silhouettes. The
+reservoir depths retain their pressure vessels and gain small condensation beads.
+
+`src/render/regions.ts` owns presentation selection, architecture and ambient
+motion. It derives identities from existing room IDs and regional lists, without
+adding a graph or persistent state. Static architecture uses the renderer's
+existing four-entry backdrop cache, keyed by era in the wing. The enclosed depths
+backdrop is now cached too. New animation evaluates at most six visible motifs
+per frame and draws before doors, terrain, hazards, controls and actors. It adds
+no bitmap downloads, shaders, filters or DOM animation. Existing collision caps,
+hazard colors, fountains, mirrors, pressure-jet outlines and map landmarks remain.
+
+Canvas ambience follows simulation time, so it stops on pause and follows local
+slow/freeze behavior. The system `prefers-reduced-motion` preference is read live;
+it stops decorative movement and suppresses camera shake. The Prince and his afterimages keep their independent visual animation clock;
+enemy actions, replayed actors and hazard telegraphs retain their existing timing. Browsers
+without the preference API keep the ordinary presentation. No save change or
+migration is needed.
+
+Local ignored `artifacts/regional-art/` contains before/after rendered campaign
+tours, room-entry art fixtures, action captures, videos, a compressed input route,
+an independent replay comparison, live-motion/preference checks and draw-cost
+samples. The seeded mortal route includes all forty anchors, both wing moments,
+optional regions and finale callbacks. Render-only fixtures are labeled separately
+from the input-only campaign. Seven focused renderer tests cover era-cache return
+and eviction, layering and simulation immutability, live reduced motion with
+active/inactive hazard telegraphs, viewport-bounded work and an unavailable
+preference API, plus movement animation during Slow and Freeze. These checks and software-browser timings do not establish human
+place recognition, blind comprehension, hardware frame rates or campaign duration.

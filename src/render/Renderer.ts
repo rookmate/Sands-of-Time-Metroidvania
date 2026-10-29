@@ -1,4 +1,4 @@
-import { drawDepthsBackdrop } from "./depths";
+import { drawRegionMotion, regionArt } from "./regions";
 import type { Game } from "../game/Game";
 import { hasRequirement, ABILITIES } from "../game/progression";
 import {
@@ -27,6 +27,12 @@ import {
 } from "./campaign";
 export class Renderer {
   private context: Context;
+  private readonly motion = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)",
+  );
+  private get ambientTime() {
+    return this.motion?.matches ? 0 : this.game.worldTime;
+  }
   private backdrops = new Map<string, HTMLCanvasElement>();
   private terrain = new Map<string, HTMLCanvasElement>();
   private skylines = new Map<string, HTMLCanvasElement>();
@@ -52,7 +58,10 @@ export class Renderer {
     const c = this.context,
       g = this.game,
       room = g.room,
-      t = g.visualTime;
+      t = this.ambientTime;
+    const region = regionArt(room);
+    const era = g instanceof CampaignGame ? g.journey.wing.era : "intact";
+    const backdropKey = region === "wing" ? `${room.id}:${era}` : room.id;
     const pal = PALETTES[room.theme];
     const sky = c.createLinearGradient(0, 0, 0, 720);
     pal.sky.forEach((color, i) => sky.addColorStop(i / 2, color));
@@ -102,22 +111,35 @@ export class Renderer {
         1.2,
       );
     }
-    if (!this.backdrops.has(room.id)) {
-      this.backdrops.set(room.id, buildBackdrop(room));
+    if (!this.backdrops.has(backdropKey)) {
+      this.backdrops.set(backdropKey, buildBackdrop(room, era));
       if (this.backdrops.size > 4)
         this.backdrops.delete(this.backdrops.keys().next().value!);
     }
     c.save();
     const shakeX =
-      g.options.shake && g.shake > 0 ? Math.sin(t * 110) * g.shake * 13 : 0;
+      g.options.shake && !this.motion?.matches && g.shake > 0
+        ? Math.sin(t * 110) * g.shake * 13
+        : 0;
     c.translate(-g.camera.x + shakeX, -g.camera.y);
-    c.globalAlpha = 0.88;
-    c.drawImage(this.backdrops.get(room.id)!, 0, 0);
+    c.globalAlpha = region === "palace" ? 0.88 : 1;
+    c.drawImage(this.backdrops.get(backdropKey)!, 0, 0);
     c.globalAlpha = 1;
-    drawDepthsBackdrop(c, g);
-    this.water(c);
+    if (region === "palace" || region === "baths" || region === "depths")
+      this.water(c);
+    drawRegionMotion(
+      c,
+      room,
+      era,
+      t,
+      g.camera.x,
+      g instanceof CampaignGame && g.journey.baths.drained,
+    );
     // Dim background palms and raised garden trees.
-    if (room.theme === "garden" || room.theme === "palace") {
+    if (
+      region === "palace" &&
+      (room.theme === "garden" || room.theme === "palace")
+    ) {
       drawPalm(c, 1150, 645, 1.35, pal.foliage + "aa");
       drawPalm(c, 1700, 650, 1.1, pal.foliage + "aa");
     }
@@ -176,7 +198,7 @@ export class Renderer {
       }
     }
     this.roomDetails(c);
-    drawCampaignScenery(c, g);
+    drawCampaignScenery(c, g, t);
     if (g.campaignProgress) {
       g.platforms.forEach((platform, index) =>
         drawPlatform(c, platform, pal, index * 71 + room.id.length),
@@ -206,7 +228,7 @@ export class Renderer {
     }
     this.hazards(c);
     drawTraversal(c, g);
-    drawCampaignObjects(c, g);
+    drawCampaignObjects(c, g, t);
     if (room.fountain) this.fountain(c, room.fountain.x, room.fountain.y);
     for (const pickup of room.pickups) {
       if (g.collected.has(pickup.id)) continue;
@@ -305,7 +327,7 @@ export class Renderer {
       c.restore();
     }
     for (const ghost of g.ghosts)
-      drawPrince(c, { ...g.player, ...ghost }, t, true, g.hasDagger);
+      drawPrince(c, { ...g.player, ...ghost }, g.visualTime, true, g.hasDagger);
     g.enemies.forEach((enemy) =>
       drawEnemy(c, enemy, g.worldTime, g.freezeTime > 0),
     );
@@ -317,13 +339,13 @@ export class Renderer {
         drawPrince(
           c,
           { ...g.player, x: g.player.x - g.player.face * i * 18 },
-          t,
+          g.visualTime,
           true,
           g.hasDagger,
         );
     }
-    if (g.player.invincible <= 0 || Math.sin(t * 35) > -0.3)
-      drawPrince(c, g.player, t, false, g.hasDagger);
+    if (g.player.invincible <= 0 || Math.sin(g.visualTime * 35) > -0.3)
+      drawPrince(c, g.player, g.visualTime, false, g.hasDagger);
     for (const projectile of g.projectiles) {
       glow(c, projectile.x, projectile.y, 23, "#ffd68b45");
       ellipse(
@@ -351,10 +373,13 @@ export class Renderer {
     }
     c.globalAlpha = 1;
     // Foreground palms frame the scene without hiding the playing field.
-    if (room.theme === "palace" || room.theme === "garden")
+    if (
+      region === "palace" &&
+      (room.theme === "palace" || room.theme === "garden")
+    )
       drawPalm(c, -45, room.height - 45, 2.5, "#1b3634");
     c.restore();
-    this.atmosphere(c);
+    if (region === "palace") this.atmosphere(c);
     if (
       g.rewinding ||
       g.freezeTime > 0 ||
@@ -392,7 +417,7 @@ export class Renderer {
     c.fillStyle = gradient;
     c.fillRect(0, y, g.room.width, 180);
     for (let i = 0; i < 50; i++) {
-      const x = (i * 127 + Math.sin(g.visualTime + i) * 10) % g.room.width,
+      const x = (i * 127 + Math.sin(this.ambientTime + i) * 10) % g.room.width,
         wy = y + ((i * 17) % 85);
       line(
         c,
@@ -406,7 +431,7 @@ export class Renderer {
     }
   }
   private fountain(c: Context, x: number, y: number) {
-    const t = this.game.visualTime;
+    const t = this.ambientTime;
     glow(c, x, y - 40, 100, "#79ded329");
     ellipse(c, x, y - 4, 42, 10, "#314c4b");
     c.fillStyle = "#afae8c";
@@ -492,7 +517,7 @@ export class Renderer {
         "#6d7461",
         1,
       );
-      glow(c, x, y, 55 + Math.sin(g.visualTime * 3 + x) * 3, "#f6d09a2c");
+      glow(c, x, y, 55 + Math.sin(this.ambientTime * 3 + x) * 3, "#f6d09a2c");
       polygon(
         c,
         [
@@ -531,7 +556,7 @@ export class Renderer {
         active = g.flags.has(e.flag);
       c.save();
       c.translate(e.x, e.y - 35);
-      c.rotate(active ? g.visualTime * 0.3 : 0);
+      c.rotate(active ? this.ambientTime * 0.3 : 0);
       c.strokeStyle = active ? "#8ed9c0" : "#bea979";
       c.lineWidth = 5;
       c.beginPath();
@@ -555,7 +580,8 @@ export class Renderer {
     // Channels run down the old stone when the sluice is restored.
     if (
       (g.flags.has("water") || room.theme === "water") &&
-      room.id !== "throne"
+      room.id !== "throne" &&
+      ["palace", "baths"].includes(regionArt(room))
     ) {
       for (let x = 410; x < room.width; x += 580) {
         const y = room.theme === "water" ? 110 : 330;
@@ -566,7 +592,8 @@ export class Renderer {
         c.fillStyle = gradient;
         c.fillRect(x, y, 22, room.height - y);
         for (let j = 0; j < 10; j++) {
-          const wy = y + ((g.visualTime * 140 + j * 63) % (room.height - y));
+          const wy =
+            y + ((this.ambientTime * 140 + j * 63) % (room.height - y));
           line(
             c,
             [
@@ -580,11 +607,10 @@ export class Renderer {
     }
   }
   private atmosphere(c: Context) {
-    const g = this.game;
     for (let i = 0; i < 55; i++) {
-      const x = ((i * 97.37 + g.visualTime * (5 + (i % 7))) % 1320) - 20;
-      const y = (i * 43.31 + Math.sin(g.visualTime * 0.4 + i) * 16) % 720;
-      c.globalAlpha = 0.2 + Math.sin(g.visualTime + i) * 0.15;
+      const x = ((i * 97.37 + this.ambientTime * (5 + (i % 7))) % 1320) - 20;
+      const y = (i * 43.31 + Math.sin(this.ambientTime * 0.4 + i) * 16) % 720;
+      c.globalAlpha = 0.2 + Math.sin(this.ambientTime + i) * 0.15;
       c.fillStyle = "#ffedc1";
       c.fillRect(x, y, i % 5 === 0 ? 2 : 1, i % 5 === 0 ? 2 : 1);
     }

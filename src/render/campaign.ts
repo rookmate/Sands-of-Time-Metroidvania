@@ -127,14 +127,14 @@ function gate(c: Context, x: number, y: number, w: number, h: number) {
       3,
     );
 }
-export function drawCampaignObjects(c: Context, game: Game) {
+export function drawCampaignObjects(c: Context, game: Game, time: number) {
   if (!(game instanceof CampaignGame)) return;
   drawOpening(c, game);
   drawEraWing(c, game);
   drawEchoes(c, game);
-  drawBaths(c, game);
+  drawBaths(c, game, time);
   drawPalace(c, game);
-  drawCooperation(c, game);
+  drawCooperation(c, game, time);
   drawRewards(c, game);
   drawRivalRooms(c, game);
   drawMastery(c, game);
@@ -179,21 +179,6 @@ export function drawCampaignObjects(c: Context, game: Game) {
             4,
           );
         });
-        if (g.section.layout === "library")
-          for (let i = 0; i < 4; i++) {
-            c.strokeStyle = "#bda97688";
-            c.beginPath();
-            c.ellipse(1100, 180, 90 + i * 40, 30 + i * 20, 0, 0, Math.PI * 2);
-            c.stroke();
-            ellipse(
-              c,
-              1100 + Math.cos(g.worldTime * 0.3 + i) * 140,
-              180 + Math.sin(g.worldTime * 0.3 + i) * 60,
-              10,
-              10,
-              "#cdb783",
-            );
-          }
         break;
       case "timed":
         lever(
@@ -287,7 +272,7 @@ export function drawCampaignObjects(c: Context, game: Game) {
                 c,
                 v.x,
                 v.y - 14 - j * 12,
-                12 + Math.sin(g.visualTime * 3 + j) * 4,
+                12 + Math.sin(time * 3 + j) * 4,
                 2,
                 "#9adacc99",
               );
@@ -438,7 +423,7 @@ export function drawCampaignObjects(c: Context, game: Game) {
   }
 }
 
-export function drawCampaignScenery(c: Context, game: Game) {
+export function drawCampaignScenery(c: Context, game: Game, time: number) {
   if (!(game instanceof CampaignGame)) return;
   drawDepthsScenery(c, game);
   const id = game.room.id,
@@ -473,13 +458,13 @@ export function drawCampaignScenery(c: Context, game: Game) {
           3,
         );
     }
-  if (["baths-main", "bathworks", "tomb"].includes(id))
+  if (id === "tomb")
     for (let x = 350; x < w - 100; x += 400) {
       ellipse(c, x, 640, 110, 16, "#95c5b080");
       for (let n = 0; n < 3; n++)
         ellipse(
           c,
-          x + Math.sin(game.visualTime + n) * 30,
+          x + Math.sin(time + n) * 30,
           560 - n * 30,
           30,
           9,
@@ -508,7 +493,7 @@ export function drawCampaignScenery(c: Context, game: Game) {
           c.fillRect(x + 10 + n * 19, y, 13, 35);
         }
     }
-  if (["prison", "tomb"].includes(id))
+  if (id === "tomb")
     for (let x = 300; x < w; x += 350) {
       arch(c, x, 300, 150, 350, "#243a40", "#849085");
       for (let n = x + 15; n < x + 150; n += 20)
