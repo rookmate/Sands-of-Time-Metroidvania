@@ -4,7 +4,7 @@ import { distance } from "../game/physics";
 import { loadOptions, writeOptions } from "../game/storage";
 import { isBoss } from "../game/enemies";
 import { ABILITIES } from "../game/progression";
-import { CAMPAIGN_START, SECTIONS, SECTION_BY_ID } from "./sections";
+import { CAMPAIGN_START, SECTIONS } from "./sections";
 import { CAMPAIGN_ROOMS } from "./world";
 import {
   freshJourney,
@@ -14,7 +14,8 @@ import {
 } from "./state";
 import { Puzzles } from "./puzzles";
 import { Farah } from "./companion";
-import type { CampaignSave } from "./types";
+import { bathsControl, bathsPlatforms } from "./baths";
+import type { CampaignDoor, CampaignSave } from "./types";
 
 export class CampaignGame extends Game {
   journey = freshJourney();
@@ -49,7 +50,7 @@ export class CampaignGame extends Game {
     this.checkpoint = { ...CAMPAIGN_START };
   }
   get section() {
-    return SECTION_BY_ID[this.room.id];
+    return CAMPAIGN_ROOMS[this.room.id].content;
   }
   override get hasDagger() {
     return this.journey?.dagger ?? false;
@@ -139,7 +140,11 @@ export class CampaignGame extends Game {
   }
   protected override roomPlatforms(time: number) {
     const base = super.roomPlatforms(time);
-    return this.puzzles ? this.puzzles.platforms(base) : base;
+    return this.puzzles
+      ? this.puzzles.platforms(
+          bathsPlatforms(this.room.id, this.journey.baths, base),
+        )
+      : base;
   }
   protected override claimItem(pickup: Pickup) {
     if (pickup.kind === "dagger") {
@@ -218,6 +223,10 @@ export class CampaignGame extends Game {
       this.notify("An earlier part of the story is unfinished.");
       return false;
     }
+    if (this.room.id === "bathworks" && !this.journey.baths.drained) {
+      this.notify(this.section.objective);
+      return false;
+    }
     if (!this.puzzles.state.solved) {
       this.notify(this.section.objective);
       return false;
@@ -268,44 +277,85 @@ export class CampaignGame extends Game {
     );
     return true;
   }
+  doorBlock(door: CampaignDoor): string | null {
+    if (
+      CAMPAIGN_ROOMS[door.to].availableAfter >
+      this.journey.completed.length +
+        (door.milestone === SECTIONS[this.journey.completed.length]?.id ? 1 : 0)
+    )
+      return "Follow the current story objective first";
+    if (door.gate === "drained" && !this.journey.baths.drained)
+      return "Flooded · open the reservoir intake and turn the sluice wheel";
+    if (
+      door.gate === "sword-dash" &&
+      (this.journey.sword < 2 || !this.abilities.has("dash"))
+    )
+      return "Requires the stronger sword and Time Dash from the upper pools";
+    if (door.gate === "shortcut" && !this.journey.baths.shortcut)
+      return "Barred from the maintenance side";
+    return null;
+  }
+  get regionalControl() {
+    return bathsControl(this);
+  }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
     const control = this.puzzles?.controls.find((c) => distance(feet, c) < 85);
     if (control) return control;
+    const regional = this.regionalControl;
+    if (regional && distance(feet, regional) < 85) return regional;
     const index = SECTIONS.findIndex((s) => s.id === this.room.id);
-    const shapeExit = this.rooms[this.room.id].doors.find(
-      (d) => d.to === SECTIONS[index + 1]?.id,
-    );
     const farah = this.companion;
-    const returnDagger =
+    if (
       index === 39 &&
       this.puzzles.state.solved &&
       farah &&
-      distance(feet, { x: farah.x + 15, y: farah.y + farah.h }) < 85;
-    if ((shapeExit && distance(feet, shapeExit) <= 95) || returnDagger)
+      distance(feet, { x: farah.x + 15, y: farah.y + farah.h }) < 85
+    )
       return {
-        label:
-          index === 39 ? "Return the Dagger to Farah" : "Continue the story",
+        label: "Return the Dagger to Farah",
         action: () => {
-          if (!this.finishSection()) return;
-          const next = SECTIONS[index + 1];
-          if (next) {
-            this.enterRoom(next.id, this.room.id);
-            this.syncRoom();
-            this.checkpoint = {
-              room: next.id,
-              x: this.player.x,
-              y: this.player.y,
-            };
-            this.player.health = this.player.maxHealth;
-            this.player.sand = this.hasDagger ? this.player.maxSand : 0;
-            this.save(false);
-          }
+          this.finishSection();
         },
       };
+    // The restored timeline has no passage back into the ruined palace.
     if (this.journey.grandRewind && index === 39) {
       const fountain = this.room.fountain;
       if (!fountain || distance(feet, fountain) >= 95) return null;
+    } else {
+      const door = CAMPAIGN_ROOMS[this.room.id].doors.find(
+        (d) => distance(feet, d) <= 95,
+      );
+      if (door) {
+        const reason = this.doorBlock(door);
+        return {
+          label: reason
+            ? `${door.label} · ${reason}`
+            : door.milestone && this.room.region !== "Baths and Waterworks"
+              ? "Continue the story"
+              : door.label,
+          action: () => {
+            if (reason) {
+              this.notify(reason);
+              return;
+            }
+            const wasCompleted = this.journey.completed.length;
+            if (door.milestone && !this.finishSection()) return;
+            this.enterRoom(door.to, this.room.id);
+            this.syncRoom();
+            if (this.journey.completed.length > wasCompleted) {
+              this.checkpoint = {
+                room: door.to,
+                x: this.player.x,
+                y: this.player.y,
+              };
+              this.player.health = this.player.maxHealth;
+              this.player.sand = this.hasDagger ? this.player.maxSand : 0;
+            }
+            this.save(false);
+          },
+        };
+      }
     }
     const interaction = super.interaction;
     if (interaction?.label === "Rest at the fountain")

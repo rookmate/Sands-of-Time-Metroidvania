@@ -1,8 +1,10 @@
-import type { EnemySpawn, Pickup, Room } from "../game/types";
+import type { EnemySpawn, Pickup } from "../game/types";
 import { geometry } from "./layouts";
+import type { CampaignRoom } from "./types";
+import { buildBaths } from "./baths";
 import { SECTIONS } from "./sections";
 
-export const CAMPAIGN_ROOMS: Record<string, Room> = Object.fromEntries(
+export const CAMPAIGN_ROOMS: Record<string, CampaignRoom> = Object.fromEntries(
   SECTIONS.map((section, index) => {
     const shape = geometry(section.layout);
     const previous = SECTIONS[index - 1],
@@ -64,7 +66,9 @@ export const CAMPAIGN_ROOMS: Record<string, Room> = Object.fromEntries(
           : Math.min(shape.width - 40, shape.entry.x + 100),
       y: shape.entry.y,
     };
-    const room: Room = {
+    const room: CampaignRoom = {
+      content: section,
+      availableAfter: index,
       id: section.id,
       name: section.title,
       mapLabel: section.title,
@@ -80,7 +84,16 @@ export const CAMPAIGN_ROOMS: Record<string, Room> = Object.fromEntries(
         ...(previous
           ? [{ ...shape.entry, to: previous.id, label: "Return passage" }]
           : []),
-        ...(next ? [{ ...shape.exit, to: next.id, label: next.title }] : []),
+        ...(next
+          ? [
+              {
+                ...shape.exit,
+                to: next.id,
+                label: next.title,
+                milestone: section.id,
+              },
+            ]
+          : []),
       ],
       fountain,
       pickups,
@@ -94,3 +107,6 @@ export const CAMPAIGN_ROOMS: Record<string, Room> = Object.fromEntries(
     return [section.id, room];
   }),
 );
+
+// This is the campaign graph. Story anchors remain in SECTIONS.
+buildBaths(CAMPAIGN_ROOMS);

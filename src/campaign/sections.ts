@@ -188,10 +188,9 @@ export const SECTIONS: Section[] = [
     part: "IV",
     layout: "hall",
     theme: "water",
-    puzzle: crate,
-    objective: "Weight the bathhouse plate to open the water passage.",
+    objective: "Find the steam chambers beyond the Baths rotunda.",
     story:
-      "The baths were quiet until the creatures found us. Farah searched the screens and narrow passages while I moved the heavy stone.",
+      "The rotunda held a drowned stair and a barred grate. Farah pointed out the steam chambers. The waterkeepers must have left another way through.",
   },
   {
     id: "bathworks",
@@ -199,8 +198,8 @@ export const SECTIONS: Section[] = [
     part: "IV",
     layout: "hall",
     theme: "water",
-    puzzle: crank("Drain the upper baths"),
-    objective: "Align the sluices and drain the upper bathworks.",
+    objective:
+      "Open the reservoir intake, then drain the Baths at the sluice wheel.",
     story:
       "The water fell away, exposing a route above the baths. A blade glimmered beyond the broken masonry.",
   },
