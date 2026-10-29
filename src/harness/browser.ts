@@ -32,6 +32,10 @@ export class BrowserHarness {
             resilienceSeed: params.has("seed")
               ? Number(params.get("seed"))
               : undefined,
+            regionOrder:
+              params.get("order") === "sky-first"
+                ? "sky-first"
+                : "gardens-first",
             cooperate: params.get("cooperate") !== "0",
             exploreBaths: params.get("explore") !== "0",
             optionalRewards:

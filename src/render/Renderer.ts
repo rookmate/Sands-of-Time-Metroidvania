@@ -120,12 +120,18 @@ export class Renderer {
       drawPalm(c, 1700, 650, 1.1, pal.foliage + "aa");
     }
     for (const door of room.doors) {
-      if (g instanceof CampaignGame && room.region === "Baths and Waterworks") {
+      if (g instanceof CampaignGame) {
         c.save();
         c.fillStyle = "#e4d1a4";
         c.font = "13px Georgia";
         c.textAlign = "center";
-        c.fillText(CAMPAIGN_ROOMS[door.to].mapLabel, door.x, door.y - 125);
+        c.fillText(
+          room.id === "hourglass" && door.to === "tomb"
+            ? "Point of no return · old palace closes"
+            : CAMPAIGN_ROOMS[door.to].mapLabel,
+          door.x,
+          door.y - 125,
+        );
         c.restore();
       }
       const open =

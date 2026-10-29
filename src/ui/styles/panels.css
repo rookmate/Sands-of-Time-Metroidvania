@@ -499,3 +499,10 @@ h2 {
 .regional-map ~ .chapter-route {
   max-height: 130px;
 }
+
+.palace-map {
+  max-height: none;
+}
+.palace-map .map-label {
+  font-size: 14px;
+}
