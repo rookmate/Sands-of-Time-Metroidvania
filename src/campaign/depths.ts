@@ -50,12 +50,11 @@ export class Depths {
     return { ...rect, warning: t < 1.5, live: t >= 1.5 && t < 2.5 };
   }
   step(dt: number) {
-    if (this.g.room.id !== "depths-heart" || !this.active || this.g.rewinding)
-      return;
+    if (this.g.room.id !== "depths-heart" || !this.active) return;
     this.clock +=
       this.g.freezeTime > 0 ? 0 : dt * (this.g.slowTime > 0 ? 0.38 : 1);
     const jet = this.jet;
-    if (jet?.live && overlap(this.g.player, jet))
+    if (jet?.live && this.g.freezeTime <= 0 && overlap(this.g.player, jet))
       this.g.damage(1, this.g.player.x < 800 ? -1 : 1);
   }
   controls() {

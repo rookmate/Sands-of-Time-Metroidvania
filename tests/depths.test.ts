@@ -259,6 +259,47 @@ it("gives real warning before pressure damage, respects Freeze, and clears an in
   expect(g.depths.jet).toBeNull();
 });
 
+it("keeps pressure advancing during player-only rewind", () => {
+  const h = reach(
+    new CampaignHarness({ immortal: false, exploreDepths: true }),
+    (g) => g.room.id === "depths-heart" && g.depths.active,
+  );
+  const g = h.game;
+  run(h.walk(250));
+  g.input.clear();
+  for (let i = 0; i < 120; i++) g.update(1 / 120);
+  const clock = g.depths.clock,
+    world = g.worldTime;
+  g.input.press("rewind");
+  for (let i = 0; i < 30; i++) g.update(1 / 120);
+  expect(g.rewinding).toBe(true);
+  expect(g.worldTime).toBeGreaterThan(world);
+  expect(g.depths.clock - clock).toBeCloseTo(30 / 120, 6);
+});
+
+it("makes a live frozen jet harmless after hit invincibility expires", () => {
+  const h = reach(
+    new CampaignHarness({ immortal: false, exploreDepths: true }),
+    (g) => g.room.id === "depths-heart" && g.depths.active,
+  );
+  const g = h.game;
+  run(h.walk(455));
+  g.input.clear();
+  run(h.until(() => !!g.depths.jet?.live, 600));
+  input(g, "freeze");
+  const clock = g.depths.clock,
+    hp = g.player.health;
+  run(h.walk(455));
+  g.input.clear();
+  for (let i = 0; i < 180; i++) g.update(1 / 120);
+  expect(g.freezeTime).toBeGreaterThan(0);
+  expect(g.depths.clock).toBe(clock);
+  expect(g.depths.jet?.live).toBe(true);
+  expect(g.player.health).toBe(hp);
+  expect(g.player.x).toBeGreaterThan(420);
+  expect(g.player.x).toBeLessThan(500);
+});
+
 it("migrates v12 and ending saves with predecessor state intact, rejects inconsistent phases, and never requires the descent", () => {
   const h = firstRelief(),
     old = JSON.parse(JSON.stringify(h.game.saved));
