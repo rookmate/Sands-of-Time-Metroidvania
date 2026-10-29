@@ -18,6 +18,7 @@ import type {
 import { SWORD, swordDuration, swordHitbox, swordPhase } from "./combat";
 import { Input } from "./input";
 import { Sound } from "./audio";
+import type { MusicScene } from "./score";
 import {
   ABILITIES,
   enemyStats,
@@ -115,6 +116,7 @@ export class Game {
     });
     document.addEventListener("visibilitychange", () => {
       if (document.hidden && this.screen === "playing") this.setScreen("pause");
+      this.syncAudio();
     });
   }
   private createPlayer(): Player {
@@ -147,6 +149,20 @@ export class Game {
       grip: null,
       gripCooldown: 0,
     };
+  }
+  get musicScene(): MusicScene {
+    return {
+      theme:
+        this.room.theme === "water"
+          ? "baths"
+          : this.room.theme === "garden"
+            ? "garden"
+            : "palace",
+      danger: this.boss ? "king" : "calm",
+    };
+  }
+  syncAudio() {
+    this.sound.sync(this.screen, this.orientationBlocked || document.hidden);
   }
   get tier() {
     return this.abilities.size;
@@ -208,6 +224,7 @@ export class Game {
   }
   setScreen(screen: Screen) {
     this.screen = screen;
+    this.syncAudio();
     this.attackBuffer = 0;
     this.input.clear();
   }
@@ -253,6 +270,7 @@ export class Game {
   }
   setOption(key: keyof Options, value: boolean) {
     this.options[key] = value;
+    this.syncAudio();
     if (this.config.persist !== false) writeOptions(this.options);
   }
   enterRoom(id: string, from?: string, position?: Vec) {
@@ -721,10 +739,8 @@ export class Game {
   }
   update(dt: number) {
     this.visualTime += dt;
-    this.sound.update(
-      dt,
-      this.screen === "playing" && !this.orientationBlocked,
-    );
+    this.syncAudio();
+    this.sound.update(dt, this.musicScene);
     if (this.screen !== "playing" || this.orientationBlocked) return;
     this.playTime += dt;
     this.roomBanner = Math.max(0, this.roomBanner - dt);
