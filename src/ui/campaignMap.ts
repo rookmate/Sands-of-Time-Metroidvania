@@ -2,6 +2,8 @@ import type { CampaignGame } from "../campaign/CampaignGame";
 import { CAMPAIGN_ROOMS } from "../campaign/world";
 import { SECTIONS } from "../campaign/sections";
 import { BATHS_IDS } from "../campaign/baths";
+import { ATTUNEMENTS, VESSEL_ID } from "../campaign/rewards";
+const REGION_IDS = [...BATHS_IDS, "echo-gallery", "keeper-cistern"];
 
 export function campaignMap(game: CampaignGame) {
   const visible = new Set(game.visited);
@@ -12,11 +14,11 @@ export function campaignMap(game: CampaignGame) {
     y: CAMPAIGN_ROOMS[id].map.y * 85 - 40,
   });
   const drawn = new Set<string>();
-  const edges = BATHS_IDS.flatMap((id) =>
+  const edges = REGION_IDS.flatMap((id) =>
     CAMPAIGN_ROOMS[id].doors.map((d) => {
       const pair = [id, d.to].sort().join(":");
       if (
-        !BATHS_IDS.includes(d.to) ||
+        !REGION_IDS.includes(d.to) ||
         drawn.has(pair) ||
         !visible.has(id) ||
         !visible.has(d.to)
@@ -29,7 +31,7 @@ export function campaignMap(game: CampaignGame) {
       return `<path d="M${a.x} ${a.y}L${b.x} ${b.y}" class="map-connection ${reason ? "sealed" : ""}"><title>${d.label}${reason ? `: ${reason}` : ""}</title></path>`;
     }),
   ).join("");
-  const nodes = BATHS_IDS.filter((id) => visible.has(id))
+  const nodes = REGION_IDS.filter((id) => visible.has(id))
     .map((id) => {
       const room = CAMPAIGN_ROOMS[id],
         p = point(id),
@@ -38,8 +40,12 @@ export function campaignMap(game: CampaignGame) {
     })
     .join("");
   const b = game.journey.baths;
-  const regional = BATHS_IDS.some((id) => game.visited.has(id))
-    ? `<p class="regional-state">Baths and Waterworks · ${b.drained ? "Drained" : b.intake ? "Intake open; turn sluice wheel" : "Flooded; intake closed"} · ${b.shortcut ? "Rotunda grate open" : "Grate barred from within"}</p><svg class="regional-map" viewBox="0 0 520 270" role="img" aria-label="Baths connections. Dashed paths are gated. Room positions show connections, not doorway height.">${edges}${nodes}</svg>`
+  const regional = REGION_IDS.some((id) => game.visited.has(id))
+    ? `<p class="regional-state">Baths and Waterworks · ${b.drained ? "Drained" : b.intake ? "Intake open; turn sluice wheel" : "Flooded; intake closed"} · ${b.shortcut ? "Rotunda grate open" : "Grate barred from within"}</p><svg class="regional-map" viewBox="0 0 700 270" role="img" aria-label="Baths connections. Dashed paths are gated. Room positions show connections, not doorway height.">${edges}${nodes}</svg>`
     : "";
-  return `${regional}<p>Story milestones · ${game.journey.completed.length}/40</p><ol class="chapter-route">${SECTIONS.map((s, i) => `<li class="${game.room.id === s.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(s.id) ? s.title : "Unexplored"}</span><span>${game.journey.completed.includes(s.id) ? "Complete" : s.id === game.quest.room ? "Next objective" : ""}</span></li>`).join("")}</ol>`;
+  const rewards = game.journey.rewards;
+  const discoveries = regional
+    ? `<p class="regional-state">Optional discoveries · ${rewards.attunement ? ATTUNEMENTS[rewards.attunement].name + ": " + ATTUNEMENTS[rewards.attunement].effect : "Time seal unchosen"} · ${game.collected.has(VESSEL_ID) ? "Sand capacity 8" : "Sand vessel unfound"} · ${rewards.inscription ? "Keepers' names remembered" : "Inscription unread"}</p>`
+    : "";
+  return `${regional}${discoveries}<p>Story milestones · ${game.journey.completed.length}/40</p><ol class="chapter-route">${SECTIONS.map((s, i) => `<li class="${game.room.id === s.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(s.id) ? s.title : "Unexplored"}</span><span>${game.journey.completed.includes(s.id) ? "Complete" : s.id === game.quest.room ? "Next objective" : ""}</span></li>`).join("")}</ol>`;
 }

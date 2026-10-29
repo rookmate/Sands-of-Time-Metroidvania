@@ -413,6 +413,12 @@ export class Game {
       });
     }
   }
+  abilityCost(ability: Ability) {
+    return ABILITIES[ability].cost;
+  }
+  protected get slowDuration() {
+    return 6;
+  }
   private spend(ability: Ability): boolean {
     if (!this.hasDagger) {
       this.notify(
@@ -424,7 +430,7 @@ export class Game {
       this.notify(`${ABILITIES[ability].name} has not yet awakened.`);
       return false;
     }
-    const cost = ABILITIES[ability].cost;
+    const cost = this.abilityCost(ability);
     if (this.player.sand < cost) {
       this.notify(
         "The Dagger is empty. Seek sand clouds, enemies, or a fountain.",
@@ -451,7 +457,8 @@ export class Game {
       this.player.vx = this.player.face * RUN_SPEED;
     }
     this.player.dashCooldown = Math.max(0, this.player.dashCooldown - dt);
-    if (this.input.consume("slow") && this.spend("slow")) this.slowTime = 6;
+    if (this.input.consume("slow") && this.spend("slow"))
+      this.slowTime = this.slowDuration;
     if (this.input.consume("freeze") && this.spend("freeze"))
       this.freezeTime = 4;
     if (
@@ -587,7 +594,11 @@ export class Game {
       this.collected.add(pickup.id);
       this.burst(pickup.x, pickup.y, "#edd293", 35);
       this.sound.play("sand");
-      if (pickup.kind === "dagger" || pickup.kind === "sword") {
+      if (
+        pickup.kind === "dagger" ||
+        pickup.kind === "sword" ||
+        pickup.kind === "vessel"
+      ) {
         this.claimItem(pickup);
       } else if (pickup.kind === "sand")
         this.player.sand = Math.min(

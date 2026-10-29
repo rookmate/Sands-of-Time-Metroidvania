@@ -1,3 +1,5 @@
+import { cisternRoute, galleryRoute, type RewardStep } from "./rewardsRoute";
+import { VESSEL_ID, type Attunement } from "../campaign/rewards";
 import { CampaignGame } from "../campaign/CampaignGame";
 import { SECTIONS, SECTION_BY_ID } from "../campaign/sections";
 import { CAMPAIGN_ROOMS } from "../campaign/world";
@@ -14,6 +16,7 @@ export class CampaignHarness {
   readonly scenario: "campaign" | "king" | "vizier";
   readonly immortal: boolean;
   readonly exploreBaths: boolean;
+  readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
   frames = 0;
   action = "Starting";
@@ -50,8 +53,10 @@ export class CampaignHarness {
       immortal?: boolean;
       resilienceSeed?: number;
       exploreBaths?: boolean;
+      optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.optionalRewards = options.optionalRewards ?? false;
     this.exploreBaths = options.exploreBaths ?? true;
     this.resilienceSeed = options.resilienceSeed ?? null;
     this.randomState = this.resilienceSeed ?? 0;
@@ -156,6 +161,7 @@ export class CampaignHarness {
       flags: [...g.flags],
       collected: [...g.collected],
       baths: { ...g.journey.baths },
+      rewards: { ...g.journey.rewards, maxSand: g.player.maxSand },
       milestones: [...g.journey.completed],
       scenes: [...this.scenes],
       puzzles: Object.entries(g.journey.puzzles)
@@ -792,6 +798,13 @@ export class CampaignHarness {
     yield* this.walk(630);
     yield* this.jump(840, 420);
   }
+  private *rewardRoute(steps: RewardStep[]) {
+    for (const step of steps) {
+      if (step === "use") yield* this.use();
+      else if (step[1] === undefined) yield* this.walk(step[0]);
+      else yield* this.jump(step[0], step[1], step[2]);
+    }
+  }
   private *bathsReturn() {
     // Upper Baths reward is awarded at its story exit, before this optional return.
     yield* this.walk(35);
@@ -805,6 +818,8 @@ export class CampaignHarness {
     yield* this.walk(260);
     yield* this.jump(370, 520);
     yield* this.jump(920, 650, 40);
+    if (this.optionalRewards)
+      yield* this.rewardRoute(galleryRoute(this.optionalRewards));
     yield* this.walk(1015);
     yield* this.use();
     yield* this.walk(1145);
@@ -832,6 +847,10 @@ export class CampaignHarness {
     yield* this.jump(540, 530);
     yield* this.walk(630);
     yield* this.jump(840, 420);
+    if (this.optionalRewards) {
+      yield* this.rewardRoute(cisternRoute);
+      this.require(this.game.collected.has(VESSEL_ID), "Missed cistern vessel");
+    }
     yield* this.walk(1125);
     yield* this.use();
     yield* this.walk(310);

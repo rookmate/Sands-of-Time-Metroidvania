@@ -36,6 +36,7 @@ Run `npm run harness`, or start `npm run dev` and open **http://localhost:5173/?
 The toolbar offers pause, single-step, restart, 1×/4×/16× playback, JSON report download, and manual takeover. **Play manually** releases automated inputs so you can practice the selected encounter. Restart to return to automation. Audio starts muted. Harness progress and options stay in memory without reading or overwriting your normal save.
 
 - `/?harness=campaign&speed=16` plays the full adaptation faster.
+- `/?harness=campaign&immortal=0&rewards=patience` or `&rewards=stillness` takes both optional Baths reward routes with the selected seal. Without `rewards`, the driver declines both rewards; `&explore=0` also skips the maintenance loop.
 - `/?harness=king` starts the Sand King encounter with the health, sword, and powers available at that point in the campaign.
 - `/?harness=vizier` starts the three doubles and final Vizier encounter after a fixture Grand Rewind, with the final sword and twelve health. Retrying either practice fight returns to that encounter.
 - `&autoplay=0` starts paused, useful before manual takeover.
@@ -46,7 +47,20 @@ Immortality prevents combat and hazard damage and knockback. Falling out of a ro
 
 `npm run test:harness` runs the same driver without rendering, including immortal and normal-damage campaigns, standalone encounters, checkpoint reload validation, and the earlier palace route. The browser exposes `window.__sandsHarness.report()`, `.pause()`, `.resume()`, and `.step(120)`. Explicit stepping works while paused. Both browser harnesses are excluded from production builds.
 
-### Campaign resilience
+### Optional Baths discoveries
+
+The reservoir's cracked service arch is visible on the first visit. Drainage raises its landing; the stronger sword and Time Dash open it on a return visit. Inside the Keeper cistern, a five-second shutter tests the high-ledge jump and Dash crossing. Existing Slow Time or Sand Prison can ease the timing. The vessel increases maximum sand from six to eight and fills the Dagger once. Fountains and Retry refill the larger capacity. An inscription on the far shelf records the workers who used the conduit to escape the siege.
+
+The maintenance conduit's far bank has a marked upper branch into the Echo gallery. Its two seals offer one permanent choice, made with E beside a seal:
+
+- **Patient current** extends Slow Time from six to nine seconds at the usual one-sand cost.
+- **Still current** reduces Sand Prison from two sand to one, with its four-second duration unchanged.
+
+Choosing one closes the other. Both can be declined. The effects and permanence are shown before choosing, and the map records discoveries. The conduit still opens the rotunda shortcut, so its reward branch joins a useful return loop. Dash distance, sword gates, water controls, and all forty narrative milestones keep their existing rules. No optional reward is required to finish the story.
+
+Fixed-step mortal routes cover both choices, the timed challenge, reward persistence, and the complete story with all new rewards declined. Seed 42 also takes the reward routes during disruption/reload and independent input replay checks. Rendered recordings establish route reachability and feedback, not a measured first-playthrough duration. Blind human discoverability and total campaign pacing remain unmeasured.
+
+## Campaign resilience
 
 `npm run test:resilience` runs seeds 7, 42, and 2026 with normal damage and assist off. Each run has a 240,000-frame budget. The driver varies attack cadence, jump release and dash timing, revisits all 38 available return passages before the Grand Rewind, lets timed gates and prison columns expire, and interrupts mechanisms and later combat waves with lethal damage and Retry or checkpoint reload. It saves partial crank, crate, and mirror progress at fountains, and reloads while hanging from grips and riding the water lift. Reloads round-trip the campaign save parser and continue in a fresh game. These runs never read or write the player's local storage.
 
@@ -92,7 +106,7 @@ Touch players can use the on-screen arrows, jump, sword, and interaction buttons
 - Each learned power raises the curse tier, strengthening enemies and reducing sand rewards. Later swords increase damage; the final sword destroys ordinary creatures in one blow. The Dagger’s ownership is separate from learned powers, so the tomb and return climb disable all time powers until the Dagger is recovered.
 - Hidden rubies increase maximum health. The campaign map separates ordered story milestones from a connected Baths and Waterworks map, including visible gated passages and regional water state. The legacy palace map retains its connected-room view.
 
-The expanded campaign has its own versioned local save slot per browser origin, `sands-of-time:campaign:v2`. It records ordered milestones, puzzle states, sword upgrades, Dagger ownership, Farah’s story state, the Grand Rewind, and persistent Baths intake, drainage and shortcut state. Journey schema v2 migrates v1 saves in the same slot, including old Baths checkpoints and pickup IDs. The earlier palace save slot is preserved separately. Unfinished combat waves restart on reload or death so a partially saved battle cannot skip opponents. Options are also stored locally. Private browsing or clearing site data can remove the save. If storage is blocked, the game remains playable for the current session and displays a notice. **Journey assist**, available in Options, reduces damage, lengthens hit protection, and slowly restores sand.
+The expanded campaign has its own versioned local save slot per browser origin, `sands-of-time:campaign:v2`. It records ordered milestones, puzzle states, sword upgrades, Dagger ownership, Farah’s story state, the Grand Rewind, and persistent Baths intake, drainage and shortcut state. Journey schema v3 migrates v1 and v2 saves in the same slot, including old Baths checkpoints and pickup IDs. It adds the permanent time-seal choice and waterkeeper inscription. Sand capacity is derived from the collected vessel, so an older save starts with its original six measures. The earlier palace save slot is preserved separately. Unfinished combat waves restart on reload or death so a partially saved battle cannot skip opponents. Options are also stored locally. Private browsing or clearing site data can remove the save. If storage is blocked, the game remains playable for the current session and displays a notice. **Journey assist**, available in Options, reduces damage, lengthens hit protection, and slowly restores sand.
 
 ## Route guide
 

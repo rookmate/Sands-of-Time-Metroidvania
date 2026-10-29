@@ -53,7 +53,11 @@ const seeds =
 it.skipIf(!!replayPath).each(seeds)(
   "survives seeded interruptions across forty sections, seed %s",
   (seed) => {
-    const h = new CampaignHarness({ immortal: false, resilienceSeed: seed });
+    const h = new CampaignHarness({
+      immortal: false,
+      resilienceSeed: seed,
+      optionalRewards: seed === 42 ? "stillness" : false,
+    });
 
     const report = h.step(240000);
     onTestFailed(() => {
