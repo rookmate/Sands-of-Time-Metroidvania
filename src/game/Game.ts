@@ -33,6 +33,7 @@ import {
   stepPlayer,
 } from "./physics";
 import { isBoss, spawnEnemies, stepEnemies } from "./enemies";
+import { bossGuards } from "./bosses";
 import {
   defaultOptions,
   loadOptions,
@@ -542,6 +543,16 @@ export class Game {
       )
         continue;
       enemy.attackId = this.attackId;
+      if (bossGuards(enemy, player, this.freezeTime > 0)) {
+        this.burst(
+          enemy.x + enemy.w / 2 + enemy.face * 25,
+          player.y + 24,
+          "#ffe0a6",
+          4,
+        );
+        contacted = true;
+        continue;
+      }
       enemy.health -=
         (player.combo === 0 ? 2 : 1) *
         (this.freezeTime > 0 ? 2 : 1) *

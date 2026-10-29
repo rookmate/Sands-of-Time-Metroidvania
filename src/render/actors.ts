@@ -1,3 +1,4 @@
+import { drawBossTell } from "./bosses";
 import { SWORD, swordDuration, swordPhase } from "../game/combat";
 import { drawRival } from "./rival";
 import type { Enemy, Player } from "../game/types";
@@ -473,6 +474,7 @@ export function drawEnemy(
   drawEnemyStatus(c, enemy, frozen);
 }
 function drawEnemyStatus(c: Context, enemy: Enemy, frozen: boolean) {
+  drawBossTell(c, enemy, frozen);
   if (!isBoss(enemy.kind) && enemy.behavior !== "ram") {
     const x = enemy.x + enemy.w / 2,
       feet = enemy.y + enemy.h;

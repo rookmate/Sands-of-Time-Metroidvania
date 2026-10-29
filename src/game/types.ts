@@ -119,6 +119,13 @@ export interface Player extends Rect {
   gripCooldown: number;
 }
 export interface Enemy extends Rect {
+  bossAttack?: {
+    move: "sweep" | "low" | "high";
+    duration: number;
+    followup: boolean;
+  };
+  bossBeat?: number;
+  bossImpact?: Rect;
   rivalMove?: "thrust" | "cast";
   rivalLunge?: number;
   behavior?: "ram";

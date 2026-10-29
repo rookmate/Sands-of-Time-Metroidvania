@@ -1,3 +1,4 @@
+import { bossGuards } from "../game/bosses";
 import { DEPTHS_IDS } from "./depthsRooms";
 import { MASTERY_IDS } from "./mastery";
 import { RIVAL_IDS } from "./rival";
@@ -95,15 +96,25 @@ export class Farah {
       .sort((a, b) => distance(a, f) - distance(b, f))[0];
     if (target && f.cooldown <= 0) {
       f.face = Math.sign(target.x - f.x) || 1;
-      target.health -= 1;
-      target.hitFlash = 0.15;
+      const guarded = bossGuards(target, f, g.freezeTime > 0);
+      if (!guarded) {
+        target.health -= 1;
+        target.hitFlash = 0.15;
+      }
       if (target.health <= 0) g.farahDefeatedEnemy(target);
       f.cooldown = 1.2;
-      g.burst(target.x + 15, target.y + 20, "#e1c89e", 3);
+      g.burst(target.x + 15, target.y + 20, guarded ? "#ffe0a6" : "#e1c89e", 3);
     }
     for (const enemy of g.enemies) {
+      // Consume the actual release area, including the first of two sweeps.
+      // A rewind frame must not repeat an impact from the preceding step.
+      const impact = enemy.bossImpact;
+      enemy.bossImpact = undefined;
+      if (impact && overlap(f, impact)) this.hurt();
       if (
         !enemy.dead &&
+        enemy.kind !== "king" &&
+        enemy.kind !== "double" &&
         this.telegraphs.has(enemy.id) &&
         enemy.telegraph <= 0 &&
         Math.abs(enemy.x - f.x) < 110 &&

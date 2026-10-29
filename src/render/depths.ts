@@ -368,7 +368,7 @@ export function drawDepths(c: Context, g: CampaignGame) {
       9,
     );
   const jet = g.depths.jet;
-  if (jet) {
+  if (jet && (jet.warning || jet.live)) {
     c.strokeStyle = jet.live ? "#ccefe2" : "#e7ba7b";
     c.lineWidth = 3;
     c.setLineDash(jet.warning ? [10, 8] : []);
@@ -384,5 +384,14 @@ export function drawDepths(c: Context, g: CampaignGame) {
       jet.x + jet.w / 2,
       jet.y - 22,
     );
+    if (jet.warning) {
+      c.fillStyle = "#e7ba7b";
+      c.fillRect(
+        jet.x,
+        jet.y - 13,
+        jet.w * ((g.depths.clock % (s.seals === 0 ? 4.8 : 4)) / 1.5),
+        5,
+      );
+    }
   }
 }
