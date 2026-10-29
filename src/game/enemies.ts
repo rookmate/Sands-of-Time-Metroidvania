@@ -1,4 +1,5 @@
 import { stepRival } from "./rival";
+import { stepPalaceBoss } from "./bosses";
 import type { Enemy, EnemySpawn, Platform, Player, Projectile } from "./types";
 import { GRAVITY, moveBody } from "./physics";
 import { enemyStats } from "./progression";
@@ -68,12 +69,17 @@ export function stepEnemies(
   damage: (amount: number, direction: number) => void,
 ) {
   for (const enemy of enemies) {
+    enemy.bossImpact = undefined;
     enemy.chargeImpact = 0;
     if (enemy.dead) continue;
     enemy.hitFlash = Math.max(0, enemy.hitFlash - dt);
     if (frozen || enemy.protected) continue;
     if (enemy.kind === "rival") {
       stepRival(enemy, player, platforms, projectiles, dt, damage);
+      continue;
+    }
+    if (enemy.kind === "king" || enemy.kind === "double") {
+      stepPalaceBoss(enemy, player, platforms, projectiles, dt, damage);
       continue;
     }
     if (enemy.behavior === "ram") {

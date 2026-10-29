@@ -527,3 +527,52 @@ J/K and the touch sword button retain the existing three-strike rhythm and damag
 Ordinary enemies recoil for 120 ms of world time against real collision surfaces, then resume their behavior. Slow extends that opening in real time; Freeze holds it until the world resumes. Sword hits retain ordinary telegraph interruption, while committed rams and bosses keep their attack patterns. No hit pause changes simulation, power costs, duration, projectile timing or sand rewards. Contact uses a short metallic/body impact distinct from an empty swing and the lower injury sound. Crowded contact produces one impact sound per simulation step. Short contact sparks, recoil and nondirectional ordinary enemy windup marks remain visible with camera shake off. Contact shake is under one world pixel, follows Prince time during Freeze, and stops in menus or with the live reduced-motion preference.
 
 Stage 17 validation includes rendered mortal campaigns with Patience and Stillness, both palace orders, all optional detours, seed 42 disruptions and independent exact-input replay. Keyboard checks inspect windup/contact/recovery and misses, combine Slow/Freeze/Dash/Rewind, pause and focus loss, and allow enemy attacks to kill the Prince before using the real Retry button. Local ignored `artifacts/combat-feel/` contains route tapes, reports, screenshots, video and captured Web Audio with nonzero decoded PCM. Automated runs and captured audio do not establish blind-player readability, subjective sound quality or campaign duration.
+
+## Boss rules and openings
+
+King Shahraman now commits a low sweep toward the Prince when its warning begins.
+Jump, retreat beyond the outlined reach, or flank him. Below half health his next
+sequence adds a second sweep with a separate 720 ms warning and the same facing.
+A phase change during a single-sweep warning cannot add an unannounced second
+strike. Each completed sequence leaves a stationary 1.15 second opening.
+
+Vizier doubles commit a low horizontal bolt with a 900 ms warning. Below half
+health their next cast is high, then high and low alternate. Jump the low lane;
+stay on the floor for the high lane. The dashed corridor shows the bolt's path,
+including its travel range. They recover for 1.15 seconds after each cast. The
+three sequential doubles still protect the real Vizier, whose exhausted final
+opening and Dagger return remain unchanged.
+
+Both encounters guard frontal sword and Farah arrow contact while approaching
+and winding up. Gold braces and sparks identify blocked contact. Their backs
+and recoveries remain vulnerable; Freeze opens their guards and Slow stretches
+warnings on the existing world clock. No optional reward, echo or era upgrade
+is required. Health, sword damage, sand rewards and companion attack timing are
+unchanged. Live attack state stays on ordinary room-local enemies and resets on
+Retry, exit or Continue. Journey v14, checkpoints and save migration are unchanged.
+
+Sahir keeps his existing committed thrust/high-cast rules, later arenas and both
+resolutions. A recovery label now identifies his existing opening, without
+appearing on the noncombat waiting/released figures. The reservoir keeper keeps
+its west/east relief phases and persistent seals. Its pressure warning gains a
+countdown; the hazard outline disappears during the safe easing interval. These
+cues use geometry, text and simulation timers and remain visible with reduced
+motion. There is no camera or flashing-animation requirement.
+
+Stage 18 proof includes depleted-sand mortal King and final-double victories
+using ordinary defensive inputs, phase transitions and repeated-reward checks;
+real keyboard pause/focus, death from attacks, the Retry button and reload/Continue;
+and two rendered seeded mortal campaigns with Patience/Stillness, both palace
+orders, optional routes, keeper phases and exact-input replay. Focused regressions
+cover committed direction, both sweep tells, low/high lanes, frontal/Farah guards,
+Freeze/Slow, reset semantics and static rendering. Ignored `artifacts/boss-design/`
+contains route tapes, reports, screenshots, videos and check logs. These are
+source-informed software playtests. Blind human readability and pacing remain
+unmeasured; no playthrough-duration claim is made.
+
+The King also uses that exact sweep area for Farah, including each release in
+the two-sweep phase. Clearing its committed direction with Slow and a flank
+keeps both characters safe; the old distance-only companion damage check no
+longer applies to these boss attacks. Each release is consumed once, so rewind
+cannot repeat it. The regression fails on the prior companion check, and normal
+keyboard D/Q play reproduces the safe flank in the renderer.

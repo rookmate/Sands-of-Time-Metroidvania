@@ -32,7 +32,15 @@ export function drawRival(
   c: Context,
   e: Pick<
     Enemy,
-    "x" | "y" | "w" | "h" | "face" | "hitFlash" | "telegraph" | "rivalMove"
+    | "x"
+    | "y"
+    | "w"
+    | "h"
+    | "face"
+    | "hitFlash"
+    | "telegraph"
+    | "rivalMove"
+    | "cooldown"
   >,
   frozen: boolean,
 ) {
@@ -120,6 +128,8 @@ export function drawRival(
       Math.max(220, Math.min(x, 1050)),
       feet - 150,
     );
+  } else if (!e.rivalMove && e.cooldown > 0) {
+    label(c, "Opening · strike", Math.max(220, Math.min(x, 1050)), feet - 150);
   }
   c.restore();
 }
@@ -216,6 +226,7 @@ export function drawRivalRooms(c: Context, g: CampaignGame) {
       face: -1,
       hitFlash: 0,
       telegraph: 0,
+      cooldown: 0,
     };
     c.globalAlpha = stage === s.bouts ? 0.85 : 0.35;
     drawRival(c, enemy, false);
@@ -245,6 +256,7 @@ export function drawRivalRooms(c: Context, g: CampaignGame) {
           face: -1,
           hitFlash: 0,
           telegraph: 0,
+          cooldown: 0,
         },
         false,
       );
