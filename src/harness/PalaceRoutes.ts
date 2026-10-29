@@ -1,3 +1,4 @@
+import { ConsequencesRoute } from "./ConsequencesRoute";
 import { MasteryRoute } from "./MasteryRoute";
 import { RivalRoute } from "./RivalRoute";
 import type { CampaignHarness } from "./CampaignHarness";
@@ -33,6 +34,8 @@ export class PalaceRoutes {
     h.game.input.clear();
   }
   private *crownToLearning() {
+    if (this.h.exploreConsequences)
+      yield* new ConsequencesRoute(this.h).refuge();
     if (this.h.investigateHistory) yield* this.route([[485], "use"]);
     yield* this.route([
       [260],
@@ -62,6 +65,7 @@ export class PalaceRoutes {
       h.game.room.id === "root-conduit",
       "Garden descent missed root conduit",
     );
+    if (h.exploreConsequences) yield* new ConsequencesRoute(h).store();
     yield* this.route([
       [260],
       [370, 520],
@@ -204,6 +208,7 @@ export class PalaceRoutes {
       yield* this.route([[335], "use"]);
       this.recover("prison-release-recovery");
     }
+    if (h.exploreConsequences) yield* new ConsequencesRoute(h).lift();
     // Walk the real cross-region archive return in both directions.
     yield* this.route([
       [885],

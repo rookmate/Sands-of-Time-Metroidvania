@@ -1,3 +1,8 @@
+import {
+  consequenceBlock,
+  consequenceControls,
+  consequencePlatforms,
+} from "./consequences";
 import { Mastery, MASTERY_IDS } from "./mastery";
 import { rivalControls, rivalDefeated } from "./rival";
 import {
@@ -215,7 +220,10 @@ export class CampaignGame extends Game {
   protected override roomPlatforms(time: number) {
     const base = traversalPlatforms(
       this,
-      wingPlatforms(this, super.roomPlatforms(time)),
+      consequencePlatforms(
+        this,
+        wingPlatforms(this, super.roomPlatforms(time)),
+      ),
     );
     return this.puzzles
       ? this.echoes.platforms(
@@ -405,6 +413,8 @@ export class CampaignGame extends Game {
       return "Secure the far-side echo latch first";
     if (door.gate === "history-sill" && !this.journey.history.opened)
       return "Stone facing rests on a worn freight sill";
+    const consequence = consequenceBlock(this, door);
+    if (consequence) return consequence;
     const wing = wingDoorBlock(this, door);
     if (wing) return wing;
     const palace = palaceBlock(this, door);
@@ -443,6 +453,10 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
+    const consequence = consequenceControls(this).find(
+      (c) => distance(feet, c) < 45,
+    );
+    if (consequence) return consequence;
     const practice = this.mastery
       .controls()
       .find((c) => distance(feet, c) < 45);

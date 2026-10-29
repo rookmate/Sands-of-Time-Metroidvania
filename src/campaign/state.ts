@@ -11,7 +11,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 11,
+  version: 12,
+  consequences: { nimaRescued: false, liftRepaired: false },
   mastery: { solved: [] },
   rival: freshRival(),
   traversal: { broken: false, latched: false },
@@ -127,11 +128,21 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 11;
       data.journey.mastery = { solved: [] };
     }
+    if (data?.journey?.version === 11) {
+      data.journey.version = 12;
+      data.journey.consequences = { nimaRescued: false, liftRepaired: false };
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 11 ||
+      state.version !== 12 ||
+      !state.consequences ||
+      typeof state.consequences.nimaRescued !== "boolean" ||
+      typeof state.consequences.liftRepaired !== "boolean" ||
+      ((state.consequences.nimaRescued || state.consequences.liftRepaired) &&
+        state.completed.length < 17) ||
+      (state.consequences.liftRepaired && !state.palace?.irrigated) ||
       !state.mastery ||
       !Array.isArray(state.mastery.solved) ||
       state.mastery.solved.length > 3 ||

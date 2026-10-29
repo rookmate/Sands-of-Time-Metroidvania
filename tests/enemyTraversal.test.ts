@@ -213,7 +213,7 @@ it("migrates v8 saves without losing predecessor state and validates bounded tra
   old.journey.version = 8;
   delete old.journey.traversal;
   const migrated = parseCampaign(JSON.stringify(old))!;
-  expect(migrated.journey.version).toBe(11);
+  expect(migrated.journey.version).toBe(12);
   expect(migrated.journey.traversal).toEqual({ broken: false, latched: false });
   expect({ ...migrated.journey, version: 8, traversal: undefined }).toEqual({
     ...old.journey,
