@@ -91,7 +91,7 @@ it("does not gain sand from a sword kill while the Dagger is missing", () => {
     false,
     false,
   );
-  advance(g, 2, "attack");
+  advance(g, 7, "attack");
   expect(g.enemies[0].dead).toBe(true);
   expect(g.player.sand).toBe(0);
 });

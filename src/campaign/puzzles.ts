@@ -1,3 +1,4 @@
+import { swordPhase } from "../game/combat";
 import { spawnEnemies } from "../game/enemies";
 import { clamp, distance } from "../game/physics";
 import type { Platform, Vec } from "../game/types";
@@ -269,7 +270,7 @@ export class Puzzles {
         break;
       case "wall":
         if (
-          g.player.attack > 0 &&
+          swordPhase(g.player) === "active" &&
           g.attackId !== this.lastStrike &&
           Math.abs(g.player.x + 15 - p.wall.x) < 110 &&
           Math.abs(feet.y - 650) < 100

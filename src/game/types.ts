@@ -135,6 +135,7 @@ export interface Enemy extends Rect {
   cooldown: number;
   telegraph: number;
   hitFlash: number;
+  hitStun?: number;
   attackId: number;
   dead: boolean;
   phase: number;

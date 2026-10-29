@@ -118,8 +118,11 @@ export class Renderer {
     }
     c.save();
     const shakeX =
-      g.options.shake && !this.motion?.matches && g.shake > 0
-        ? Math.sin(t * 110) * g.shake * 13
+      g.screen === "playing" &&
+      g.options.shake &&
+      !this.motion?.matches &&
+      g.shake > 0
+        ? Math.sin(g.visualTime * 110) * g.shake * 13
         : 0;
     c.translate(-g.camera.x + shakeX, -g.camera.y);
     c.globalAlpha = region === "palace" ? 0.88 : 1;
