@@ -42,7 +42,7 @@ export function moveBody(
 }
 export function stepPlayer(
   player: Player,
-  input: Input,
+  input: Pick<Input, "down" | "consume">,
   platforms: Platform[],
   dt: number,
   width: number,

@@ -20,6 +20,7 @@ export class CampaignHarness {
   readonly exploreBaths: boolean;
   readonly cooperate: boolean;
   readonly regionOrder: "gardens-first" | "sky-first";
+  readonly exploreEchoes: boolean;
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
   frames = 0;
@@ -59,9 +60,11 @@ export class CampaignHarness {
       exploreBaths?: boolean;
       cooperate?: boolean;
       regionOrder?: "gardens-first" | "sky-first";
+      exploreEchoes?: boolean;
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.exploreEchoes = options.exploreEchoes ?? false;
     this.regionOrder = options.regionOrder ?? "gardens-first";
     this.cooperate = options.cooperate ?? true;
     this.optionalRewards = options.optionalRewards ?? false;

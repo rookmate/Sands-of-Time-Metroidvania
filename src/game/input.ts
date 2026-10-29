@@ -9,6 +9,8 @@ export type Action =
   | "slow"
   | "freeze"
   | "dash"
+  | "echo"
+  | "cancelEcho"
   | "map"
   | "pause";
 const BINDINGS: Record<string, Action> = {
@@ -29,6 +31,8 @@ const BINDINGS: Record<string, Action> = {
   KeyF: "freeze",
   ShiftLeft: "dash",
   ShiftRight: "dash",
+  KeyC: "echo",
+  KeyX: "cancelEcho",
   KeyM: "map",
   Escape: "pause",
 };
