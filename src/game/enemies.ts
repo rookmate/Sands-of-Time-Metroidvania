@@ -1,10 +1,12 @@
+import { stepRival } from "./rival";
 import type { Enemy, EnemySpawn, Platform, Player, Projectile } from "./types";
 import { GRAVITY, moveBody } from "./physics";
 import { enemyStats } from "./progression";
 export const isBoss = (kind: EnemySpawn["kind"]) =>
-  ["guardian", "vizier", "king", "double"].includes(kind);
+  ["guardian", "vizier", "king", "double", "rival"].includes(kind);
 export const enemyName = (kind: EnemySpawn["kind"]) =>
   ({
+    rival: "Sahir · the split crest",
     guard: "Sand guard",
     archer: "Sand archer",
     brute: "Sand brute",
@@ -70,6 +72,10 @@ export function stepEnemies(
     if (enemy.dead) continue;
     enemy.hitFlash = Math.max(0, enemy.hitFlash - dt);
     if (frozen || enemy.protected) continue;
+    if (enemy.kind === "rival") {
+      stepRival(enemy, player, platforms, projectiles, dt, damage);
+      continue;
+    }
     if (enemy.behavior === "ram") {
       stepRam(enemy, player, platforms, tier, dt, damage);
       continue;

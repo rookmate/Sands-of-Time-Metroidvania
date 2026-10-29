@@ -1,3 +1,5 @@
+import { RivalRoute } from "./RivalRoute";
+import { RIVAL_IDS, type RivalOutcome } from "../campaign/rival";
 import { EnemyTraversalRoute } from "./EnemyTraversalRoute";
 import { TRAVERSAL_IDS } from "../campaign/enemyTraversal";
 import { HistoryRoute } from "./HistoryRoute";
@@ -27,6 +29,7 @@ export class CampaignHarness {
   readonly exploreEraWing: boolean;
   readonly investigateHistory: boolean;
   readonly exploreEnemyTraversal: boolean;
+  readonly rivalOutcome: RivalOutcome | false;
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
   frames = 0;
@@ -70,9 +73,11 @@ export class CampaignHarness {
       exploreEraWing?: boolean;
       investigateHistory?: boolean;
       exploreEnemyTraversal?: boolean;
+      rivalOutcome?: RivalOutcome | false;
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.rivalOutcome = options.rivalOutcome ?? false;
     this.exploreEnemyTraversal = options.exploreEnemyTraversal ?? false;
     this.investigateHistory = options.investigateHistory ?? false;
     this.exploreEraWing = options.exploreEraWing ?? false;
@@ -186,6 +191,7 @@ export class CampaignHarness {
       baths: { ...g.journey.baths },
       palace: { ...g.journey.palace },
       regionOrder: this.regionOrder,
+      rival: { ...g.journey.rival },
       cooperation: { ...g.journey.cooperation },
       rewards: { ...g.journey.rewards, maxSand: g.player.maxSand },
       milestones: [...g.journey.completed],
@@ -232,7 +238,7 @@ export class CampaignHarness {
     this.require(g.screen === "playing", "Unexpected screen " + g.screen);
     this.require(!g.orientationBlocked, "Landscape orientation is required");
     if (
-      !TRAVERSAL_IDS.includes(g.room.id) &&
+      ![...TRAVERSAL_IDS, ...RIVAL_IDS].includes(g.room.id) &&
       this.frames %
         (this.resilienceSeed === null ? 42 : 38 + (this.resilienceSeed % 9)) ===
         0
@@ -836,6 +842,7 @@ export class CampaignHarness {
       if (index === 28) {
         yield* palace.sky();
         if (this.regionOrder === "sky-first") yield* palace.gardens();
+        if (this.rivalOutcome) yield* new RivalRoute(this).gallery();
         if (this.investigateHistory) yield* new HistoryRoute(this).reveal();
       }
       if (

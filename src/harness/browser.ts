@@ -36,6 +36,12 @@ export class BrowserHarness {
               params.get("order") === "sky-first"
                 ? "sky-first"
                 : "gardens-first",
+            rivalOutcome:
+              params.get("rival") === "released"
+                ? "released"
+                : params.get("rival") === "defeated"
+                  ? "defeated"
+                  : false,
             exploreEnemyTraversal: params.get("creatures") === "1",
             investigateHistory: params.get("history") === "1",
             exploreEraWing: params.get("wing") === "1",

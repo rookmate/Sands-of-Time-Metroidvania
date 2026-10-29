@@ -224,3 +224,43 @@ Beyond it, a scarab's weight extends two crossing stones while it stands on a st
 `enemyTraversal.ts` owns the authored geometry, pressure-plate contract, impact check and recall interactions. The ram is an opt-in brute behavior in the existing enemy simulation, using ordinary body collision and sword damage. The scarab uses the existing patrol and melee behavior. Crossing stones are ordinary one-way platforms. Journey v9 adds only `traversal: { broken, latched }`, migrating v1–v8 in the same slot. Neither encounter advances a story milestone or requires a time-seal choice, sand vessel, or Time Dash. The existing Hourglass cutoff remains.
 
 Development route: `/?harness=campaign&immortal=0&autoplay=0&creatures=1`. Add `&order=sky-first&seed=42&wing=1&echoes=1&history=1` for the combined predecessor route. `EnemyTraversalRoute.ts` records normal inputs from the Zoo and back; it suppresses the harness's automatic sword pulses only inside the pens so it can intentionally preserve the mechanisms. Seven focused tests cover both full mortal regional orders and independent input replay, sword/ram separation, ordinary kills and no-sand recalls, fallen-creature recovery, missed crossings, an empty Dagger, death/Retry/reload, the one-time heart and v8 migration with predecessor state intact. Existing campaign and combat suites also run. Ignored `artifacts/enemy-traversal/` contains recorded inputs, Chromium reports, screenshots and video. Automated reachability is not a human pacing or discoverability measurement, and no gameplay-hours claim is made.
+
+### Sahir, the split crest
+
+Three optional split-crest passages lead from the Cypress court, Archive stair,
+and flooded prison cells to Sahir's unfinished drills. Accept at the gold
+standard with E. His hooked glaive sights a thrust for 0.95 seconds, then
+commits in that direction. Jump clear and strike during his 1.6-second recovery.
+The raised gallery and broken muster dais add a high cast with a white crest
+and 1.1-second warning; their lower floors shelter the Prince and catch misses.
+Normal Freeze, Slow, Dash and movement rewind still work.
+
+His weapon rack identifies the palace drillmaster. Rereadable muster rolls
+explain his last vigil. After the court and gallery, the last muster offers a
+final rematch or a release at the lowered blue standard. Reading a roll teaches
+the release. Both choices permanently end his encounters, leaving either a
+resting Sahir or his broken glaive. The reward is this resolution, with no
+mandatory upgrade or repeatable combat sand. The earlier palace-history mystery
+and its witnesses remain separate.
+
+Duels are opt-in and ordered even if the palace regions are explored in another
+order. Later sites remain safe to investigate before earlier drills. The west
+exit and fountains stay usable. Farah waits outside these rooms without changing
+her story state. Partial fights reset on exit, Retry and Continue. Completed
+drills and the final choice save immediately using the existing checkpoint.
+Journey schema v10 migrates v1-v9 in the same campaign save slot; it adds only
+`rival: { bouts, named, oath, outcome }`. It stores no live opponent or history.
+The Hourglass still seals the old palace, so finish optional visits beforehand.
+
+Validation: `npm test` includes two mortal full-campaign rival routes and exact
+input replays, seed 42 with all preceding optional systems, interruption through
+exit/death/Retry/reload at each duel, out-of-order visits, duplicate acceptance,
+both irreversible outcomes, v9 migration, no combat-sand farming, a clean
+ordinary jump dodge, high-cast shelter, a missed-dais recovery, and a complete
+campaign skipping Sahir. For rendered routes use
+`?harness=campaign&immortal=0&autoplay=0&rival=released` or
+`rival=defeated&order=sky-first&seed=42&history=1&wing=1&echoes=1&creatures=1`.
+Local `artifacts/rival` contains recorded input traces, browser reports,
+screenshots and videos. Ordinary Continue keyboard play and compact landscape
+controls are checked separately. Blind human discoverability, difficulty and
+pacing remain unmeasured; these routes make no gameplay-hours claim.

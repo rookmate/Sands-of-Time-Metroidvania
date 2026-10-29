@@ -1,3 +1,4 @@
+import { RIVAL_IDS } from "./rival";
 import { TRAVERSAL_IDS } from "./enemyTraversal";
 import { cooperationActive, stairPosition } from "./cooperation";
 import type { Companion, Vec } from "../game/types";
@@ -15,7 +16,7 @@ export class Farah {
     this.trail = [];
     this.telegraphs.clear();
     // Farah waits outside the hollow-creature pens instead of killing their mechanisms.
-    this.actor = TRAVERSAL_IDS.includes(g.room.id)
+    this.actor = [...TRAVERSAL_IDS, ...RIVAL_IDS].includes(g.room.id)
       ? null
       : g.journey.farah === "following" || g.journey.farah === "restored"
         ? {

@@ -1,3 +1,4 @@
+import { RivalRoute } from "./RivalRoute";
 import type { CampaignHarness } from "./CampaignHarness";
 import type { RewardStep } from "./rewardsRoute";
 
@@ -52,6 +53,7 @@ export class PalaceRoutes {
   *gardens() {
     const h = this.h;
     yield* this.route([[85], "use", [1715], "use", [85], "use"]);
+    if (h.rivalOutcome) yield* new RivalRoute(h).court();
     if (h.investigateHistory) yield* this.route([[195], "use"]);
     yield* this.route([[500], [1135], "use"]);
     h.require(
@@ -177,7 +179,9 @@ export class PalaceRoutes {
   }
   *prison() {
     const h = this.h;
-    yield* this.route([[1185], "use", [1145], "use", [485], "use", [235]]);
+    yield* this.route([[1185], "use"]);
+    if (h.rivalOutcome) yield* new RivalRoute(h).muster(h.rivalOutcome);
+    yield* this.route([[1145], "use", [485], "use", [235]]);
     if (h.resilienceSeed !== null) {
       yield* this.route([[185], "use"]);
       this.recover("counterweight-recovery");

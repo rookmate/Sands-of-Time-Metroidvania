@@ -56,6 +56,7 @@ export interface Pickup extends Vec {
 export interface EnemySpawn extends Vec {
   behavior?: "ram";
   kind:
+    | "rival"
     | "guard"
     | "archer"
     | "brute"
@@ -118,6 +119,8 @@ export interface Player extends Rect {
   gripCooldown: number;
 }
 export interface Enemy extends Rect {
+  rivalMove?: "thrust" | "cast";
+  rivalLunge?: number;
   behavior?: "ram";
   charge?: { direction: number; remaining: number };
   chargeImpact?: number;

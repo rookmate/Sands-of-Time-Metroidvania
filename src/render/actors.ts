@@ -1,3 +1,4 @@
+import { drawRival } from "./rival";
 import type { Enemy, Player } from "../game/types";
 import { ellipse, line, polygon, type Context } from "./shapes";
 import { isBoss } from "../game/enemies";
@@ -284,6 +285,11 @@ export function drawEnemy(
   frozen: boolean,
 ) {
   if (enemy.dead) return;
+  if (enemy.kind === "rival") {
+    drawRival(c, enemy, frozen);
+    drawEnemyStatus(c, enemy, frozen);
+    return;
+  }
   if (enemy.kind === "bird") {
     c.save();
     c.translate(enemy.x + 15, enemy.y + 15);

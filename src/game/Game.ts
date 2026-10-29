@@ -537,7 +537,7 @@ export class Game {
       enemy.health -=
         (player.combo === 0 ? 2 : 1) *
         (this.freezeTime > 0 ? 2 : 1) *
-        (["king", "double", "vizier"].includes(enemy.kind)
+        (["king", "double", "vizier", "rival"].includes(enemy.kind)
           ? Math.min(2, this.swordPower)
           : this.swordPower);
       enemy.hitFlash = 0.15;
