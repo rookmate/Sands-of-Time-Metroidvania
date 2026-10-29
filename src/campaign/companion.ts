@@ -1,3 +1,4 @@
+import { DEPTHS_IDS } from "./depthsRooms";
 import { MASTERY_IDS } from "./mastery";
 import { RIVAL_IDS } from "./rival";
 import { TRAVERSAL_IDS } from "./enemyTraversal";
@@ -17,9 +18,12 @@ export class Farah {
     this.trail = [];
     this.telegraphs.clear();
     // Farah waits outside the hollow-creature pens instead of killing their mechanisms.
-    this.actor = [...TRAVERSAL_IDS, ...RIVAL_IDS, ...MASTERY_IDS].includes(
-      g.room.id,
-    )
+    this.actor = [
+      ...DEPTHS_IDS,
+      ...TRAVERSAL_IDS,
+      ...RIVAL_IDS,
+      ...MASTERY_IDS,
+    ].includes(g.room.id)
       ? null
       : g.journey.farah === "following" || g.journey.farah === "restored"
         ? {

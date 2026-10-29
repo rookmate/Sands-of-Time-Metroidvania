@@ -31,6 +31,7 @@ export class CampaignHarness {
   readonly exploreEnemyTraversal: boolean;
   readonly exploreMastery: boolean;
   readonly exploreConsequences: boolean;
+  readonly exploreDepths: boolean;
   readonly rivalOutcome: RivalOutcome | false;
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
@@ -77,10 +78,12 @@ export class CampaignHarness {
       exploreEnemyTraversal?: boolean;
       exploreMastery?: boolean;
       exploreConsequences?: boolean;
+      exploreDepths?: boolean;
       rivalOutcome?: RivalOutcome | false;
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.exploreDepths = options.exploreDepths ?? false;
     this.exploreConsequences = options.exploreConsequences ?? false;
     this.exploreMastery = options.exploreMastery ?? false;
     this.rivalOutcome = options.rivalOutcome ?? false;
@@ -195,6 +198,7 @@ export class CampaignHarness {
       flags: [...g.flags],
       collected: [...g.collected],
       baths: { ...g.journey.baths },
+      depths: { ...g.journey.depths },
       palace: { ...g.journey.palace },
       regionOrder: this.regionOrder,
       rival: { ...g.journey.rival },

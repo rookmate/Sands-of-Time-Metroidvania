@@ -1,3 +1,4 @@
+import { freshDepths } from "./depths";
 import { MASTERY_IDS } from "./mastery";
 import { freshRival } from "./rival";
 import { HISTORY_IDS } from "./history";
@@ -11,7 +12,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 12,
+  version: 13,
+  depths: freshDepths(),
   consequences: { nimaRescued: false, liftRepaired: false },
   mastery: { solved: [] },
   rival: freshRival(),
@@ -132,11 +134,25 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 12;
       data.journey.consequences = { nimaRescued: false, liftRepaired: false };
     }
+    if (data?.journey?.version === 12) {
+      data.journey.version = 13;
+      data.journey.depths = freshDepths();
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 12 ||
+      state.version !== 13 ||
+      !state.depths ||
+      typeof state.depths.diverted !== "boolean" ||
+      ![0, 1, 2].includes(state.depths.seals) ||
+      typeof state.depths.resolved !== "boolean" ||
+      (state.depths.seals > 0 && !state.depths.diverted) ||
+      (state.depths.resolved && state.depths.seals !== 2) ||
+      ((state.depths.diverted ||
+        state.depths.seals > 0 ||
+        state.depths.resolved) &&
+        (state.completed.length < 17 || !state.baths?.drained)) ||
       !state.consequences ||
       typeof state.consequences.nimaRescued !== "boolean" ||
       typeof state.consequences.liftRepaired !== "boolean" ||

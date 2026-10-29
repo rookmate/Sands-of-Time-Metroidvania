@@ -306,3 +306,62 @@ Journey schema v12 adds only `consequences: { nimaRescued, liftRepaired }`. Vers
 For later stages, these two booleans are reliable payoffs. `liftRepaired && palace.prisonOpen` opens the reciprocal `refuge-lift` doors between `lamp-refuge` at x1150/floor650 and `warden-loft` at x750/floor650. The refuge's west door at x70/floor650 returns to `cypress-crown` at x900/floor650. `nimaRescued` supplies the occupied refuge, lamp and bowls. With Nima present, `history.read.includes("witness")` adds copied names above the beds and a spoken acknowledgement; `rival.outcome === "released"` adds a quiet split crest and acknowledges Sahir's mercy. The defeated outcome has its own brief acknowledgement. These read existing canonical state directly, so discovery or mercy before or after rescue works without another acknowledgement flag. This stage does not change the final sequence.
 
 Development route: `/?harness=campaign&immortal=0&autoplay=0&consequences=1&history=1`. Add `&order=sky-first&seed=42&rival=released&wing=1&echoes=1&mastery=1&creatures=1` for the integrated alternate-order run. Eight focused tests cover both complete mortal routes and independent exact-input replay, actual grille collision/release, rescue and repair across death/Retry/reload, a dry empty refuge first, repair without rescue, rescue without repair, repeated actions, later acknowledgements, v11 migration and ending compatibility. Existing campaigns also finish while ignoring both decisions. Local ignored `artifacts/consequences/` holds recorded inputs, Chromium reports, screenshots and videos, plus normal keyboard rescue, actual Retry, ordinary Continue and landscape touch interaction proof. Automated routes establish reachable scenes and persistent results, not a human duration estimate. Blind discoverability, difficulty and pacing remain unmeasured.
+
+### Beneath the reservoir
+
+The three-knock pipe on the Sluice reservoir floor foreshadows an optional
+pressure well on the first visit. E at x580/floor650 explains the cracked hatch
+at x740/floor650. The hatch requires drained Baths, the upper-pool sword and
+Time Dash. Neither this entrance nor the spring lift replaces any mandatory
+Baths, garden or prison connection. All forty story anchors remain unchanged.
+
+The descent has five connected spaces with different jobs:
+
+- **Sounding well:** staggered descending landings, readable flood marks and a
+  full west ladder back to the reservoir, even before any puzzle is solved.
+- **Flood lock:** record a wait on the striped floor plate, then climb the
+  opposite shelves through its grille and secure the upper latch. This uses
+  the existing bounded C/X echo system, not an additional replay implementation.
+- **Filter race:** jump from the raised launch lip and Time Dash across the
+  broken upper channel. A full lower catch floor and west ladder recover misses,
+  including empty-sand failures. Return to the lock fountain to refill. The
+  far-bank wheel diverts poisoned runoff away from the spring.
+- **Bronze keeper:** an environmental guardian, not a combat wave. Admit clean
+  water at the lower inlet. Its west approach curtain warns for 1.5 seconds,
+  fires for one second, then eases. Climb through that interval and secure the
+  west relief. The second phase alternates shelf risers. Secure the east relief,
+  then answer at the keeper's cupped hand. Slow and Freeze affect the cycle;
+  normal rewind changes the Prince, not the water's history. The west retreat
+  and entry fountain stay usable throughout.
+- **Spring:** the keeper was protecting workers' drinking water. The repaired
+  clay cup resolves its vigil. An ordinary optional heart waits on the high
+  bank. The earned service lift links the spring to the Baths rotunda at
+  x1120/floor650 in both directions, bypassing the steam route on later visits.
+
+`world.ts` remains the canonical graph. `depthsRooms.ts` owns authored room data;
+`depths.ts` owns only the local guardian and controls. Journey v13 adds
+`depths: { diverted, seals: 0 | 1 | 2, resolved }`. Versions 1–12 migrate through
+the existing slot with the descent untouched, preserving earlier decisions and
+ending saves. Secured valves and resolution save immediately without moving
+the fountain checkpoint. Live pressure cycles reset on exit, death, Retry or
+Continue. Echo tapes clear at room boundaries. Farah waits above the narrow
+shaft without changing her canonical story state. The existing heart collection
+system prevents duplicate rewards. No earlier optional gift or decision is
+required here.
+
+Development proof: `?harness=campaign&immortal=0&depths=1&autoplay=0`, optionally
+with `&seed=42&order=sky-first&echoes=1&wing=1&history=1&creatures=1&rival=released&mastery=1&consequences=1`.
+`tests/depths.test.ts` covers continuous mortal routes and independent input
+replay, early observation/gating, both recovery ladders, pressure damage and
+Freeze, each saved relief through death/Retry/Continue, resolution, reciprocal
+exit, one-time heart, migration and completion while ignoring the descent.
+
+Rendered play found and corrected a too-short descent landing, an insufficient
+Dash launch height, a guardian curtain that initially missed the intended climb,
+and an outdoor backdrop that weakened the underground setting. The final route
+waits on the safe shelf for the pressure to ease before climbing. Local salt-dark
+cistern walls, pressure ribs, depth marks, visible pipe outlines and the bronze
+keeper distinguish the region. Recorded routes and screenshots live in ignored
+`artifacts/depths` in the owning worktree. Automated routes establish reachability
+and persistence; blind human discoverability, difficulty and pacing remain
+unmeasured. No playthrough-hours claim is made.

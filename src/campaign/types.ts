@@ -59,6 +59,10 @@ export interface Section {
 export interface CampaignDoor extends Door {
   milestone?: string;
   gate?:
+    | "depths-entry"
+    | "depths-filter"
+    | "depths-rest"
+    | "depths-lock"
     | "refuge-lift"
     | "mastery-wall"
     | "mastery-rope"
@@ -113,7 +117,8 @@ export interface PalaceState {
   prisonOpen: boolean;
 }
 export interface CampaignState {
-  version: 12;
+  version: 13;
+  depths: import("./depths").DepthsState;
   consequences: { nimaRescued: boolean; liftRepaired: boolean };
   mastery: { solved: string[] };
   rival: import("./rival").RivalState;

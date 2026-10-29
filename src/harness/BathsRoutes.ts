@@ -1,3 +1,4 @@
+import { DepthsRoute } from "./DepthsRoute";
 import { EraWingRoute } from "./EraWingRoute";
 import { EchoRoute } from "./EchoRoute";
 import type { CampaignHarness } from "./CampaignHarness";
@@ -155,6 +156,7 @@ export class BathsRoutes {
         "Missed cistern vessel",
       );
     }
+    if (this.h.exploreDepths) yield* new DepthsRoute(this.h).play();
     yield* this.h.walk(1125);
     yield* this.h.use();
     yield* this.h.walk(310);

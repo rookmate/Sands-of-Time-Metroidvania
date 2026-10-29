@@ -1,3 +1,4 @@
+import { buildDepths } from "./depthsRooms";
 import { buildConsequences } from "./consequences";
 import { buildMastery } from "./mastery";
 import { buildRival } from "./rival";
@@ -140,3 +141,5 @@ buildRival(CAMPAIGN_ROOMS);
 buildMastery(CAMPAIGN_ROOMS);
 
 buildConsequences(CAMPAIGN_ROOMS);
+
+buildDepths(CAMPAIGN_ROOMS);

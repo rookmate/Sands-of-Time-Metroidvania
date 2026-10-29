@@ -1,3 +1,5 @@
+import { Depths, depthsBlock } from "./depths";
+import { DEPTHS_IDS } from "./depthsRooms";
 import {
   consequenceBlock,
   consequenceControls,
@@ -45,6 +47,7 @@ import type { CampaignDoor, CampaignSave } from "./types";
 
 export class CampaignGame extends Game {
   journey = freshJourney();
+  readonly depths = new Depths(this);
   readonly mastery = new Mastery(this);
   readonly echoes = new Echoes(this);
   readonly puzzles: Puzzles;
@@ -111,7 +114,7 @@ export class CampaignGame extends Game {
     };
   }
   override get quest() {
-    if (MASTERY_IDS.includes(this.room.id))
+    if ([...MASTERY_IDS, ...DEPTHS_IDS].includes(this.room.id))
       return {
         title: this.room.name,
         text: this.section.objective,
@@ -214,6 +217,7 @@ export class CampaignGame extends Game {
   }
   override enterRoom(...args: Parameters<Game["enterRoom"]>) {
     this.echoes?.clear();
+    this.depths?.leave();
     this.mastery?.enter(args[0]);
     super.enterRoom(...args);
   }
@@ -327,8 +331,12 @@ export class CampaignGame extends Game {
       stepCooperation(this, dt);
     }
     super.update(dt);
-    if (this.screen === "death") this.echoes.clear();
+    if (this.screen === "death") {
+      this.echoes.clear();
+      this.depths.leave();
+    }
     if (active && this.screen === "playing") {
+      this.depths.step(dt);
       this.mastery.step();
       stepEnemyTraversal(this);
       this.farah.step(dt);
@@ -413,6 +421,8 @@ export class CampaignGame extends Game {
       return "Secure the far-side echo latch first";
     if (door.gate === "history-sill" && !this.journey.history.opened)
       return "Stone facing rests on a worn freight sill";
+    const depths = depthsBlock(this, door);
+    if (depths) return depths;
     const consequence = consequenceBlock(this, door);
     if (consequence) return consequence;
     const wing = wingDoorBlock(this, door);
@@ -453,6 +463,8 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
+    const depth = this.depths.controls().find((c) => distance(feet, c) < 45);
+    if (depth) return depth;
     const consequence = consequenceControls(this).find(
       (c) => distance(feet, c) < 45,
     );
