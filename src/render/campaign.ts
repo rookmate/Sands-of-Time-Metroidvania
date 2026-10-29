@@ -1,3 +1,4 @@
+import { drawMastery } from "./mastery";
 import { drawRivalRooms } from "./rival";
 import { drawEnemyTraversal } from "./enemyTraversal";
 import { drawHistory } from "./history";
@@ -131,6 +132,7 @@ export function drawCampaignObjects(c: Context, game: Game) {
   drawCooperation(c, game);
   drawRewards(c, game);
   drawRivalRooms(c, game);
+  drawMastery(c, game);
   drawHistory(c, game);
   drawEnemyTraversal(c, game);
   const g = game,

@@ -1,3 +1,4 @@
+import { Mastery, MASTERY_IDS } from "./mastery";
 import { rivalControls, rivalDefeated } from "./rival";
 import {
   TRAVERSAL_IDS,
@@ -39,6 +40,7 @@ import type { CampaignDoor, CampaignSave } from "./types";
 
 export class CampaignGame extends Game {
   journey = freshJourney();
+  readonly mastery = new Mastery(this);
   readonly echoes = new Echoes(this);
   readonly puzzles: Puzzles;
   readonly farah: Farah;
@@ -104,6 +106,12 @@ export class CampaignGame extends Game {
     };
   }
   override get quest() {
+    if (MASTERY_IDS.includes(this.room.id))
+      return {
+        title: this.room.name,
+        text: this.section.objective,
+        room: this.room.id,
+      };
     if (cooperationActive(this))
       return {
         title: "Farah and the bell spillway",
@@ -148,6 +156,7 @@ export class CampaignGame extends Game {
     return this.companion?.health === 0 ? undefined : super.deathMemory;
   }
   override start(continueJourney = false) {
+    this.mastery.leave();
     this.journey =
       continueJourney && this.campaignSave
         ? structuredClone(this.campaignSave.journey)
@@ -191,6 +200,7 @@ export class CampaignGame extends Game {
       this.notify("Journey saved · Health and sands restored");
   }
   override respawn() {
+    this.mastery.leave();
     if (!this.journey.completed.includes(this.room.id))
       this.journey.puzzles[this.room.id] = freshPuzzle(this.section.puzzle);
     this.activeRoom = "";
@@ -199,6 +209,7 @@ export class CampaignGame extends Game {
   }
   override enterRoom(...args: Parameters<Game["enterRoom"]>) {
     this.echoes?.clear();
+    this.mastery?.enter(args[0]);
     super.enterRoom(...args);
   }
   protected override roomPlatforms(time: number) {
@@ -310,6 +321,7 @@ export class CampaignGame extends Game {
     super.update(dt);
     if (this.screen === "death") this.echoes.clear();
     if (active && this.screen === "playing") {
+      this.mastery.step();
       stepEnemyTraversal(this);
       this.farah.step(dt);
       this.puzzles.step(0);
@@ -377,6 +389,12 @@ export class CampaignGame extends Game {
     return true;
   }
   doorBlock(door: CampaignDoor): string | null {
+    if (
+      door.gate &&
+      MASTERY_IDS.includes(door.gate) &&
+      !this.journey.mastery.solved.includes(door.gate)
+    )
+      return "Secure this chamber's movement seal first";
     if (door.gate === "ram-wall" && !this.journey.traversal.broken)
       return "A weakened wall blocks the service passage";
     if (
@@ -425,6 +443,10 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
+    const practice = this.mastery
+      .controls()
+      .find((c) => distance(feet, c) < 45);
+    if (practice) return practice;
     const rival = rivalControls(this).find((c) => distance(feet, c) < 45);
     if (rival) return rival;
     const creature = traversalControls(this).find(

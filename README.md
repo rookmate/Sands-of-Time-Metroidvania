@@ -264,3 +264,33 @@ Local `artifacts/rival` contains recorded input traces, browser reports,
 screenshots and videos. Ordinary Continue keyboard play and compact landscape
 controls are checked separately. Blind human discoverability, difficulty and
 pacing remain unmeasured; these routes make no gameplay-hours claim.
+
+### Optional movement chambers
+
+The marked door at Cypress court's lower floor leads to three short practice
+chambers after Time Dash awakens. The returning step teaches a wall kick onto a
+high ledge. Hands above the court joins a rope catch and bar transfer. The patient
+crossing combines a solid launch ledge, rope and midair Time Dash. Secure each
+upper handprint with Interact to open the next chamber. Secured seals also return
+you to the launch mat, so the west doors provide a short way home.
+
+Striped catch mats retry misses immediately without damage. Round retry stones
+restore practice sand; normal Rewind can recover a fall before the mat catches
+it. Practice sand is borrowed for the chamber visit and restored to the incoming
+amount on exit. Local retries and saved seals never change the main fountain
+checkpoint. Reload and ordinary Retry return to that checkpoint while preserving
+seals and the final landing's one-time life memory. Farah waits outside without
+changing her story state. No timer, mandatory milestone or new ability is added.
+
+Journey v11 migrates v1–v10 in the existing save slot. The only added persistent
+field is `mastery.solved`, an ordered list of secured room ids. The canonical graph
+still lives in `src/campaign/world.ts`; the forty narrative anchors are unchanged.
+
+Development proof: `npm test -- tests/mastery.test.ts` exercises mortal campaigns
+in both regional orders, independent input replay, earlier optional systems,
+missed handholds/ledges, Rewind, depleted sand, exits, Retry/reload, ordered gates,
+assist and one-time rewards. The rendered route is
+`?harness=campaign&immortal=0&autoplay=0&mastery=1`; add
+`&order=sky-first&seed=42&echoes=1&wing=1&history=1&creatures=1&rival=released`
+for the integrated resilience route. Automated routes establish reachability,
+not human pacing, difficulty, discoverability or hours of gameplay.

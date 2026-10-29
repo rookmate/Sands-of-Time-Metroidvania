@@ -29,6 +29,7 @@ export class CampaignHarness {
   readonly exploreEraWing: boolean;
   readonly investigateHistory: boolean;
   readonly exploreEnemyTraversal: boolean;
+  readonly exploreMastery: boolean;
   readonly rivalOutcome: RivalOutcome | false;
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
@@ -73,10 +74,12 @@ export class CampaignHarness {
       exploreEraWing?: boolean;
       investigateHistory?: boolean;
       exploreEnemyTraversal?: boolean;
+      exploreMastery?: boolean;
       rivalOutcome?: RivalOutcome | false;
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.exploreMastery = options.exploreMastery ?? false;
     this.rivalOutcome = options.rivalOutcome ?? false;
     this.exploreEnemyTraversal = options.exploreEnemyTraversal ?? false;
     this.investigateHistory = options.investigateHistory ?? false;
@@ -222,7 +225,7 @@ export class CampaignHarness {
     this.game.input.release(action);
     this.game.input.press(action);
   }
-  private aim(x: number) {
+  aim(x: number) {
     const g = this.game,
       diff = x - g.player.x;
     g.input.release(diff > 0 ? "left" : "right");
