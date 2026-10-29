@@ -192,7 +192,7 @@ it("migrates v7 checkpoints with predecessor discoveries intact and rejects malf
   old.journey.version = 7;
   delete old.journey.history;
   const migrated = parseCampaign(JSON.stringify(old))!;
-  expect(migrated.journey.version).toBe(8);
+  expect(migrated.journey.version).toBe(9);
   expect(migrated.journey.history).toEqual({ opened: false, read: [] });
   expect(migrated.journey.wing).toEqual(old.journey.wing);
   expect(migrated.journey.echoes).toEqual(old.journey.echoes);

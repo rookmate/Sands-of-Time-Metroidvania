@@ -133,7 +133,7 @@ it("migrates v3 without starting cooperation or losing optional rewards, and val
   delete raw.journey.cooperation;
   const migrated = parseCampaign(JSON.stringify(raw))!;
   expect(migrated).not.toBeNull();
-  expect(migrated.journey.version).toBe(8);
+  expect(migrated.journey.version).toBe(9);
   expect(migrated.journey.cooperation).toEqual({
     phase: "idle",
     travel: 0,

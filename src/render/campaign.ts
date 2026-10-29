@@ -1,3 +1,4 @@
+import { drawEnemyTraversal } from "./enemyTraversal";
 import { drawHistory } from "./history";
 import { drawEraWing } from "./eraWing";
 import { drawEchoes } from "./echoes";
@@ -129,6 +130,7 @@ export function drawCampaignObjects(c: Context, game: Game) {
   drawCooperation(c, game);
   drawRewards(c, game);
   drawHistory(c, game);
+  drawEnemyTraversal(c, game);
   const g = game,
     p = g.puzzles.definition,
     s = g.puzzles.state;

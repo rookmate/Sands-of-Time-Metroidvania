@@ -36,6 +36,7 @@ export class BrowserHarness {
               params.get("order") === "sky-first"
                 ? "sky-first"
                 : "gardens-first",
+            exploreEnemyTraversal: params.get("creatures") === "1",
             investigateHistory: params.get("history") === "1",
             exploreEraWing: params.get("wing") === "1",
             exploreEchoes: params.get("echoes") === "1",

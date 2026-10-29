@@ -9,7 +9,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 8,
+  version: 9,
+  traversal: { broken: false, latched: false },
   history: { read: [], opened: false },
   wing: { era: "intact", discovered: false },
   echoes: { solved: [] },
@@ -110,11 +111,21 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 8;
       data.journey.history = { read: [], opened: false };
     }
+    if (data?.journey?.version === 8) {
+      data.journey.version = 9;
+      data.journey.traversal = { broken: false, latched: false };
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 8 ||
+      state.version !== 9 ||
+      !state.traversal ||
+      typeof state.traversal.broken !== "boolean" ||
+      typeof state.traversal.latched !== "boolean" ||
+      (state.traversal.latched && !state.traversal.broken) ||
+      ((state.traversal.broken || state.traversal.latched) &&
+        state.completed.length < 11) ||
       !state.history ||
       typeof state.history.opened !== "boolean" ||
       !Array.isArray(state.history.read) ||

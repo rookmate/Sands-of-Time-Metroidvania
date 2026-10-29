@@ -143,7 +143,7 @@ it.each(["baths-main", "bathworks", "upper-baths"])(
     if (room !== "baths-main") raw.collected.push("bathworks-sand");
     const migrated = parseCampaign(JSON.stringify(raw));
     expect(migrated).not.toBeNull();
-    expect(migrated!.journey.version).toBe(8);
+    expect(migrated!.journey.version).toBe(9);
     expect(migrated!.journey.completed).toEqual(h.game.journey.completed);
     expect(migrated!.collected).toEqual(raw.collected);
     expect(migrated!.checkpoint.x).toBeLessThan(CAMPAIGN_ROOMS[room].width);

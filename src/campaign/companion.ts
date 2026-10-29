@@ -1,3 +1,4 @@
+import { TRAVERSAL_IDS } from "./enemyTraversal";
 import { cooperationActive, stairPosition } from "./cooperation";
 import type { Companion, Vec } from "../game/types";
 import { clamp, distance, overlap } from "../game/physics";
@@ -13,8 +14,10 @@ export class Farah {
     const g = this.game;
     this.trail = [];
     this.telegraphs.clear();
-    this.actor =
-      g.journey.farah === "following" || g.journey.farah === "restored"
+    // Farah waits outside the hollow-creature pens instead of killing their mechanisms.
+    this.actor = TRAVERSAL_IDS.includes(g.room.id)
+      ? null
+      : g.journey.farah === "following" || g.journey.farah === "restored"
         ? {
             x: g.journey.farah === "restored" ? 650 : g.player.x - 75,
             y: g.player.y,

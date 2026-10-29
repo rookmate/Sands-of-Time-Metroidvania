@@ -1,3 +1,5 @@
+import { EnemyTraversalRoute } from "./EnemyTraversalRoute";
+import { TRAVERSAL_IDS } from "../campaign/enemyTraversal";
 import { HistoryRoute } from "./HistoryRoute";
 import { BathsRoutes } from "./BathsRoutes";
 import { PalaceRoutes } from "./PalaceRoutes";
@@ -24,6 +26,7 @@ export class CampaignHarness {
   readonly exploreEchoes: boolean;
   readonly exploreEraWing: boolean;
   readonly investigateHistory: boolean;
+  readonly exploreEnemyTraversal: boolean;
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
   frames = 0;
@@ -66,9 +69,11 @@ export class CampaignHarness {
       exploreEchoes?: boolean;
       exploreEraWing?: boolean;
       investigateHistory?: boolean;
+      exploreEnemyTraversal?: boolean;
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.exploreEnemyTraversal = options.exploreEnemyTraversal ?? false;
     this.investigateHistory = options.investigateHistory ?? false;
     this.exploreEraWing = options.exploreEraWing ?? false;
     this.exploreEchoes = options.exploreEchoes ?? false;
@@ -227,9 +232,10 @@ export class CampaignHarness {
     this.require(g.screen === "playing", "Unexpected screen " + g.screen);
     this.require(!g.orientationBlocked, "Landscape orientation is required");
     if (
+      !TRAVERSAL_IDS.includes(g.room.id) &&
       this.frames %
         (this.resilienceSeed === null ? 42 : 38 + (this.resilienceSeed % 9)) ===
-      0
+        0
     )
       this.pulse("attack");
     const slow = g.slowTime,
@@ -809,6 +815,8 @@ export class CampaignHarness {
         yield* this.disturb(index);
         g = this.game;
       }
+      if (index === 11 && this.exploreEnemyTraversal)
+        yield* new EnemyTraversalRoute(this).explore();
       if (index === 14) {
         yield* baths.bathsApproach();
         this.scenes.push({

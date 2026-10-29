@@ -1,3 +1,9 @@
+import {
+  TRAVERSAL_IDS,
+  stepEnemyTraversal,
+  traversalControls,
+  traversalPlatforms,
+} from "./enemyTraversal";
 import { historyControls } from "./history";
 import { wingPlatforms, wingControls, wingDoorBlock } from "./eraWing";
 import { ECHO_CHAMBERS } from "./echoRooms";
@@ -195,7 +201,10 @@ export class CampaignGame extends Game {
     super.enterRoom(...args);
   }
   protected override roomPlatforms(time: number) {
-    const base = wingPlatforms(this, super.roomPlatforms(time));
+    const base = traversalPlatforms(
+      this,
+      wingPlatforms(this, super.roomPlatforms(time)),
+    );
     return this.puzzles
       ? this.echoes.platforms(
           this.puzzles.platforms(
@@ -240,6 +249,11 @@ export class CampaignGame extends Game {
       );
     }
     this.save(false);
+  }
+  protected override enemySandReward(enemy: Enemy) {
+    return TRAVERSAL_IDS.includes(this.room.id)
+      ? 0
+      : super.enemySandReward(enemy);
   }
   protected override enemyDefeated(enemy: Enemy) {
     const id = `${this.room.id}:${enemy.id}`;
@@ -291,6 +305,7 @@ export class CampaignGame extends Game {
     super.update(dt);
     if (this.screen === "death") this.echoes.clear();
     if (active && this.screen === "playing") {
+      stepEnemyTraversal(this);
       this.farah.step(dt);
       this.puzzles.step(0);
     }
@@ -357,6 +372,8 @@ export class CampaignGame extends Game {
     return true;
   }
   doorBlock(door: CampaignDoor): string | null {
+    if (door.gate === "ram-wall" && !this.journey.traversal.broken)
+      return "A weakened wall blocks the service passage";
     if (
       door.gate &&
       Object.hasOwn(ECHO_CHAMBERS, door.gate) &&
@@ -403,6 +420,10 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
+    const creature = traversalControls(this).find(
+      (c) => distance(feet, c) < 45,
+    );
+    if (creature) return creature;
     const evidence = historyControls(this).find((c) => distance(feet, c) < 45);
     if (evidence) return evidence;
     const mirror = wingControls(this).find((c) => distance(feet, c) < 45);
