@@ -1,3 +1,4 @@
+import { RIVAL_IDS } from "../campaign/rival";
 import { TRAVERSAL_IDS } from "../campaign/enemyTraversal";
 import { HISTORY_EVIDENCE } from "../campaign/history";
 import { WING_IDS, WING_HEART } from "../campaign/eraWing";
@@ -70,5 +71,9 @@ export function campaignMap(game: CampaignGame) {
   const pens = TRAVERSAL_IDS.some((id) => visible.has(id))
     ? `<p class="regional-state">Animal service pens · Zoo side entrance. ${game.journey.traversal.broken ? "Ram wall broken" : "Bait the ram into weakened masonry"} · ${game.journey.traversal.latched ? "Scarab stones latched" : "Freeze the scarab on its striped plate to cross"}. Recall bells restore hollow creatures without sand rewards. Safe lower floors return to fountains.</p>`
     : "";
-  return `${pens}${investigation}${wing}${palaceMap(game)}${regional}${regional ? `<p class="regional-state">${cooperationStatus(game)}</p>` : ""}${discoveries}${game.visited.has("echo-step") ? `<p class="regional-state">Echo chambers · ${CORE_ECHO_IDS.filter((id) => game.journey.echoes.solved.includes(id)).length}/3 latches secured. C records, C replays or replaces, X cancels. Tapes clear on room exit, Retry and reload; secured gates stay open.</p>` : ""}<p>Story milestones · ${game.journey.completed.length}/40</p><ol class="chapter-route">${SECTIONS.map((s, i) => `<li class="${game.room.id === s.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(s.id) ? s.title : "Unexplored"}</span><span>${game.journey.completed.includes(s.id) ? "Complete" : s.id === game.quest.room ? "Next objective" : ""}</span></li>`).join("")}</ol>`;
+  const rival =
+    RIVAL_IDS.some((id) => visible.has(id)) || game.journey.rival.named
+      ? `<p class="regional-state">Sahir, the split crest · ${game.journey.rival.outcome ?? `${game.journey.rival.bouts}/2 drills complete`}. Practice court off Cypress court → gallery off Archive stair → last muster beside Flooded cells. ${game.journey.rival.oath ? "His lesson: the drill ends when all come home. Blue standard releases him; gold accepts the last rematch." : "His weapon rack and muster roll explain whom he is waiting for."} Duels are optional; unfinished fights reset on exit or Retry.</p>`
+      : "";
+  return `${rival}${pens}${investigation}${wing}${palaceMap(game)}${regional}${regional ? `<p class="regional-state">${cooperationStatus(game)}</p>` : ""}${discoveries}${game.visited.has("echo-step") ? `<p class="regional-state">Echo chambers · ${CORE_ECHO_IDS.filter((id) => game.journey.echoes.solved.includes(id)).length}/3 latches secured. C records, C replays or replaces, X cancels. Tapes clear on room exit, Retry and reload; secured gates stay open.</p>` : ""}<p>Story milestones · ${game.journey.completed.length}/40</p><ol class="chapter-route">${SECTIONS.map((s, i) => `<li class="${game.room.id === s.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(s.id) ? s.title : "Unexplored"}</span><span>${game.journey.completed.includes(s.id) ? "Complete" : s.id === game.quest.room ? "Next objective" : ""}</span></li>`).join("")}</ol>`;
 }

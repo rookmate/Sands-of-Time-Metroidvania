@@ -1,3 +1,4 @@
+import { freshRival } from "./rival";
 import { HISTORY_IDS } from "./history";
 import { ECHO_CHAMBERS } from "./echoRooms";
 import { freshPalace } from "./palace";
@@ -9,7 +10,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 9,
+  version: 10,
+  rival: freshRival(),
   traversal: { broken: false, latched: false },
   history: { read: [], opened: false },
   wing: { era: "intact", discovered: false },
@@ -115,11 +117,27 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 9;
       data.journey.traversal = { broken: false, latched: false };
     }
+    if (data?.journey?.version === 9) {
+      data.journey.version = 10;
+      data.journey.rival = freshRival();
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 9 ||
+      state.version !== 10 ||
+      !state.rival ||
+      ![0, 1, 2].includes(state.rival.bouts) ||
+      typeof state.rival.named !== "boolean" ||
+      typeof state.rival.oath !== "boolean" ||
+      ![null, "released", "defeated"].includes(state.rival.outcome) ||
+      (state.rival.oath && !state.rival.named) ||
+      (state.rival.outcome !== null && state.rival.bouts !== 2) ||
+      (state.rival.outcome === "released" && !state.rival.oath) ||
+      ((state.rival.named || state.rival.bouts > 0) &&
+        state.completed.length < 17) ||
+      (state.rival.bouts > 1 && state.completed.length < 28) ||
+      (state.rival.outcome !== null && state.completed.length < 32) ||
       !state.traversal ||
       typeof state.traversal.broken !== "boolean" ||
       typeof state.traversal.latched !== "boolean" ||

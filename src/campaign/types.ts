@@ -110,7 +110,8 @@ export interface PalaceState {
   prisonOpen: boolean;
 }
 export interface CampaignState {
-  version: 9;
+  version: 10;
+  rival: import("./rival").RivalState;
   traversal: { broken: boolean; latched: boolean };
   history: { read: import("./history").HistoryEvidence[]; opened: boolean };
   wing: { era: import("./eraWing").WingEra; discovered: boolean };

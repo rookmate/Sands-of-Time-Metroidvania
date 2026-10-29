@@ -1,3 +1,4 @@
+import { drawRivalRooms } from "./rival";
 import { drawEnemyTraversal } from "./enemyTraversal";
 import { drawHistory } from "./history";
 import { drawEraWing } from "./eraWing";
@@ -129,6 +130,7 @@ export function drawCampaignObjects(c: Context, game: Game) {
   drawPalace(c, game);
   drawCooperation(c, game);
   drawRewards(c, game);
+  drawRivalRooms(c, game);
   drawHistory(c, game);
   drawEnemyTraversal(c, game);
   const g = game,

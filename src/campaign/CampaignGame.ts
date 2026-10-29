@@ -1,3 +1,4 @@
+import { rivalControls, rivalDefeated } from "./rival";
 import {
   TRAVERSAL_IDS,
   stepEnemyTraversal,
@@ -251,11 +252,15 @@ export class CampaignGame extends Game {
     this.save(false);
   }
   protected override enemySandReward(enemy: Enemy) {
-    return TRAVERSAL_IDS.includes(this.room.id)
+    return enemy.kind === "rival" || TRAVERSAL_IDS.includes(this.room.id)
       ? 0
       : super.enemySandReward(enemy);
   }
   protected override enemyDefeated(enemy: Enemy) {
+    if (enemy.kind === "rival") {
+      rivalDefeated(this);
+      return;
+    }
     const id = `${this.room.id}:${enemy.id}`;
     if (!this.journey.defeated.includes(id)) this.journey.defeated.push(id);
     if (enemy.kind === "vizier" && this.room.id === "honor")
@@ -420,6 +425,8 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
+    const rival = rivalControls(this).find((c) => distance(feet, c) < 45);
+    if (rival) return rival;
     const creature = traversalControls(this).find(
       (c) => distance(feet, c) < 45,
     );
