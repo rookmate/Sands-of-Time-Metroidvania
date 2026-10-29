@@ -1,3 +1,4 @@
+import { drawHistory } from "./history";
 import { drawEraWing } from "./eraWing";
 import { drawEchoes } from "./echoes";
 import { drawPalace } from "./palace";
@@ -127,6 +128,7 @@ export function drawCampaignObjects(c: Context, game: Game) {
   drawPalace(c, game);
   drawCooperation(c, game);
   drawRewards(c, game);
+  drawHistory(c, game);
   const g = game,
     p = g.puzzles.definition,
     s = g.puzzles.state;

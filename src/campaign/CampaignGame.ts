@@ -1,3 +1,4 @@
+import { historyControls } from "./history";
 import { wingPlatforms, wingControls, wingDoorBlock } from "./eraWing";
 import { ECHO_CHAMBERS } from "./echoRooms";
 import { Echoes } from "./echoes";
@@ -362,6 +363,8 @@ export class CampaignGame extends Game {
       !this.journey.echoes.solved.includes(door.gate)
     )
       return "Secure the far-side echo latch first";
+    if (door.gate === "history-sill" && !this.journey.history.opened)
+      return "Stone facing rests on a worn freight sill";
     const wing = wingDoorBlock(this, door);
     if (wing) return wing;
     const palace = palaceBlock(this, door);
@@ -400,6 +403,8 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
+    const evidence = historyControls(this).find((c) => distance(feet, c) < 45);
+    if (evidence) return evidence;
     const mirror = wingControls(this).find((c) => distance(feet, c) < 45);
     if (mirror) return mirror;
     const echo = this.echoes.controls().find((c) => distance(feet, c) < 45);

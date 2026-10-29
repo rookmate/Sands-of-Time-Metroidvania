@@ -1,3 +1,4 @@
+import { buildHistory } from "./history";
 import { buildEraWing } from "./eraWing";
 import { buildEchoRooms } from "./echoRooms";
 import { buildPalace } from "./palace";
@@ -125,3 +126,5 @@ buildPalace(CAMPAIGN_ROOMS);
 buildEchoRooms(CAMPAIGN_ROOMS);
 
 buildEraWing(CAMPAIGN_ROOMS);
+
+buildHistory(CAMPAIGN_ROOMS);

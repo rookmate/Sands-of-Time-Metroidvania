@@ -1,3 +1,4 @@
+import { HISTORY_EVIDENCE } from "../campaign/history";
 import { WING_IDS, WING_HEART } from "../campaign/eraWing";
 import { CORE_ECHO_IDS } from "../campaign/echoRooms";
 import { palaceMap } from "./palaceMap";
@@ -61,5 +62,9 @@ export function campaignMap(game: CampaignGame) {
   const wing = WING_IDS.some((id) => game.visited.has(id))
     ? `<p class="regional-state">Twin mirror wing · ${game.journey.wing.era}. E at mirrors changes this wing only. R rewinds movement; C/X records or cancels echoes. Switching clears tapes. ${game.journey.wing.discovered ? "Unsent dedication read" : "Unsent gift undiscovered"} · ${game.collected.has(WING_HEART) ? "Heart found" : "Heart unfound"}. Lower arcade floor always returns west.</p>`
     : "";
-  return `${wing}${palaceMap(game)}${regional}${regional ? `<p class="regional-state">${cooperationStatus(game)}</p>` : ""}${discoveries}${game.visited.has("echo-step") ? `<p class="regional-state">Echo chambers · ${CORE_ECHO_IDS.filter((id) => game.journey.echoes.solved.includes(id)).length}/3 latches secured. C records, C replays or replaces, X cancels. Tapes clear on room exit, Retry and reload; secured gates stay open.</p>` : ""}<p>Story milestones · ${game.journey.completed.length}/40</p><ol class="chapter-route">${SECTIONS.map((s, i) => `<li class="${game.room.id === s.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(s.id) ? s.title : "Unexplored"}</span><span>${game.journey.completed.includes(s.id) ? "Complete" : s.id === game.quest.room ? "Next objective" : ""}</span></li>`).join("")}</ol>`;
+  const investigation =
+    game.journey.history.read.length || game.journey.history.opened
+      ? `<p class="regional-state">Palace history · ${game.journey.history.opened ? "Cypress facing open" : "The court's account is in doubt"}. Observations to reread: ${game.journey.history.read.map((id) => `${HISTORY_EVIDENCE[id].title} (${CAMPAIGN_ROOMS[HISTORY_EVIDENCE[id].room].mapLabel})`).join("; ") || "none"}. These are observations, not keys; no complete collection is needed.</p>`
+      : "";
+  return `${investigation}${wing}${palaceMap(game)}${regional}${regional ? `<p class="regional-state">${cooperationStatus(game)}</p>` : ""}${discoveries}${game.visited.has("echo-step") ? `<p class="regional-state">Echo chambers · ${CORE_ECHO_IDS.filter((id) => game.journey.echoes.solved.includes(id)).length}/3 latches secured. C records, C replays or replaces, X cancels. Tapes clear on room exit, Retry and reload; secured gates stay open.</p>` : ""}<p>Story milestones · ${game.journey.completed.length}/40</p><ol class="chapter-route">${SECTIONS.map((s, i) => `<li class="${game.room.id === s.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(s.id) ? s.title : "Unexplored"}</span><span>${game.journey.completed.includes(s.id) ? "Complete" : s.id === game.quest.room ? "Next objective" : ""}</span></li>`).join("")}</ol>`;
 }
