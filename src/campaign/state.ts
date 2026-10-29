@@ -1,3 +1,4 @@
+import { ECHO_CHAMBERS } from "./echoRooms";
 import { freshPalace } from "./palace";
 import { parseSave } from "../game/storage";
 import type { CampaignSave, CampaignState, Puzzle, PuzzleState } from "./types";
@@ -7,7 +8,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 5,
+  version: 6,
+  echoes: { solved: [] },
   palace: freshPalace(),
   cooperation: freshCooperation(),
   rewards: { attunement: null, inscription: false },
@@ -93,11 +95,21 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
         prisonOpen: prisonDone,
       };
     }
+    if (data?.journey?.version === 5) {
+      data.journey.version = 6;
+      data.journey.echoes = { solved: [] };
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 5 ||
+      state.version !== 6 ||
+      !state.echoes ||
+      !Array.isArray(state.echoes.solved) ||
+      state.echoes.solved.length > 3 ||
+      new Set(state.echoes.solved).size !== state.echoes.solved.length ||
+      !state.echoes.solved.every((id) => Object.hasOwn(ECHO_CHAMBERS, id)) ||
+      (state.echoes.solved.length > 0 && state.completed.length < 17) ||
       !state.palace ||
       ![
         state.palace.irrigated,

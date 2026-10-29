@@ -59,6 +59,9 @@ export interface Section {
 export interface CampaignDoor extends Door {
   milestone?: string;
   gate?:
+    | "echo-step"
+    | "echo-bell"
+    | "echo-span"
     | "drained"
     | "sword-dash"
     | "shortcut"
@@ -103,7 +106,8 @@ export interface PalaceState {
   prisonOpen: boolean;
 }
 export interface CampaignState {
-  version: 5;
+  version: 6;
+  echoes: { solved: string[] };
   palace: PalaceState;
   cooperation: CooperationState;
   rewards: {

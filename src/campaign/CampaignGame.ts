@@ -1,3 +1,5 @@
+import { ECHO_CHAMBERS } from "./echoRooms";
+import { Echoes } from "./echoes";
 import { palaceBlock, palaceControls, palacePlatforms } from "./palace";
 import {
   cooperationActive,
@@ -28,6 +30,7 @@ import type { CampaignDoor, CampaignSave } from "./types";
 
 export class CampaignGame extends Game {
   journey = freshJourney();
+  readonly echoes = new Echoes(this);
   readonly puzzles: Puzzles;
   readonly farah: Farah;
   readonly immortal: boolean;
@@ -185,15 +188,21 @@ export class CampaignGame extends Game {
     super.respawn();
     this.syncRoom();
   }
+  override enterRoom(...args: Parameters<Game["enterRoom"]>) {
+    this.echoes?.clear();
+    super.enterRoom(...args);
+  }
   protected override roomPlatforms(time: number) {
     const base = super.roomPlatforms(time);
     return this.puzzles
-      ? this.puzzles.platforms(
-          palacePlatforms(
-            this,
-            cooperationPlatforms(
+      ? this.echoes.platforms(
+          this.puzzles.platforms(
+            palacePlatforms(
               this,
-              bathsPlatforms(this.room.id, this.journey.baths, base),
+              cooperationPlatforms(
+                this,
+                bathsPlatforms(this.room.id, this.journey.baths, base),
+              ),
             ),
           ),
         )
@@ -273,10 +282,12 @@ export class CampaignGame extends Game {
     this.syncRoom();
     const active = this.screen === "playing" && !this.orientationBlocked;
     if (active) {
+      this.echoes.step();
       this.puzzles.step(dt);
       stepCooperation(this, dt);
     }
     super.update(dt);
+    if (this.screen === "death") this.echoes.clear();
     if (active && this.screen === "playing") {
       this.farah.step(dt);
       this.puzzles.step(0);
@@ -344,6 +355,12 @@ export class CampaignGame extends Game {
     return true;
   }
   doorBlock(door: CampaignDoor): string | null {
+    if (
+      door.gate &&
+      Object.hasOwn(ECHO_CHAMBERS, door.gate) &&
+      !this.journey.echoes.solved.includes(door.gate)
+    )
+      return "Secure the far-side echo latch first";
     const palace = palaceBlock(this, door);
     if (palace) return palace;
     if (door.milestone === "upper-baths" && cooperationActive(this))
@@ -380,6 +397,8 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
+    const echo = this.echoes.controls().find((c) => distance(feet, c) < 45);
+    if (echo) return echo;
     const control = this.puzzles?.controls.find((c) => distance(feet, c) < 85);
     if (control) return control;
     const cooperative = cooperationControls(this).find(

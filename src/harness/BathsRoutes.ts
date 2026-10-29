@@ -1,3 +1,4 @@
+import { EchoRoute } from "./EchoRoute";
 import type { CampaignHarness } from "./CampaignHarness";
 import {
   cooperationApproach,
@@ -117,6 +118,7 @@ export class BathsRoutes {
     yield* this.h.jump(920, 650, 40);
     if (this.h.optionalRewards)
       yield* this.h.rewardRoute(galleryRoute(this.h.optionalRewards));
+    if (this.h.exploreEchoes) yield* new EchoRoute(this.h).play();
     yield* this.h.walk(1015);
     yield* this.h.use();
     yield* this.h.walk(1145);

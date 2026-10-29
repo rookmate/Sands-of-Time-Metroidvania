@@ -1,3 +1,4 @@
+import { CampaignGame } from "../campaign/CampaignGame";
 import type { Game } from "../game/Game";
 import type { Options, Screen } from "../game/types";
 import { ABILITIES, ORDER } from "../game/progression";
@@ -182,13 +183,14 @@ export class UI {
         break;
       case "power": {
         const action = button.dataset.power as
-          "rewind" | "slow" | "freeze" | "dash";
+          "rewind" | "slow" | "freeze" | "dash" | "echo" | "cancelEcho";
         if (action === "rewind") {
           game.input.press(action);
           window.setTimeout(() => game.input.release(action), 1000);
         } else {
           game.input.release(action);
           game.input.press(action);
+          game.input.release(action);
         }
         break;
       }
@@ -240,7 +242,7 @@ export class UI {
         this.overlay.innerHTML = `<section class="modal-backdrop map-backdrop"><div class="map-panel"><div class="panel-heading"><div><p class="small-label">THE KINGDOM OF AZAD</p><h2>The palace</h2></div><button class="close-button" data-action="resume" aria-label="Close map">×</button></div><div class="map-objective"><span>✦</span><div><strong>${g.quest.title}</strong><p>${g.quest.text}</p></div><span class="explored">${Math.round((g.visited.size / ROOM_COUNT) * 100)}% explored</span></div>${mapMarkup(g)}<div class="map-legend"><span><i class="current-mark">◆</i> You are here</span><span><i>◈</i> Fountain</span><span><i>✧</i> Time memory</span><span><i>✦</i> Objective</span><span class="map-unexplored">┄ Unexplored / sealed</span></div><div class="map-bottom"><span>Curse intensity <b>${"◆".repeat(g.tier)}${"◇".repeat(ORDER.length - g.tier)}</b></span><span>${key("M")} Return to journey</span></div></div></section>`;
         break;
       case "help":
-        this.overlay.innerHTML = `<section class="modal-backdrop"><div class="help-panel"><div class="panel-heading"><div><p class="small-label">THE PRINCE’S HANDBOOK</p><h2>Make every moment count.</h2></div><button class="close-button" data-action="back" aria-label="Close controls">×</button></div><div class="help-columns"><div><h3>Movement & combat</h3>${this.control("A / D", "Move", "Arrow keys work too.")}${this.control("SPACE", "Jump / climb", "Hold for height. Jump against a wall to leap away.")}${this.control("J", "Sword strike", "Strike again to chain a three-hit combo.")}${this.control("E", "Interact", "Use doors, restore mechanisms, and rest at fountains.")}<p class="help-tip">Hold toward a wall while jumping to run up it. Catch a ledge, then jump to climb. Press down to drop through thin terraces. Catch a bar or rope, release jump, then jump toward the next grip. On ladders, hold jump to climb and move sideways to dismount.</p></div><div><h3>The Dagger of Time</h3>${this.control("R", "Rewind", "Hold to recover movement and health. 1 sand per second.")}${this.control("Q", "Slow time", "Slow the room for 6 seconds. Costs 1 sand.")}${this.control("F", "Sand prison", "Freeze the room for 4 seconds. Double sword damage. Costs 2 sand.")}${this.control("SHIFT", "Time dash", "Surge forward through danger. Costs 1 sand.")}<p class="help-tip">Hold E and move to push crates. Use E at mechanisms and Farah switches. Hold down + E and move to slide mirrors. Powers awaken through the story; they are unavailable while the Dagger is missing. Fountains save your progress.</p></div></div><div class="help-bottom"><span>${key("M")} Palace map &nbsp; ${key("ESC")} Pause</span><button class="outline-button" data-action="back">Understood <span>→</span></button></div></div></section>`;
+        this.overlay.innerHTML = `<section class="modal-backdrop"><div class="help-panel"><div class="panel-heading"><div><p class="small-label">THE PRINCE’S HANDBOOK</p><h2>Make every moment count.</h2></div><button class="close-button" data-action="back" aria-label="Close controls">×</button></div><div class="help-columns"><div><h3>Movement & combat</h3>${this.control("A / D", "Move", "Arrow keys work too.")}${this.control("SPACE", "Jump / climb", "Hold for height. Jump against a wall to leap away.")}${this.control("J", "Sword strike", "Strike again to chain a three-hit combo.")}${this.control("E", "Interact", "Use doors, restore mechanisms, and rest at fountains.")}<p class="help-tip">Hold toward a wall while jumping to run up it. Catch a ledge, then jump to climb. Press down to drop through thin terraces. Catch a bar or rope, release jump, then jump toward the next grip. On ladders, hold jump to climb and move sideways to dismount.</p></div><div><h3>The Dagger of Time</h3>${this.control("R", "Rewind", "Hold to recover movement and health. 1 sand per second.")}${this.control("Q", "Slow time", "Slow the room for 6 seconds. Costs 1 sand.")}${this.control("F", "Sand prison", "Freeze the room for 4 seconds. Double sword damage. Costs 2 sand.")}${this.control("SHIFT", "Time dash", "Surge forward through danger. Costs 1 sand.")}${this.control("C / X", "Local time echo / cancel", "In striped waterkeeper chambers: C records up to 8s, C replays for 24s. C during replay replaces it. X cancels. Each recording costs 1 sand. Only movement, plates and marked bells replay. Other time powers cancel. Reload keeps latches, clears echoes.")}<p class="help-tip">Hold E and move to push crates. Use E at mechanisms and Farah switches. Hold down + E and move to slide mirrors. Powers awaken through the story; they are unavailable while the Dagger is missing. Fountains save your progress.</p></div></div><div class="help-bottom"><span>${key("M")} Palace map &nbsp; ${key("ESC")} Pause</span><button class="outline-button" data-action="back">Understood <span>→</span></button></div></div></section>`;
         break;
       case "options":
         this.overlay.innerHTML = `<section class="modal-backdrop"><div class="options-panel"><div class="panel-heading"><div><p class="small-label">MAKE THE JOURNEY YOURS</p><h2>Options</h2></div><button class="close-button" data-action="back" aria-label="Close options">×</button></div>${this.option("music", "Music", "An original, synthesized palace score.")}${this.option("sfx", "Sound effects", "Footsteps, blades, water, and time.")}${this.option("shake", "Screen shake", "Camera feedback during combat.")}${this.option("assist", "Journey assist", "Take less damage and slowly regenerate sand.")}<p class="save-note">Options are saved automatically in this browser.</p><button class="outline-button" data-action="back">Return <span>→</span></button></div></section>`;
@@ -269,20 +271,27 @@ export class UI {
     if (this.hud.hidden) return;
     const p = g.player;
     const interaction = g.interaction;
-    const power = g.rewinding
-      ? "REWINDING"
-      : g.freezeTime > 0
-        ? `SAND PRISON · ${g.freezeTime.toFixed(1)}s`
-        : g.slowTime > 0
-          ? `SLOW TIME · ${g.slowTime.toFixed(1)}s`
-          : "";
+    const echoes =
+      g instanceof CampaignGame && g.echoes.available ? g.echoes : null;
+    const power =
+      echoes && echoes.phase !== "idle"
+        ? echoes.phase === "recording"
+          ? "Recording · C replay · X cancel"
+          : "Echo playing · C replace · X cancel"
+        : g.rewinding
+          ? "REWINDING"
+          : g.freezeTime > 0
+            ? `SAND PRISON · ${g.freezeTime.toFixed(1)}s`
+            : g.slowTime > 0
+              ? `SLOW TIME · ${g.slowTime.toFixed(1)}s`
+              : "";
     const boss = g.boss;
     const hint = g.roomBanner > 0 && g.screen === "playing";
     const markup = `<div class="hud-top"><div class="vitals"><div class="health" aria-label="Health ${Math.max(0, p.health)} of ${p.maxHealth}">${Array.from({ length: p.maxHealth }, (_, i) => `<span class="health-diamond ${i < p.health ? "full" : ""}"></span>`).join("")}</div><div class="sand"><span class="sand-dagger">${icons.dagger}</span><div class="sand-grains" aria-label="Sand ${p.sand.toFixed(1)} of ${p.maxSand}">${Array.from({ length: p.maxSand }, (_, i) => `<span style="--fill:${Math.max(0, Math.min(1, p.sand - i)) * 100}%"></span>`).join("")}</div><span class="sand-count">${Math.floor(p.sand)} / ${p.maxSand}</span></div></div>
       <div class="hud-location"><span>CHAPTER ${g.room.chapter} · ${g.room.region.toUpperCase()}</span><strong>${g.room.name}</strong>${g.campaignProgress ? `<small class="journey-status">${g.campaignProgress.completed}/40 milestones · ${g.hasDagger ? "Dagger held" : "No Dagger"}${g.companion ? ` · Farah ${g.companion.health}/${g.companion.maxHealth}` : ""}</small>` : ""}</div><div class="hud-buttons"><button data-action="map" aria-label="Open palace map">${icons.map}<kbd>M</kbd></button><button data-action="pause" aria-label="Pause game">${icons.pause}</button></div></div>
       ${boss ? `<div class="boss-health"><span>${enemyName(boss.kind).toUpperCase()}${boss.phase ? " · UNBOUND" : ""}</span><div><i style="width:${(boss.health / boss.maxHealth) * 100}%"></i></div></div>` : ""}
       ${hint ? `<div class="room-hint">${g.room.hint}</div>` : ""}
-      ${power ? `<div class="power-active">${power}</div>` : ""}
+      ${power ? `<div class="power-active${echoes ? " echo-status" : ""}">${power}</div>` : ""}
       ${interaction && g.screen === "playing" ? `<button class="interact-prompt" data-action="interact" style="left:${Math.max(15, Math.min(85, ((p.x + 15 - g.camera.x) / 1280) * 100))}%;top:${Math.max(24, ((p.y - 32 - g.camera.y) / 720) * 100)}%">${key("E")} ${interaction.label}</button>` : ""}
       ${g.toastTime > 0 ? `<div class="toast" role="status">${g.toast}</div>` : ""}
       <div class="hud-bottom"><div class="objective"><span class="objective-star">✧</span><div><span class="objective-label">CURRENT OBJECTIVE</span><strong>${g.quest.title}</strong><p>${g.quest.text}</p></div></div><div class="abilities">${ORDER.map(
@@ -291,12 +300,27 @@ export class UI {
             data = ABILITIES[ability];
           return `<button class="ability ${unlocked ? "unlocked" : "locked"} ${(ability === "rewind" && g.rewinding) || (ability === "slow" && g.slowTime > 0) || (ability === "freeze" && g.freezeTime > 0) ? "active" : ""}" data-action="power" data-power="${ability}" title="${unlocked ? data.name + " · " + g.abilityCost(ability) + " sand" : data.name + " · Dagger or power unavailable"}" aria-label="${data.name}${unlocked ? "" : ", locked"}" ${unlocked ? "" : "disabled"}><span class="ability-icon">${unlocked ? icons[ability] : icons.lock}</span><kbd>${data.key}</kbd></button>`;
         },
-      ).join("")}</div></div>`;
-    if (markup === this.lastHudMarkup) return;
+      ).join(
+        "",
+      )}${echoes ? `<button class="ability unlocked" data-action="power" data-power="echo" aria-label="${echoes.phase === "recording" ? "Replay echo" : echoes.phase === "playing" ? "Replace echo" : "Record echo"}" title="C records for 1 sand; C again replays; X cancels"><span class="ability-icon">${echoes.phase === "recording" ? "REC" : echoes.phase === "playing" ? "NEW" : "ECHO"}</span><kbd>C</kbd></button>${echoes.phase !== "idle" ? `<button class="ability unlocked" data-action="power" data-power="cancelEcho" aria-label="Cancel echo"><span class="ability-icon">×</span><kbd>X</kbd></button>` : ""}` : ""}</div></div>`;
+    const updateEchoClock = () => {
+      const clock = this.hud.querySelector(".echo-status");
+      if (clock && echoes && echoes.phase !== "idle")
+        clock.textContent = echoes.status;
+    };
+    if (markup === this.lastHudMarkup) {
+      updateEchoClock();
+      return;
+    }
     this.lastHudMarkup = markup;
     this.hud.innerHTML = markup;
+    updateEchoClock();
     this.hud
       .querySelector('[data-action="interact"]')
-      ?.addEventListener("click", () => this.game.interaction?.action());
+      ?.addEventListener("click", () => {
+        this.game.input.release("interact");
+        this.game.input.press("interact");
+        this.game.input.release("interact");
+      });
   }
 }

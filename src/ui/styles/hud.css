@@ -259,3 +259,18 @@
 .boss-health + .room-hint {
   top: 132px;
 }
+
+.power-active.echo-status {
+  top: 185px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  width: max-content;
+  max-width: 90%;
+  text-align: center;
+}
+@media (max-height: 600px) {
+  .power-active.echo-status {
+    top: 115px;
+    font-size: 10px;
+  }
+}
