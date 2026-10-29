@@ -1,3 +1,4 @@
+import { drawDepths, drawDepthsScenery } from "./depths";
 import { drawConsequences } from "./consequences";
 import { drawMastery } from "./mastery";
 import { drawRivalRooms } from "./rival";
@@ -137,6 +138,7 @@ export function drawCampaignObjects(c: Context, game: Game) {
   drawHistory(c, game);
   drawEnemyTraversal(c, game);
   drawConsequences(c, game);
+  drawDepths(c, game);
   const g = game,
     p = g.puzzles.definition,
     s = g.puzzles.state;
@@ -434,6 +436,7 @@ export function drawCampaignObjects(c: Context, game: Game) {
 
 export function drawCampaignScenery(c: Context, game: Game) {
   if (!(game instanceof CampaignGame)) return;
+  drawDepthsScenery(c, game);
   const id = game.room.id,
     w = game.room.width;
   c.save();

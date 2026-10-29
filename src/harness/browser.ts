@@ -42,6 +42,7 @@ export class BrowserHarness {
                 : params.get("rival") === "defeated"
                   ? "defeated"
                   : false,
+            exploreDepths: params.get("depths") === "1",
             exploreConsequences: params.get("consequences") === "1",
             exploreMastery: params.get("mastery") === "1",
             exploreEnemyTraversal: params.get("creatures") === "1",

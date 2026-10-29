@@ -10,6 +10,11 @@ export interface EchoChamber {
 }
 export const CORE_ECHO_IDS = ["echo-step", "echo-bell", "echo-span"];
 export const ECHO_CHAMBERS: Record<string, EchoChamber> = {
+  "depths-lock": {
+    plate: { x: 350, y: 650 },
+    gate: { x: 940, y: 0, w: 30, h: 650 },
+    latch: { x: 1090, y: 420 },
+  },
   "mirror-vault": {
     plate: { x: 350, y: 650 },
     bell: { x: 760, y: 650 },

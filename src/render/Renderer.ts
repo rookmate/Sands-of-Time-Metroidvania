@@ -1,3 +1,4 @@
+import { drawDepthsBackdrop } from "./depths";
 import type { Game } from "../game/Game";
 import { hasRequirement, ABILITIES } from "../game/progression";
 import {
@@ -113,6 +114,7 @@ export class Renderer {
     c.globalAlpha = 0.88;
     c.drawImage(this.backdrops.get(room.id)!, 0, 0);
     c.globalAlpha = 1;
+    drawDepthsBackdrop(c, g);
     this.water(c);
     // Dim background palms and raised garden trees.
     if (room.theme === "garden" || room.theme === "palace") {
