@@ -1,3 +1,4 @@
+import { campaignMusic } from "./music";
 import { MAP_MARKERS, type MapMarker } from "./cartography";
 import { Opening, SUN_VAULT } from "./opening";
 import {
@@ -88,6 +89,9 @@ export class CampaignGame extends Game {
     this.farah = new Farah(this);
     this.visited = new Set([CAMPAIGN_START.room]);
     this.checkpoint = { ...CAMPAIGN_START };
+  }
+  override get musicScene() {
+    return campaignMusic(this);
   }
   get section() {
     return CAMPAIGN_ROOMS[this.room.id].content;
@@ -205,6 +209,7 @@ export class CampaignGame extends Game {
   }
   override setOption(key: keyof Options, value: boolean) {
     this.options[key] = value;
+    this.syncAudio();
     if (this.persistent) writeOptions(this.options);
   }
   override save(showMessage = true) {

@@ -576,3 +576,48 @@ keeps both characters safe; the old distance-only companion damage check no
 longer applies to these boss attacks. Each release is consumed once, so rewind
 cannot repeat it. The regression fails on the prior companion check, and normal
 keyboard D/Q play reproduces the safe flank in the renderer.
+
+### Regional score and audio lifecycle
+
+The original synthesized score, "The sands remember", shares a falling A–F–E–D
+answer across the palace, gardens, Baths, prison machinery, Observatory, reservoir
+depths and echo chambers. The service crown recalls the palace phrase; the
+Daggerless climb leaves longer rests, and the restored ending resolves the
+phrase differently. The local mirror wing keeps its tempo and tune across eras,
+with a lower, incomplete answer in ruin. These are authored note arrangements,
+with no recorded tracks, external audio downloads or paid audio services.
+
+`src/campaign/music.ts` reads existing room, era and encounter state. It does not
+write campaign state or add save fields. Ordinary nearby danger lowers the tune
+and adds a pulse; King, Sahir, keeper and Vizier use different pulse signatures.
+Leaving range holds danger for 2.5 simulation seconds to prevent flicker. Music
+keeps its audio-clock tempo during Slow, Freeze, rewind and harness acceleration.
+Neighbouring rooms with the same arrangement keep the phrase. A regional/era
+change releases old notes before starting the new phrase. Exploration includes
+empty beats and bars; story panels stop the bed, and power/save chimes briefly
+duck it even when effects are disabled.
+
+Music and action effects retain their separate saved boolean switches and the
+header's combined mute. There is no recorded voice channel. Audio is created or
+resumed only on a keyboard/pointer gesture; unavailable audio leaves play usable.
+Pause, map, help, options, title, portrait blocking and hidden tabs fade and
+release both buses. Stories/death allow their short effects while music stays
+quiet. Retry/Resume restart one phrase with fresh encounter selection; ending
+plays a calm reprise. Hidden-tab silencing runs from the visibility event even
+when animation frames stop. Muting releases existing tails as well as preventing
+new notes.
+
+One context, three gains and a compressor serve the game. Notes have attack and
+release envelopes, use a short audio-clock scheduling window, disconnect on end,
+and have a hard 40-voice ceiling shared by music and effects. A stalled frame
+skips missed beats instead of firing a backlog. No timers or looping source
+nodes accumulate across rooms, eras or retries.
+
+Verification includes focused score/lifecycle tests and the existing mortal
+campaign/replay/save regressions. Local evidence in ignored `artifacts/music`
+contains rendered routes, recorded browser-output audio and lifecycle reports.
+Captured output and signal inspection prove that samples exist, transitions run
+and muted intervals are silent. They do not establish subjective listening
+quality, physical speaker/headphone loudness or a blind player's response. This
+agent environment rejected audio input as unsupported, so no listening approval
+is claimed. Gameplay duration remains unmeasured.

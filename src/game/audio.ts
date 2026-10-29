@@ -1,18 +1,69 @@
-import type { Options } from "./types";
+import type { Options, Screen } from "./types";
+import { eighth, scoreStep, type MusicScene } from "./score";
+
+interface Voice {
+  oscillator: OscillatorNode;
+  envelope: GainNode;
+  bus: "music" | "sfx";
+  end: number;
+}
 export class Sound {
   private context: AudioContext | null = null;
   private master: GainNode | null = null;
-  private musicClock = 0;
-  private noteIndex = 0;
+  private music: GainNode | null = null;
+  private effects: GainNode | null = null;
+  private voices = new Set<Voice>();
+  private scene: MusicScene = { theme: "palace", danger: "calm" };
+  private screen: Screen = "title";
+  private blocked = false;
+  private nextNote = 0;
+  private step = 0;
+  private dangerClock = 0;
+  private quietUntil = 0;
+  private playing = false;
+  private effectsOn = false;
   constructor(public options: Options) {}
+  // Called only from a user gesture. Unsupported/denied audio leaves play usable.
   start() {
-    this.context ??= new AudioContext();
-    if (!this.master) {
-      this.master = this.context.createGain();
-      this.master.gain.value = 0.19;
-      this.master.connect(this.context.destination);
+    try {
+      if (!this.context) {
+        this.context = new AudioContext();
+        this.master = this.context.createGain();
+        this.master.gain.value = 0.19;
+        const limiter = this.context.createDynamicsCompressor();
+        limiter.threshold.value = -12;
+        limiter.knee.value = 8;
+        limiter.ratio.value = 12;
+        limiter.attack.value = 0.003;
+        limiter.release.value = 0.18;
+        this.master.connect(limiter);
+        limiter.connect(this.context.destination);
+        this.music = this.context.createGain();
+        this.effects = this.context.createGain();
+        this.music.gain.value = this.effects.gain.value = 0;
+        this.music.connect(this.master);
+        this.effects.connect(this.master);
+      }
+      if (this.context.state === "suspended")
+        void this.context.resume().catch(() => {});
+    } catch {
+      /* No audio device or Web Audio support. */
     }
-    if (this.context.state === "suspended") void this.context.resume();
+  }
+  private fade(node: GainNode, value: number, seconds = 0.12) {
+    const t = this.context!.currentTime;
+    node.gain.cancelAndHoldAtTime(t);
+    node.gain.linearRampToValueAtTime(value, t + seconds);
+  }
+  private release(bus: Voice["bus"]) {
+    const t = this.context!.currentTime;
+    for (const v of this.voices)
+      if (v.bus === bus && v.end > t + 0.04) {
+        v.envelope.gain.cancelAndHoldAtTime(t);
+        v.envelope.gain.linearRampToValueAtTime(0, t + 0.035);
+        v.oscillator.stop(t + 0.04);
+        v.end = t + 0.04;
+      }
   }
   private tone(
     frequency: number,
@@ -20,11 +71,20 @@ export class Sound {
     type: OscillatorType,
     gain = 0.3,
     endFrequency?: number,
+    bus: Voice["bus"] = "sfx",
+    at?: number,
   ) {
-    if (!this.context || !this.master) return;
-    const t = this.context.currentTime;
-    const oscillator = this.context.createOscillator();
-    const envelope = this.context.createGain();
+    const ctx = this.context;
+    if (
+      !ctx ||
+      ctx.state !== "running" ||
+      !this.master ||
+      this.voices.size >= 40
+    )
+      return;
+    const t = at ?? ctx.currentTime;
+    const oscillator = ctx.createOscillator(),
+      envelope = ctx.createGain();
     oscillator.type = type;
     oscillator.frequency.setValueAtTime(frequency, t);
     if (endFrequency)
@@ -32,13 +92,52 @@ export class Sound {
         endFrequency,
         t + duration,
       );
-    envelope.gain.setValueAtTime(0.001, t);
-    envelope.gain.exponentialRampToValueAtTime(gain, t + 0.018);
-    envelope.gain.exponentialRampToValueAtTime(0.001, t + duration);
+    envelope.gain.setValueAtTime(0, t);
+    envelope.gain.linearRampToValueAtTime(
+      gain,
+      t + Math.min(0.025, duration / 4),
+    );
+    envelope.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    envelope.gain.linearRampToValueAtTime(0, t + duration + 0.01);
     oscillator.connect(envelope);
-    envelope.connect(this.master);
+    envelope.connect(bus === "music" ? this.music! : this.effects!);
+    const voice = { oscillator, envelope, bus, end: t + duration + 0.02 };
+    this.voices.add(voice);
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      envelope.disconnect();
+      this.voices.delete(voice);
+    };
     oscillator.start(t);
-    oscillator.stop(t + duration + 0.01);
+    oscillator.stop(voice.end);
+  }
+  // Sync also runs immediately on screen/settings changes, before another frame.
+  sync(screen: Screen, blocked: boolean) {
+    this.screen = screen;
+    this.blocked = blocked;
+    if (!this.context || !this.music || !this.effects) return;
+    const musicOn =
+      this.options.music &&
+      !blocked &&
+      (screen === "playing" || screen === "ending");
+    const sfxOn =
+      this.options.sfx &&
+      !blocked &&
+      ["playing", "story", "death"].includes(screen);
+    if (musicOn !== this.playing) {
+      this.fade(this.music, musicOn ? 1 : 0);
+      this.release("music");
+      this.nextNote = this.context.currentTime + 0.06;
+      this.step = 0;
+      this.scene = { ...this.scene, danger: "calm" };
+      this.dangerClock = 0;
+      this.playing = musicOn;
+    }
+    if (sfxOn !== this.effectsOn) {
+      this.fade(this.effects, sfxOn ? 1 : 0, 0.04);
+      if (!sfxOn) this.release("sfx");
+      this.effectsOn = sfxOn;
+    }
   }
   play(
     kind:
@@ -52,7 +151,11 @@ export class Sound {
       | "death"
       | "step",
   ) {
-    if (!this.options.sfx) return;
+    if (!this.blocked && (kind === "power" || kind === "save")) {
+      this.quietUntil = (this.context?.currentTime ?? 0) + 2.2;
+      if (this.music) this.fade(this.music, 0.22, 0.08);
+    }
+    if (!this.options.sfx || !this.effectsOn) return;
     switch (kind) {
       case "jump":
         this.tone(180, 0.15, "sine", 0.13, 330);
@@ -88,20 +191,45 @@ export class Sound {
         break;
     }
   }
-  update(dt: number, active: boolean) {
-    if (!active || !this.options.music || !this.context) return;
-    this.musicClock -= dt;
-    if (this.musicClock > 0) return;
-    this.musicClock = 0.55;
-    const scale = [146.83, 164.81, 174.61, 220, 233.08, 293.66, 349.23, 329.63];
-    const pattern = [0, 3, 5, 2, 4, 3, 1, 0, 5, 6, 4, 3, 7, 5, 3, 1];
-    this.tone(
-      scale[pattern[this.noteIndex % pattern.length]],
-      1.5,
-      "sine",
-      0.09,
-    );
-    if (this.noteIndex % 8 === 0) this.tone(73.42, 5, "sine", 0.12);
-    this.noteIndex++;
+  update(dt: number, scene: MusicScene) {
+    this.sync(this.screen, this.blocked);
+    const ctx = this.context;
+    if (!ctx || ctx.state !== "running" || !this.playing) return;
+    // Encounter entry is immediate; leaving danger waits 2.5 seconds to avoid
+    // music flicker while jumping across the edge of an enemy's range.
+    if (scene.danger === "calm" && this.scene.danger !== "calm")
+      this.dangerClock += dt;
+    else this.dangerClock = 0;
+    const danger =
+      scene.danger === "calm" && this.dangerClock < 2.5
+        ? this.scene.danger
+        : scene.danger;
+    const next = { ...scene, danger };
+    if (next.theme !== this.scene.theme || next.era !== this.scene.era) {
+      this.release("music");
+      this.step = 0;
+      this.nextNote = ctx.currentTime + 0.08;
+      this.dangerClock = 0;
+      next.danger = scene.danger;
+    }
+    this.scene = next;
+    // Use the audio clock, never accelerated simulation time. After a stalled
+    // frame, skip the gap instead of emitting a backlog of notes.
+    if (this.nextNote < ctx.currentTime)
+      this.nextNote = ctx.currentTime + 0.025;
+    if (this.nextNote > ctx.currentTime + 0.1) return;
+    this.fade(this.music!, ctx.currentTime < this.quietUntil ? 0.22 : 1, 0.2);
+    for (const note of scoreStep(this.scene, this.step))
+      this.tone(
+        440 * 2 ** ((note.midi - 69) / 12),
+        note.length,
+        note.voice,
+        note.gain,
+        undefined,
+        "music",
+        this.nextNote,
+      );
+    this.nextNote += eighth(this.scene);
+    this.step++;
   }
 }

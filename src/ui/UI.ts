@@ -27,6 +27,9 @@ export class UI {
       <div class="touch-controls" id="touch-controls" hidden><div><button data-hold="left" aria-label="Move left">◁</button><button data-hold="right" aria-label="Move right">▷</button><button data-hold="down" aria-label="Drop or slide mirror">↓</button></div><div><button data-hold="interact" aria-label="Interact">E</button><button data-hold="attack" aria-label="Attack">⚔</button><button data-hold="jump" aria-label="Jump">↑</button></div></div>
       </div></main>
       <footer class="site-footer"><div class="footer-controls"><span>${key("A")}${key("D")} Move</span><span>${key("SPACE")} Jump</span><span>${key("J")} Attack</span><span>${key("E")} Interact</span><span>${key("M")} Map</span></div><span class="footer-message">Every grain holds a second chance.</span><button id="footer-pause" class="text-button">${key("ESC")} Pause</button></footer>`;
+    // Reattempt unlock on genuine interaction, including Resume after device interruption.
+    root.addEventListener("pointerdown", () => this.game.sound.start());
+    window.addEventListener("keydown", () => this.game.sound.start());
     this.overlay = root.querySelector("#overlay")!;
     this.hud = root.querySelector("#hud")!;
     root.querySelector(".brand")!.addEventListener("click", (e) => {
