@@ -1,3 +1,4 @@
+import { buildMastery } from "./mastery";
 import { buildRival } from "./rival";
 import { buildEnemyTraversal } from "./enemyTraversal";
 import { buildHistory } from "./history";
@@ -134,3 +135,5 @@ buildHistory(CAMPAIGN_ROOMS);
 buildEnemyTraversal(CAMPAIGN_ROOMS);
 
 buildRival(CAMPAIGN_ROOMS);
+
+buildMastery(CAMPAIGN_ROOMS);

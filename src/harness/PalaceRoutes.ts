@@ -1,3 +1,4 @@
+import { MasteryRoute } from "./MasteryRoute";
 import { RivalRoute } from "./RivalRoute";
 import type { CampaignHarness } from "./CampaignHarness";
 import type { RewardStep } from "./rewardsRoute";
@@ -54,6 +55,7 @@ export class PalaceRoutes {
     const h = this.h;
     yield* this.route([[85], "use", [1715], "use", [85], "use"]);
     if (h.rivalOutcome) yield* new RivalRoute(h).court();
+    if (h.exploreMastery) yield* new MasteryRoute(h).explore();
     if (h.investigateHistory) yield* this.route([[195], "use"]);
     yield* this.route([[500], [1135], "use"]);
     h.require(

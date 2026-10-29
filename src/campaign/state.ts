@@ -1,3 +1,4 @@
+import { MASTERY_IDS } from "./mastery";
 import { freshRival } from "./rival";
 import { HISTORY_IDS } from "./history";
 import { ECHO_CHAMBERS } from "./echoRooms";
@@ -10,7 +11,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 10,
+  version: 11,
+  mastery: { solved: [] },
   rival: freshRival(),
   traversal: { broken: false, latched: false },
   history: { read: [], opened: false },
@@ -121,11 +123,20 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 10;
       data.journey.rival = freshRival();
     }
+    if (data?.journey?.version === 10) {
+      data.journey.version = 11;
+      data.journey.mastery = { solved: [] };
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 10 ||
+      state.version !== 11 ||
+      !state.mastery ||
+      !Array.isArray(state.mastery.solved) ||
+      state.mastery.solved.length > 3 ||
+      !state.mastery.solved.every((id, i) => id === MASTERY_IDS[i]) ||
+      (state.mastery.solved.length > 0 && state.completed.length < 17) ||
       !state.rival ||
       ![0, 1, 2].includes(state.rival.bouts) ||
       typeof state.rival.named !== "boolean" ||

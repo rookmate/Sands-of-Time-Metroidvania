@@ -59,6 +59,8 @@ export interface Section {
 export interface CampaignDoor extends Door {
   milestone?: string;
   gate?:
+    | "mastery-wall"
+    | "mastery-rope"
     | "ram-wall"
     | "history-sill"
     | "wing-wall"
@@ -110,7 +112,8 @@ export interface PalaceState {
   prisonOpen: boolean;
 }
 export interface CampaignState {
-  version: 10;
+  version: 11;
+  mastery: { solved: string[] };
   rival: import("./rival").RivalState;
   traversal: { broken: boolean; latched: boolean };
   history: { read: import("./history").HistoryEvidence[]; opened: boolean };
