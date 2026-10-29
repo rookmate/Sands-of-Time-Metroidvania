@@ -346,3 +346,22 @@ it("keeps remembered galleries traversable both ways until the Hourglass descent
   expect(g.journey.wing.era).toBe("ruined");
   expect(g.companion).not.toBeNull();
 });
+
+it("clears rewind ghosts when returning the Dagger after the Vizier", () => {
+  const h = reach(
+    new CampaignHarness({ immortal: false }),
+    (g) => g.room.id === "honor" && g.puzzles.state.solved,
+  );
+  const g = h.game;
+  run(h.rewardRoute([[235], "use", [650]]));
+  g.input.clear();
+  g.input.press("rewind");
+  for (let i = 0; i < 12; i++) run(h.tick());
+  g.input.clear();
+  expect(g.ghosts.length).toBeGreaterThan(0);
+  run(h.use());
+  expect(g.screen).toBe("ending");
+  expect(g.ghosts).toEqual([]);
+  for (let i = 0; i < 120; i++) g.update(1 / 120);
+  expect(g.ghosts).toEqual([]);
+});

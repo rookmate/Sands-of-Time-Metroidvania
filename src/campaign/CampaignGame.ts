@@ -398,6 +398,7 @@ export class CampaignGame extends Game {
     }
     if (section.id === "honor") {
       this.flags.add("victory");
+      this.ghosts = [];
       this.echoes.clear();
       this.slowTime = 0;
       this.freezeTime = 0;

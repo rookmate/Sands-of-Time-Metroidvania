@@ -412,7 +412,7 @@ history reversal.
 input replay, skipped and completed optional paths, both permanent latches
 through death/Retry/reload, a wrong receiver, depleted-sand misses, chain recovery,
 reciprocal backtracking, local era/echo boundaries, legacy checkpoints before and
-after the climax, ending Continue and new journey. The full suite passes 205
+after the climax, ending Continue and new journey. The full suite passes 206
 tests with one existing conditional replay skip; build and formatting also pass.
 Rendered Chromium routes cover both campaigns, earlier callbacks and all three
 galleries with no browser errors. A 932 × 430 ordinary page exercises keyboard
