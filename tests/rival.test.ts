@@ -226,7 +226,7 @@ it("migrates v9 checkpoints without disturbing predecessor progress and rejects 
   const migrated = parseCampaign(JSON.stringify(old));
   expect(migrated?.journey).toEqual({
     ...old.journey,
-    version: 11,
+    version: 12,
     rival: freshRival(),
   });
   expect(migrated?.collected).toEqual(old.collected);

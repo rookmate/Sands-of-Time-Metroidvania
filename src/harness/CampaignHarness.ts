@@ -30,6 +30,7 @@ export class CampaignHarness {
   readonly investigateHistory: boolean;
   readonly exploreEnemyTraversal: boolean;
   readonly exploreMastery: boolean;
+  readonly exploreConsequences: boolean;
   readonly rivalOutcome: RivalOutcome | false;
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
@@ -75,10 +76,12 @@ export class CampaignHarness {
       investigateHistory?: boolean;
       exploreEnemyTraversal?: boolean;
       exploreMastery?: boolean;
+      exploreConsequences?: boolean;
       rivalOutcome?: RivalOutcome | false;
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.exploreConsequences = options.exploreConsequences ?? false;
     this.exploreMastery = options.exploreMastery ?? false;
     this.rivalOutcome = options.rivalOutcome ?? false;
     this.exploreEnemyTraversal = options.exploreEnemyTraversal ?? false;

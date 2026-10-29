@@ -186,7 +186,7 @@ it("migrates v10 saves without altering earlier state and validates ordered seal
   const migrated = parseCampaign(JSON.stringify(old))!;
   expect(migrated.journey).toEqual({
     ...old.journey,
-    version: 11,
+    version: 12,
     mastery: { solved: [] },
   });
   expect(migrated.checkpoint).toEqual(old.checkpoint);
