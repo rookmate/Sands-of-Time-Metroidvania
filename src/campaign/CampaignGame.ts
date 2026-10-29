@@ -1,3 +1,9 @@
+import {
+  FINALE_IDS,
+  finaleBlock,
+  finaleControls,
+  finalePlatforms,
+} from "./finale";
 import { Depths, depthsBlock } from "./depths";
 import { DEPTHS_IDS } from "./depthsRooms";
 import {
@@ -114,7 +120,7 @@ export class CampaignGame extends Game {
     };
   }
   override get quest() {
-    if ([...MASTERY_IDS, ...DEPTHS_IDS].includes(this.room.id))
+    if ([...FINALE_IDS, ...MASTERY_IDS, ...DEPTHS_IDS].includes(this.room.id))
       return {
         title: this.room.name,
         text: this.section.objective,
@@ -209,7 +215,7 @@ export class CampaignGame extends Game {
   }
   override respawn() {
     this.mastery.leave();
-    if (!this.journey.completed.includes(this.room.id))
+    if (this.section.puzzle && !this.journey.completed.includes(this.room.id))
       this.journey.puzzles[this.room.id] = freshPuzzle(this.section.puzzle);
     this.activeRoom = "";
     super.respawn();
@@ -222,11 +228,14 @@ export class CampaignGame extends Game {
     super.enterRoom(...args);
   }
   protected override roomPlatforms(time: number) {
-    const base = traversalPlatforms(
+    const base = finalePlatforms(
       this,
-      consequencePlatforms(
+      traversalPlatforms(
         this,
-        wingPlatforms(this, super.roomPlatforms(time)),
+        consequencePlatforms(
+          this,
+          wingPlatforms(this, super.roomPlatforms(time)),
+        ),
       ),
     );
     return this.puzzles
@@ -389,6 +398,14 @@ export class CampaignGame extends Game {
     }
     if (section.id === "honor") {
       this.flags.add("victory");
+      this.ghosts = [];
+      this.echoes.clear();
+      this.slowTime = 0;
+      this.freezeTime = 0;
+      this.player.dashTime = 0;
+      this.rewinding = false;
+      this.projectiles = [];
+      this.history = [];
       this.journey.dagger = false;
       this.player.sand = 0;
       this.save(false);
@@ -398,13 +415,17 @@ export class CampaignGame extends Game {
     this.showStory(
       section.title,
       section.story,
-      section.reward
-        ? `${ABILITIES[section.reward].name} awakens. ${SECTIONS[index + 1].objective}`
-        : SECTIONS[index + 1].objective,
+      section.id === "tower-lift"
+        ? "The inner stair has fallen. Follow the service crown above the Baths, Hall of Learning and prison to the Hourglass. Farah stays with you."
+        : section.reward
+          ? `${ABILITIES[section.reward].name} awakens. ${SECTIONS[index + 1].objective}`
+          : SECTIONS[index + 1].objective,
     );
     return true;
   }
   doorBlock(door: CampaignDoor): string | null {
+    const finale = finaleBlock(this, door);
+    if (finale) return finale;
     if (
       door.gate &&
       MASTERY_IDS.includes(door.gate) &&
@@ -463,6 +484,8 @@ export class CampaignGame extends Game {
   }
   override get interaction(): { label: string; action: () => void } | null {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
+    const final = finaleControls(this).find((c) => distance(feet, c) < 45);
+    if (final) return final;
     const depth = this.depths.controls().find((c) => distance(feet, c) < 45);
     if (depth) return depth;
     const consequence = consequenceControls(this).find(

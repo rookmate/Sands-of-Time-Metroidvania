@@ -365,3 +365,63 @@ keeper distinguish the region. Recorded routes and screenshots live in ignored
 `artifacts/depths` in the owning worktree. Automated routes establish reachability
 and persistence; blind human discoverability, difficulty and pacing remain
 unmeasured. No playthrough-hours claim is made.
+
+## Finale: the remembered service crown
+
+After the Tower elevator, its broken inner stair sends the Prince and Farah
+through three physical upper galleries of places they know. These are part of
+Azad before the Hourglass descent, not memories or a second timeline.
+
+- The **Baths rotunda crown** overlooks the drained basin and copper supply
+  pipe. Climb the dry overflow shelves, jump then Dash to the wheel, and open
+  the Hall grille. A lower floor catches misses; the entry fountain restores
+  empty sand. Repairing the refuge drive earlier gives a lift directly to the
+  wheel landing. Nima's lit niche acknowledges her rescue and marks the dry
+  route. The old keeper's inscription provides the same route if she was missed.
+- The **Hall clerestory** revisits light and water routing. The west mirror
+  alternates between the lower drain and high receiver, with a visible beam.
+  Aim high, climb the shelves, and pin the east receiver to lift the roof
+  shutter. The dedication recognizes the buried witnesses if their names were
+  discovered, but its diagram is readable without that discovery.
+- The **warden's high chain** uses the prison winch over the cells. Climb the
+  counterweight shelves, catch the bar while descending, then jump east.
+  Missing returns to the lower floor. Releasing Sahir earlier leaves a level
+  crossing here; defeating him leaves a distinct crest acknowledgment. Skipping
+  the rival leaves the ordinary bar route intact.
+
+All galleries have entry fountains and reciprocal returns. Only the existing
+Hourglass descent seals the old palace. Dagger loss, the Tomb sword, Farah's
+fall and Dagger recovery, the Grand Rewind, restored Farah, the Vizier and final
+Dagger return retain their original forty-anchor order. The ending returns to
+title or begins a new journey; Continue on a completed save returns to the
+ending. Returning the Dagger clears remaining power effects and movement history.
+
+`world.ts` builds the sole graph through `buildFinale`; `finale.ts` owns its
+rooms, controls and gates. Existing per-room `PuzzleState` stores the overflow
+latch in `activated`, and the Hall mirror in `values[0]` plus its receiver latch
+in `activated`. Permanent actions save without moving the fountain checkpoint.
+Retry resets narrative puzzle attempts, preserving these permanent gallery
+mechanisms. No save version change is needed: journey v13 and all earlier
+migrations retain their slot, rewards and chronology. Old checkpoints at the
+Hourglass or later do not need to return through the new rooms. The local
+mirror-wing era stays saved and confined to that wing; tapes and power effects
+clear on room entry. The finale adds no rewards, ability grants or global
+history reversal.
+
+`tests/finale.test.ts` covers two full mortal campaigns and independent exact
+input replay, skipped and completed optional paths, both permanent latches
+through death/Retry/reload, a wrong receiver, depleted-sand misses, chain recovery,
+reciprocal backtracking, local era/echo boundaries, legacy checkpoints before and
+after the climax, ending Continue and new journey. The full suite passes 206
+tests with one existing conditional replay skip; build and formatting also pass.
+Rendered Chromium routes cover both campaigns, earlier callbacks and all three
+galleries with no browser errors. A 932 × 430 ordinary page exercises keyboard
+lift/wheel, the actual Retry button, reload/Continue and ending/title/new journey.
+That direct Retry check caught and fixed a latch reset which a combined
+Retry-then-reload test had hidden. Local ignored `artifacts/finale/` retains
+reports, compressed inputs, videos, screenshots and review evidence.
+
+This completes the nine additional expansion stages after the four regional
+foundations. Blind human discoverability, difficulty and first-playthrough
+pacing remain unmeasured. Room counts and automated route times do not establish
+a four-to-six-hour playthrough.
