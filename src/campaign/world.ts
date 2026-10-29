@@ -2,6 +2,7 @@ import type { EnemySpawn, Pickup } from "../game/types";
 import { geometry } from "./layouts";
 import type { CampaignRoom } from "./types";
 import { buildRewardRooms } from "./rewards";
+import { buildCooperation } from "./cooperation";
 import { buildBaths } from "./baths";
 import { SECTIONS } from "./sections";
 
@@ -113,3 +114,5 @@ export const CAMPAIGN_ROOMS: Record<string, CampaignRoom> = Object.fromEntries(
 buildBaths(CAMPAIGN_ROOMS);
 
 buildRewardRooms(CAMPAIGN_ROOMS);
+
+buildCooperation(CAMPAIGN_ROOMS);

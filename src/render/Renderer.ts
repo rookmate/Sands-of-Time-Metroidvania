@@ -31,11 +31,14 @@ export class Renderer {
   private skylines = new Map<string, HTMLCanvasElement>();
   constructor(
     public canvas: HTMLCanvasElement,
-    private game: Game,
+    private readonly currentGame: () => Game,
   ) {
     this.context = canvas.getContext("2d", { alpha: false })!;
     this.resize();
     window.addEventListener("resize", () => this.resize());
+  }
+  private get game() {
+    return this.currentGame();
   }
   private resize() {
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
