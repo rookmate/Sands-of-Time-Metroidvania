@@ -21,6 +21,7 @@ export class CampaignHarness {
   readonly cooperate: boolean;
   readonly regionOrder: "gardens-first" | "sky-first";
   readonly exploreEchoes: boolean;
+  readonly exploreEraWing: boolean;
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
   frames = 0;
@@ -61,9 +62,11 @@ export class CampaignHarness {
       cooperate?: boolean;
       regionOrder?: "gardens-first" | "sky-first";
       exploreEchoes?: boolean;
+      exploreEraWing?: boolean;
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.exploreEraWing = options.exploreEraWing ?? false;
     this.exploreEchoes = options.exploreEchoes ?? false;
     this.regionOrder = options.regionOrder ?? "gardens-first";
     this.cooperate = options.cooperate ?? true;

@@ -125,7 +125,7 @@ it("migrates v4 saves on both sides of the new gates and preserves rewards, pick
     delete old.journey.palace;
     const migrated = parseCampaign(JSON.stringify(old))!;
     expect(migrated).not.toBeNull();
-    expect(migrated.journey.version).toBe(6);
+    expect(migrated.journey.version).toBe(7);
     expect(migrated.journey.palace).toEqual({
       irrigated: room !== "learning",
       sky: room !== "learning",

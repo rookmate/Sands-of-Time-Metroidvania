@@ -1,3 +1,4 @@
+import { EraWingRoute } from "./EraWingRoute";
 import { EchoRoute } from "./EchoRoute";
 import type { CampaignHarness } from "./CampaignHarness";
 import {
@@ -119,6 +120,7 @@ export class BathsRoutes {
     if (this.h.optionalRewards)
       yield* this.h.rewardRoute(galleryRoute(this.h.optionalRewards));
     if (this.h.exploreEchoes) yield* new EchoRoute(this.h).play();
+    if (this.h.exploreEraWing) yield* new EraWingRoute(this.h).play();
     yield* this.h.walk(1015);
     yield* this.h.use();
     yield* this.h.walk(1145);

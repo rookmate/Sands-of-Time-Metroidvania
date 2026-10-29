@@ -59,6 +59,8 @@ export interface Section {
 export interface CampaignDoor extends Door {
   milestone?: string;
   gate?:
+    | "wing-wall"
+    | "wing-arch"
     | "echo-step"
     | "echo-bell"
     | "echo-span"
@@ -106,7 +108,8 @@ export interface PalaceState {
   prisonOpen: boolean;
 }
 export interface CampaignState {
-  version: 6;
+  version: 7;
+  wing: { era: import("./eraWing").WingEra; discovered: boolean };
   echoes: { solved: string[] };
   palace: PalaceState;
   cooperation: CooperationState;

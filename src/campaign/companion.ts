@@ -31,6 +31,17 @@ export class Farah {
         : null;
     if (cooperationActive(g)) this.step(0);
   }
+  atMirror(point: Vec) {
+    this.trail = [];
+    if (this.actor)
+      Object.assign(this.actor, {
+        x: point.x - 55,
+        y: point.y - this.actor.h,
+        vx: 0,
+        vy: 0,
+        holding: null,
+      });
+  }
   step(dt: number) {
     const f = this.actor,
       g = this.game;

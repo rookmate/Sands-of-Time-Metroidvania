@@ -1,3 +1,4 @@
+import { buildEraWing } from "./eraWing";
 import { buildEchoRooms } from "./echoRooms";
 import { buildPalace } from "./palace";
 import type { EnemySpawn, Pickup } from "../game/types";
@@ -122,3 +123,5 @@ buildCooperation(CAMPAIGN_ROOMS);
 buildPalace(CAMPAIGN_ROOMS);
 
 buildEchoRooms(CAMPAIGN_ROOMS);
+
+buildEraWing(CAMPAIGN_ROOMS);
