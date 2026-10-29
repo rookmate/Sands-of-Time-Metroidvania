@@ -76,6 +76,9 @@ export class Input {
   endStep() {
     this.pressed.clear();
   }
+  snapshotPressed() {
+    return [...this.pressed];
+  }
   snapshotHeld() {
     return [...this.held];
   }

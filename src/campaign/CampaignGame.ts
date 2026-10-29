@@ -24,7 +24,7 @@ export class CampaignGame extends Game {
   private readonly persistent: boolean;
   private campaignSave: CampaignSave | null = null;
   private activeRoom = "";
-  constructor(config: GameConfig = {}) {
+  constructor(config: GameConfig & { save?: CampaignSave } = {}) {
     super({
       ...config,
       persist: false,
@@ -37,6 +37,10 @@ export class CampaignGame extends Game {
       this.options = loadOptions();
       this.sound.options = this.options;
       this.campaignSave = loadCampaign();
+      this.saved = this.campaignSave;
+    }
+    if (config.save) {
+      this.campaignSave = structuredClone(config.save);
       this.saved = this.campaignSave;
     }
     this.puzzles = new Puzzles(this);

@@ -191,8 +191,9 @@ export class Puzzles {
                 : 1200,
             w: 180,
             h: 24,
+            // Columns extend/retract instantly; they are not rideable motion.
+            // Treating retraction as a platform delta carries riders below the floor.
             oneWay: true,
-            kind: "moving",
           })),
         ];
       case "battle":

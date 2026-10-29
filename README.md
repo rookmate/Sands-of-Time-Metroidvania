@@ -20,6 +20,7 @@ Open the local URL printed by Vite, normally **http://localhost:5173**. Click **
 ```sh
 npm test          # Physics, traversal, progression, combat, and save checks
 npm run test:harness # Complete campaign and standalone boss runs, without a browser
+npm run test:resilience # Bounded seeded interruptions with replay checks
 npm run harness   # Open the rendered, immortal campaign harness
 npm run build     # Type checking and production build
 npm run preview   # Serve the production build locally
@@ -44,6 +45,19 @@ The toolbar offers pause, single-step, restart, 1×/4×/16× playback, JSON repo
 Immortality prevents combat and hazard damage and knockback. Falling out of a room still fails a run. A failure reports the current action, area, coordinates, and frame. The full report records forty ordered milestones, puzzle completion, enemy defeats, powers used, and the Dagger, Farah, and timeline state at every chapter boundary.
 
 `npm run test:harness` runs the same driver without rendering, including immortal and normal-damage campaigns, standalone encounters, checkpoint reload validation, and the earlier palace route. The browser exposes `window.__sandsHarness.report()`, `.pause()`, `.resume()`, and `.step(120)`. Explicit stepping works while paused. Both browser harnesses are excluded from production builds.
+
+### Campaign resilience
+
+`npm run test:resilience` runs seeds 7, 42, and 2026 with normal damage and assist off. Each run has a 240,000-frame budget. The driver varies attack cadence, jump release and dash timing, revisits all 38 available return passages before the Grand Rewind, lets timed gates and prison columns expire, and interrupts mechanisms and later combat waves with lethal damage and Retry or checkpoint reload. It saves partial crank, crate, and mirror progress at fountains, and reloads while hanging from grips and riding the water lift. Reloads round-trip the campaign save parser and continue in a fresh game. These runs never read or write the player's local storage.
+
+Every run records held keys and new presses at 120 Hz, plus explicit death/Retry and reload events. The suite replays that sequence without the route planner and checks the resulting player, story, enemies, platforms, and checkpoint. A failure writes its input sequence, seed, error, and final state to the ignored `artifacts/resilience/seed-<seed>.json` file. Replay compares against that captured state; it does not claim the failed route completed. After a fix, rerun the seed to prove it reaches the ending.
+
+```sh
+SANDS_SEED=42 npm run test:resilience
+SANDS_REPLAY=artifacts/resilience/seed-42.json npm run test:resilience
+```
+
+The campaign harness's failure report also includes its compressed input events in `replay`. Lethal interruptions are test faults through the normal damage and Retry path; traversal and puzzle solutions still use player inputs. The suite samples bounded variations, rather than proving every possible input sequence safe.
 
 ## Controls
 
