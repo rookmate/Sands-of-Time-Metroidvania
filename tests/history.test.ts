@@ -106,7 +106,8 @@ it("lets an observant player open the sill at milestone 17 without collecting cl
   expect(g.story?.title).toBe("The facing lowers");
   expect(g.journey.history).toEqual({ opened: true, read: [] });
   expect(g.doorBlock(door)).toBeNull();
-  expect(campaignMap(g)).toContain("Witnesses' room");
+  expect(campaignMap(g)).toContain('data-map-room="witness-room"');
+  expect(campaignMap(g)).not.toContain("Witnesses' room");
   g.closeStory();
   input(g, "interact");
   expect(g.room.id).toBe(HISTORY_ROOM);
@@ -192,7 +193,7 @@ it("migrates v7 checkpoints with predecessor discoveries intact and rejects malf
   old.journey.version = 7;
   delete old.journey.history;
   const migrated = parseCampaign(JSON.stringify(old))!;
-  expect(migrated.journey.version).toBe(13);
+  expect(migrated.journey.version).toBe(14);
   expect(migrated.journey.history).toEqual({ opened: false, read: [] });
   expect(migrated.journey.wing).toEqual(old.journey.wing);
   expect(migrated.journey.echoes).toEqual(old.journey.echoes);

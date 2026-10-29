@@ -52,7 +52,7 @@ it.each(["gardens-first", "sky-first"] as const)(
       "Archive stair",
     ])
       expect(map).toContain(name);
-    expect(map).toContain("Point of no return");
+    expect(map).toContain('data-selected-room="orrery"');
     const report = h.step(240000);
     expect(report.status, report.error ?? "").toBe("passed");
     expect(report.rooms).toEqual(expect.arrayContaining(PALACE_IDS));
@@ -125,7 +125,7 @@ it("migrates v4 saves on both sides of the new gates and preserves rewards, pick
     delete old.journey.palace;
     const migrated = parseCampaign(JSON.stringify(old))!;
     expect(migrated).not.toBeNull();
-    expect(migrated.journey.version).toBe(13);
+    expect(migrated.journey.version).toBe(14);
     expect(migrated.journey.palace).toEqual({
       irrigated: room !== "learning",
       sky: room !== "learning",

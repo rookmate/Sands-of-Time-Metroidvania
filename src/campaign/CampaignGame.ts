@@ -1,3 +1,4 @@
+import { MAP_MARKERS, type MapMarker } from "./cartography";
 import { Opening, SUN_VAULT } from "./opening";
 import {
   FINALE_IDS,
@@ -368,19 +369,9 @@ export class CampaignGame extends Game {
       this.notify("An earlier part of the story is unfinished.");
       return false;
     }
-    if (this.room.id === "bathworks" && !this.journey.baths.drained) {
-      this.notify(this.section.objective);
-      return false;
-    }
-    if (!this.puzzles.state.solved) {
-      this.notify(this.section.objective);
-      return false;
-    }
-    if (
-      this.section.item &&
-      !this.collected.has(`${this.room.id}-${this.section.item}`)
-    ) {
-      this.notify("Recover the item before leaving this area.");
+    const blocked = this.sectionBlock(this.room.id);
+    if (blocked) {
+      this.notify(blocked);
       return false;
     }
     const section = this.section;
@@ -432,7 +423,37 @@ export class CampaignGame extends Game {
     );
     return true;
   }
-  doorBlock(door: CampaignDoor): string | null {
+  setMapMarker(room: string, marker: MapMarker | null) {
+    if (
+      !this.visited.has(room) ||
+      (marker !== null && !Object.hasOwn(MAP_MARKERS, marker))
+    )
+      return;
+    if (marker === null) delete this.journey.mapMarkers[room];
+    else this.journey.mapMarkers[room] = marker;
+    // Uses the existing fountain checkpoint; charting never moves or heals you.
+    this.save(false);
+  }
+  private sectionBlock(source: string): string | null {
+    const room = CAMPAIGN_ROOMS[source];
+    if (this.journey.completed.includes(source)) return null;
+    if (SECTIONS[this.journey.completed.length]?.id !== source)
+      return "An earlier part of the story is unfinished.";
+    if (
+      (source === "bathworks" && !this.journey.baths.drained) ||
+      !(this.journey.puzzles[source]?.solved ?? !room.content.puzzle)
+    )
+      return room.content.objective;
+    if (
+      room.content.item &&
+      !this.collected.has(`${source}-${room.content.item}`)
+    )
+      return "Recover the item before leaving this area.";
+    return null;
+  }
+  doorBlock(door: CampaignDoor, source = this.room.id): string | null {
+    if (source === "honor" && this.journey.grandRewind)
+      return "Restored timeline · no return to the ruined palace";
     if (door.gate === "sun-seal" && !this.hasDagger)
       return "Dagger-shaped seal · return with the treasury Dagger";
     const finale = finaleBlock(this, door);
@@ -459,7 +480,7 @@ export class CampaignGame extends Game {
     if (consequence) return consequence;
     const wing = wingDoorBlock(this, door);
     if (wing) return wing;
-    const palace = palaceBlock(this, door);
+    const palace = palaceBlock(this, door, source);
     if (palace) return palace;
     if (door.milestone === "upper-baths" && cooperationActive(this))
       return "Reunite with Farah in the valve loft before leaving the Baths";
@@ -488,7 +509,7 @@ export class CampaignGame extends Game {
       return "Requires the stronger sword and Time Dash from the upper pools";
     if (door.gate === "shortcut" && !this.journey.baths.shortcut)
       return "Barred from the maintenance side";
-    return null;
+    return door.milestone ? this.sectionBlock(source) : null;
   }
   get regionalControl() {
     return bathsControl(this);

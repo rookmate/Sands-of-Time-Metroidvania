@@ -1,3 +1,4 @@
+import { MAP_MARKERS } from "./cartography";
 import { freshDepths } from "./depths";
 import { MASTERY_IDS } from "./mastery";
 import { freshRival } from "./rival";
@@ -12,7 +13,8 @@ import type { Ability } from "../game/types";
 import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 13,
+  version: 14,
+  mapMarkers: {},
   depths: freshDepths(),
   consequences: { nimaRescued: false, liftRepaired: false },
   mastery: { solved: [] },
@@ -138,11 +140,24 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 13;
       data.journey.depths = freshDepths();
     }
+    if (data?.journey?.version === 13) {
+      data.journey.version = 14;
+      data.journey.mapMarkers = {};
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 13 ||
+      state.version !== 14 ||
+      !state.mapMarkers ||
+      typeof state.mapMarkers !== "object" ||
+      Array.isArray(state.mapMarkers) ||
+      Object.entries(state.mapMarkers).some(
+        ([id, marker]) =>
+          !data.visited.includes(id) ||
+          typeof marker !== "string" ||
+          !Object.hasOwn(MAP_MARKERS, marker),
+      ) ||
       !state.depths ||
       typeof state.depths.diverted !== "boolean" ||
       ![0, 1, 2].includes(state.depths.seals) ||

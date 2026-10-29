@@ -1,96 +1,170 @@
-import { SUN_VAULT, SUN_HEART } from "../campaign/opening";
-import { FINALE_IDS } from "../campaign/finale";
-import { depthsMap } from "./depthsMap";
-import { MASTERY_IDS } from "../campaign/mastery";
-import { RIVAL_IDS } from "../campaign/rival";
-import { TRAVERSAL_IDS } from "../campaign/enemyTraversal";
-import { HISTORY_EVIDENCE } from "../campaign/history";
-import { WING_IDS, WING_HEART } from "../campaign/eraWing";
-import { CORE_ECHO_IDS } from "../campaign/echoRooms";
-import { palaceMap } from "./palaceMap";
-import { COOP_ROOMS, cooperationStatus } from "../campaign/cooperation";
+import { mapNotes } from "./mapNotes";
 import type { CampaignGame } from "../campaign/CampaignGame";
 import { CAMPAIGN_ROOMS } from "../campaign/world";
 import { SECTIONS } from "../campaign/sections";
-import { BATHS_IDS } from "../campaign/baths";
-import { ATTUNEMENTS, VESSEL_ID } from "../campaign/rewards";
-const REGION_IDS = [
-  ...WING_IDS,
-  ...BATHS_IDS,
-  ...COOP_ROOMS,
-  "echo-gallery",
-  "keeper-cistern",
-  ...CORE_ECHO_IDS,
-];
+import { HISTORY_EVIDENCE } from "../campaign/history";
+import { WING } from "../campaign/eraWing";
+import { ATTUNEMENTS } from "../campaign/rewards";
+import {
+  chartedDoors,
+  chartedRooms,
+  mapLandmarks,
+  MAP_MARKERS,
+  passageState,
+} from "../campaign/cartography";
 
-export function campaignMap(game: CampaignGame) {
-  const visible = new Set(game.visited);
-  for (const id of game.visited)
-    CAMPAIGN_ROOMS[id].doors.forEach((d) => visible.add(d.to));
-  const point = (id: string) => ({
-    x: CAMPAIGN_ROOMS[id].map.x * 170 + 80,
-    y: CAMPAIGN_ROOMS[id].map.y * 85 - 40,
-  });
-  const drawn = new Set<string>();
-  const edges = REGION_IDS.flatMap((id) =>
-    CAMPAIGN_ROOMS[id].doors.map((d) => {
-      const pair = [id, d.to].sort().join(":");
-      if (
-        !REGION_IDS.includes(d.to) ||
-        drawn.has(pair) ||
-        !visible.has(id) ||
-        !visible.has(d.to)
-      )
-        return "";
-      drawn.add(pair);
-      const a = point(id),
-        b = point(d.to),
-        reason = game.doorBlock(d);
-      return `<path d="M${a.x} ${a.y}L${b.x} ${b.y}" class="map-connection ${reason ? "sealed" : ""}"><title>${d.label}${reason ? `: ${reason}` : ""}</title></path>`;
-    }),
-  ).join("");
-  const nodes = REGION_IDS.filter((id) => visible.has(id))
+const escape = (text: string) =>
+  text.replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ]!,
+  );
+const regionName = (id: string) =>
+  CAMPAIGN_ROOMS[id].region.replace(/ · \d+\/40$/, "");
+
+// This is a view of the campaign graph, not an independently authored route.
+// Only visited rooms expose onward doors. Adjacent unknowns remain unnamed.
+export function campaignMap(g: CampaignGame, selection = g.room.id) {
+  const visible = chartedRooms(g);
+  const selected = visible.has(selection) ? selection : g.room.id;
+  const visited = g.visited.has(selected);
+  const name = (id: string) =>
+    g.visited.has(id) ? CAMPAIGN_ROOMS[id].mapLabel : "Unexplored passage";
+  const marker = (id: string) => {
+    const value = g.journey.mapMarkers[id];
+    return value ? MAP_MARKERS[value].symbol : "";
+  };
+  const landmarkSymbols = (id: string) =>
+    g.visited.has(id)
+      ? mapLandmarks(g, id)
+          .map((s) => s.split(" ")[0])
+          .join(" ")
+      : "";
+  const select = (id: string, extra = "") =>
+    `<button type="button" data-map-room="${id}" ${extra}>${g.room.id === id ? "◆ " : ""}${marker(id)} ${escape(name(id))}</button>`;
+  const neighbors = new Set<string>();
+  if (visited) for (const d of chartedDoors(g, selected)) neighbors.add(d.to);
+  for (const id of g.visited)
+    if (chartedDoors(g, id).some((d) => d.to === selected)) neighbors.add(id);
+  const ids = [...neighbors];
+  const left = ids.filter((_, i) => i % 2 === 0);
+  const right = ids.filter((_, i) => i % 2 === 1);
+  const height = Math.max(240, Math.max(left.length, right.length) * 100);
+  const y = (i: number, count: number) => ((i + 0.5) * height) / count;
+  const edge = (id: string, x: number, cy: number) => {
+    const out = visited
+      ? chartedDoors(g, selected).find((d) => d.to === id)
+      : undefined;
+    const back = g.visited.has(id)
+      ? chartedDoors(g, id).find((d) => d.to === selected)
+      : undefined;
+    const blocked =
+      !out ||
+      passageState(g, selected, out).reason ||
+      !back ||
+      passageState(g, id, back).reason;
+    return `<path class="atlas-edge ${blocked ? "restricted" : ""}" d="M300 ${height / 2} L${x} ${cy}"/>`;
+  };
+  const branch = (id: string, i: number, count: number, side: string) =>
+    `<div class="atlas-room ${side} ${g.visited.has(id) ? "known" : "unknown"}" style="top:${(y(i, count) / height) * 100}%">${select(id, `aria-label="Select ${escape(name(id))}"`)}<span>${g.visited.has(id) ? `${landmarkSymbols(id)} ${escape(regionName(id))}` : "Not yet charted"}</span></div>`;
+  const passages = ids
     .map((id) => {
-      const room = CAMPAIGN_ROOMS[id],
-        p = point(id),
-        visited = game.visited.has(id);
-      return `<g class="map-node ${visited ? "visited" : "unknown"} ${game.room.id === id ? "current" : ""}"><rect x="${p.x - 23}" y="${p.y - 13}" width="46" height="26"/><text x="${p.x}" y="${p.y + 5}" class="map-symbol">${game.room.id === id ? "◆" : visited ? "·" : "?"}</text><text x="${p.x}" y="${p.y + 32}" class="map-label">${room.mapLabel}</text></g>`;
+      const out = visited
+        ? chartedDoors(g, selected).filter((d) => d.to === id)
+        : [];
+      const back = g.visited.has(id)
+        ? chartedDoors(g, id).filter((d) => d.to === selected)
+        : [];
+      const status = (
+        source: string,
+        d: (typeof out)[number],
+        direction: string,
+      ) => {
+        const s = passageState(g, source, d);
+        // Labels often contain the unknown destination's name. Use only gate feedback.
+        return `<p class="passage-${s.kind}"><b>${direction}</b> ${escape(s.label)}</p>`;
+      };
+      return `<li>${select(id)}${out.map((d) => status(selected, d, "→ Out")).join("")}${back.map((d) => status(id, d, "← Back")).join("")}${!out.length ? `<p>→ ${visited ? "No outward doorway" : "Onward route uncharted"}</p>` : ""}${!back.length ? `<p>← ${g.visited.has(id) ? "No return doorway" : "Return uncharted"}</p>` : ""}</li>`;
     })
     .join("");
-  const b = game.journey.baths;
-  const regional = REGION_IDS.some((id) => game.visited.has(id))
-    ? `<p class="regional-state">Baths and Waterworks · ${b.drained ? "Drained" : b.intake ? "Intake open; turn sluice wheel" : "Flooded; intake closed"} · ${b.shortcut ? "Rotunda grate open" : "Grate barred from within"}</p><svg class="regional-map" viewBox="0 0 900 440" role="img" aria-label="Baths connections. Dashed paths are gated. Room positions show connections, not doorway height.">${edges}${nodes}</svg>`
-    : "";
-  const rewards = game.journey.rewards;
-  const discoveries = regional
-    ? `<p class="regional-state">Optional discoveries · ${rewards.attunement ? ATTUNEMENTS[rewards.attunement].name + ": " + ATTUNEMENTS[rewards.attunement].effect : "Time seal unchosen"} · ${game.collected.has(VESSEL_ID) ? "Sand capacity 8" : "Sand vessel unfound"} · ${rewards.inscription ? "Keepers' names remembered" : "Inscription unread"}</p>`
-    : "";
-  const wing = WING_IDS.some((id) => game.visited.has(id))
-    ? `<p class="regional-state">Twin mirror wing · ${game.journey.wing.era}. E at mirrors changes this wing only. R rewinds movement; C/X records or cancels echoes. Switching clears tapes. ${game.journey.wing.discovered ? "Unsent dedication read" : "Unsent gift undiscovered"} · ${game.collected.has(WING_HEART) ? "Heart found" : "Heart unfound"}. Lower arcade floor always returns west.</p>`
-    : "";
-  const investigation =
-    game.journey.history.read.length || game.journey.history.opened
-      ? `<p class="regional-state">Palace history · ${game.journey.history.opened ? "Cypress facing open" : "The court's account is in doubt"}. Observations to reread: ${game.journey.history.read.map((id) => `${HISTORY_EVIDENCE[id].title} (${CAMPAIGN_ROOMS[HISTORY_EVIDENCE[id].room].mapLabel})`).join("; ") || "none"}. These are observations, not keys; no complete collection is needed.</p>`
+  const groups = new Map<string, string[]>();
+  for (const id of Object.keys(CAMPAIGN_ROOMS)) {
+    if (!g.visited.has(id)) continue;
+    const region = regionName(id);
+    if (!groups.has(region)) groups.set(region, []);
+    groups.get(region)!.push(id);
+  }
+  const index = [...groups]
+    .map(
+      ([region, rooms]) =>
+        `<optgroup label="${escape(region)}">${rooms.map((id) => `<option value="${id}" ${selected === id ? "selected" : ""}>${g.room.id === id ? "◆ " : ""}${marker(id)} ${escape(name(id))}</option>`).join("")}</optgroup>`,
+    )
+    .join("");
+  const markers = Object.entries(g.journey.mapMarkers)
+    .map(
+      ([id, value]) =>
+        `<li>${select(id)} <span>${MAP_MARKERS[value!].label}</span></li>`,
+    )
+    .join("");
+  const era =
+    WING[selected] && visited
+      ? `<p class="atlas-era">◐ ${g.journey.wing.era === "intact" ? "Intact" : "Ruined"} wing. Passages show this era. Twin mirrors change only this wing; the lower arcade always returns west. Markers refer to the same room in both eras.</p>`
       : "";
-  const pens = TRAVERSAL_IDS.some((id) => visible.has(id))
-    ? `<p class="regional-state">Animal service pens · Zoo side entrance. ${game.journey.traversal.broken ? "Ram wall broken" : "Bait the ram into weakened masonry"} · ${game.journey.traversal.latched ? "Scarab stones latched" : "Freeze the scarab on its striped plate to cross"}. Recall bells restore hollow creatures without sand rewards. Safe lower floors return to fountains.</p>`
-    : "";
-  const rival =
-    RIVAL_IDS.some((id) => visible.has(id)) || game.journey.rival.named
-      ? `<p class="regional-state">Sahir, the split crest · ${game.journey.rival.outcome ?? `${game.journey.rival.bouts}/2 drills complete`}. Practice court off Cypress court → gallery off Archive stair → last muster beside Flooded cells. ${game.journey.rival.oath ? "His lesson: the drill ends when all come home. Blue standard releases him; gold accepts the last rematch." : "His weapon rack and muster roll explain whom he is waiting for."} Duels are optional; unfinished fights reset on exit or Retry.</p>`
-      : "";
-  const mastery = MASTERY_IDS.some((id) => visible.has(id))
-    ? `<p class="regional-state">Movement chambers · optional entrance at Cypress court. Returning step → Hands above the court → Patient crossing. ${game.journey.mastery.solved.length}/3 seals secured. E at round stones retries, E at secured seals returns to the start. Catch mats return you without damage; R can recover before landing. Practice sand stays in the chambers. Local retries never move your main fountain checkpoint.</p>`
-    : "";
-  const remembered =
-    visible.has("lamp-store") || visible.has("lamp-refuge")
-      ? `<p class="regional-state">The lamp keeper · Store beside the Root conduit → refuge off the Cypress crown. ${game.journey.consequences.nimaRescued ? "Nima rescued; her lamp burns at the refuge" : "Nima has not reached the refuge"}. ${game.journey.consequences.liftRepaired ? (game.journey.palace.prisonOpen ? "Repaired lift open: refuge ↔ warden's loft" : "Lift drive repaired; waiting for the warden's locks") : "Optional lift repair on the refuge's upper shelf needs garden irrigation"}. Ordinary routes stay open. Nima remembers the witnesses' names and Sahir's release if you bring that knowledge home.</p>`
-      : "";
-  const crown = FINALE_IDS.some((id) => visible.has(id))
-    ? `<p class="regional-state">Service crown · Tower elevator → Baths overflow → Hall clerestory → Warden high chain → Hourglass. ${game.journey.puzzles["crown-baths"]?.activated ? "Overflow grille open" : "Turn the upper overflow wheel"} · ${game.journey.puzzles["crown-hall"]?.activated ? "Roof light pinned" : "Aim the west mirror high and pin the east receiver"}. Lower floors catch misses. The Hourglass descent seals returns.</p>`
-    : "";
-  const opening = visible.has(SUN_VAULT)
-    ? `<p class="regional-state">${game.room.id === SUN_VAULT ? "◆ You are in the sun vault. " : ""}Opening route · Siege terrace ↔ Sun vault. ${game.hasDagger ? "Dagger seal open" : "Return from the treasury with the Dagger"}. ${game.collected.has(SUN_HEART) ? "Life upgrade found" : "Optional life upgrade on the upper shelves"}.</p>`
-    : "";
-  return `${opening}${crown}${depthsMap(game, visible)}${remembered}${mastery}${rival}${pens}${investigation}${wing}${palaceMap(game)}${regional}${regional ? `<p class="regional-state">${cooperationStatus(game)}</p>` : ""}${discoveries}${game.visited.has("echo-step") ? `<p class="regional-state">Echo chambers · ${CORE_ECHO_IDS.filter((id) => game.journey.echoes.solved.includes(id)).length}/3 latches secured. C records, C replays or replaces, X cancels. Tapes clear on room exit, Retry and reload; secured gates stay open.</p>` : ""}<p>Story milestones · ${game.journey.completed.length}/40</p><ol class="chapter-route">${SECTIONS.map((s, i) => `<li class="${game.room.id === s.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(s.id) ? s.title : "Unexplored"}</span><span>${game.journey.completed.includes(s.id) ? "Complete" : s.id === game.quest.room ? "Next objective" : ""}</span></li>`).join("")}</ol>`;
+  const attunement = g.journey.rewards.attunement;
+  const observations = g.journey.history.read
+    .map(
+      (id) =>
+        `<li>${escape(HISTORY_EVIDENCE[id].title)} · ${escape(CAMPAIGN_ROOMS[HISTORY_EVIDENCE[id].room].mapLabel)}</li>`,
+    )
+    .join("");
+  return `<div class="explorer-atlas" data-selected-room="${selected}">
+    <div class="atlas-toolbar"><label>Charted rooms <select aria-label="Charted rooms" data-map-index>${!visited ? '<option selected value="">Unexplored passage</option>' : ""}${index}</select></label><button type="button" data-map-room="${g.room.id}">◆ Locate me</button><span>${g.visited.size} rooms charted · ${g.journey.completed.length}/40 milestones</span></div>
+    <p class="atlas-location">◆ You are in ${escape(g.room.mapLabel)}${g.journey.completed.length >= 35 ? ". The Hourglass descent has sealed the old palace." : ""}</p>
+    <div class="atlas-columns"><section class="atlas-chart" aria-label="Room connections"><p class="atlas-caption">Connected rooms · schematic, not distance or doorway height</p>
+    <div class="atlas-drawing" style="--atlas-height:${height}px;--compact-height:${Math.max(180, Math.max(left.length, right.length) * 100)}px"><svg viewBox="0 0 600 ${height}" preserveAspectRatio="none" aria-hidden="true">${left.map((id, i) => edge(id, 95, y(i, left.length))).join("")}${right.map((id, i) => edge(id, 505, y(i, right.length))).join("")}</svg>
+    ${left.map((id, i) => branch(id, i, left.length, "left")).join("")}${right.map((id, i) => branch(id, i, right.length, "right")).join("")}
+    <div class="atlas-room selected ${selected === g.room.id ? "here" : ""}" style="top:50%"><strong>${selected === g.room.id ? "◆ " : ""}${escape(name(selected))}</strong><span>Selected room${selected === g.room.id ? " · you are here" : ""}</span><span>${landmarkSymbols(selected)}</span></div></div>
+    <p class="atlas-key">◆ Your position · ◈ Fountain · ⚑ ? ◇ Your markers<br>Solid: open both ways · Dashed: restricted or uncharted direction</p>
+    </section><section class="atlas-detail" aria-label="Selected room"><h3>${escape(name(selected))}</h3>
+    ${
+      visited
+        ? `<p>${escape(regionName(selected))}</p><ul class="atlas-landmarks">${mapLandmarks(
+            g,
+            selected,
+          )
+            .map((s) => `<li>${escape(s)}</li>`)
+            .join(
+              "",
+            )}</ul>${era}<fieldset class="atlas-marker-tools"><legend>Your marker</legend>${Object.entries(
+            MAP_MARKERS,
+          )
+            .map(
+              ([value, data]) =>
+                `<button type="button" data-map-marker="${value}" aria-pressed="${g.journey.mapMarkers[selected] === value}">${data.symbol} ${data.label}</button>`,
+            )
+            .join(
+              "",
+            )}<button type="button" data-map-marker="remove" ${g.journey.mapMarkers[selected] ? "" : "disabled"}>Remove marker</button></fieldset>`
+        : "<p>Explore this passage to chart its landmarks and onward doors.</p>"
+    }
+    <h4>Passages from selected room</h4><ul class="atlas-passages">${passages}</ul></section></div>
+    <details class="atlas-notes"><summary>Marked places${markers ? ` · ${Object.keys(g.journey.mapMarkers).length}` : " · none"}</summary><ul>${markers}</ul></details>
+    <details class="atlas-notes"><summary>Journey notes · ${g.journey.completed.length}/40 story milestones</summary>${mapNotes(
+      g,
+    )
+      .map((note) => `<p>${escape(note)}</p>`)
+      .join(
+        "",
+      )}${attunement ? `<p>${ATTUNEMENTS[attunement].name}: ${ATTUNEMENTS[attunement].effect}</p>` : ""}${observations ? `<ul>${observations}</ul>` : ""}<ol>${SECTIONS.filter(
+      (s) => g.visited.has(s.id),
+    )
+      .map(
+        (s) =>
+          `<li>${escape(s.title)} · ${g.journey.completed.includes(s.id) ? "Complete" : "Explored"}</li>`,
+      )
+      .join("")}</ol></details>
+    <p class="atlas-help">Choose a charted room or a connected passage. Tab moves between controls; Enter selects. Markers save at your existing fountain checkpoint. M or Esc returns to play.</p>
+  </div>`;
 }

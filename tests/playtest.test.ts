@@ -103,7 +103,7 @@ it.each([2165, 2170])(
     g.begin();
     g.journey.completed = ["siege"];
     g.enterRoom("treasury", undefined, { x, y: 594 });
-    expect(g.interaction?.label).toBe("Continue the story");
+    expect(g.interaction?.label).toContain("Recover the item");
     g.interaction!.action();
     expect(g.room.id).toBe("treasury");
     expect(g.journey.completed).toEqual(["siege"]);
