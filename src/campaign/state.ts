@@ -5,7 +5,8 @@ import { SECTIONS } from "./sections";
 import type { Ability } from "../game/types";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 1,
+  version: 2,
+  baths: { intake: false, drained: false, shortcut: false },
   completed: [],
   dagger: false,
   sword: 1,
@@ -31,14 +32,51 @@ export function freshPuzzle(puzzle?: Puzzle): PuzzleState {
   };
 }
 export function parseCampaign(raw: string | null): CampaignSave | null {
-  const common = parseSave(raw, CAMPAIGN_ROOMS);
-  if (!common || !raw) return null;
+  if (!raw) return null;
   try {
-    const data: CampaignSave = JSON.parse(raw);
-    const state = data.journey;
+    const data = JSON.parse(raw);
+    // v1 checkpoints in the two former 2200px halls map onto safe new floors.
+    if (data?.journey?.version === 1) {
+      const legacyRooms = {
+        ...CAMPAIGN_ROOMS,
+        "baths-main": { ...CAMPAIGN_ROOMS["baths-main"], width: 2200 },
+        bathworks: { ...CAMPAIGN_ROOMS.bathworks, width: 2200 },
+      };
+      if (!parseSave(raw, legacyRooms)) return null;
+      const drained =
+        data.journey.completed?.length >= 16 ||
+        data.journey.puzzles?.bathworks?.solved === true;
+      data.journey = {
+        ...data.journey,
+        version: 2,
+        baths: { intake: drained, drained, shortcut: false },
+      };
+      // Their old crate/crank definitions no longer exist. Retained unsolved
+      // entries would block finishSection with no remaining controls to solve.
+      if (data.journey.puzzles) {
+        delete data.journey.puzzles["baths-main"];
+        delete data.journey.puzzles.bathworks;
+      }
+      if (["baths-main", "bathworks"].includes(data.room) && data.checkpoint) {
+        data.checkpoint = {
+          x: Math.min(
+            Math.max(data.checkpoint.x, 12),
+            CAMPAIGN_ROOMS[data.room].width - 60,
+          ),
+          y: 594,
+        };
+      }
+    }
+    if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
+    const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 1 ||
+      state.version !== 2 ||
+      !state.baths ||
+      ![state.baths.intake, state.baths.drained, state.baths.shortcut].every(
+        (v) => typeof v === "boolean",
+      ) ||
+      (state.baths.drained && !state.baths.intake) ||
       typeof state.dagger !== "boolean" ||
       typeof state.grandRewind !== "boolean" ||
       ![1, 2, 3].includes(state.sword) ||
@@ -90,18 +128,19 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       (data.flags.includes("victory") && state.completed.length !== 40)
     )
       return null;
-    const index = SECTIONS.findIndex((s) => s.id === data.room);
+    const index = CAMPAIGN_ROOMS[data.room].availableAfter;
     if (
       index > state.completed.length ||
       data.visited.some(
-        (id) => SECTIONS.findIndex((s) => s.id === id) > state.completed.length,
+        (id: string) =>
+          CAMPAIGN_ROOMS[id].availableAfter > state.completed.length,
       )
     )
       return null;
     const pickups = new Set(
       Object.values(CAMPAIGN_ROOMS).flatMap((r) => r.pickups.map((p) => p.id)),
     );
-    if (data.collected.some((id) => !pickups.has(id))) return null;
+    if (data.collected.some((id: string) => !pickups.has(id))) return null;
     const expectedSword = data.collected.includes("tomb-sword")
       ? 3
       : data.collected.includes("upper-baths-sword")

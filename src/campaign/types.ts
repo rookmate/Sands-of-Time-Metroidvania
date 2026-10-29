@@ -1,4 +1,4 @@
-import type { Ability, Room, SaveData, Vec, Rect } from "../game/types";
+import type { Ability, Room, SaveData, Vec, Rect, Door } from "../game/types";
 
 export type Layout =
   | "hall"
@@ -56,6 +56,20 @@ export interface Section {
   companion?: "following" | "separated" | "gone" | "dead" | "restored";
   arrival?: FarahState;
 }
+export interface CampaignDoor extends Door {
+  milestone?: string;
+  gate?: "drained" | "sword-dash" | "shortcut";
+}
+export interface CampaignRoom extends Room {
+  content: Section;
+  availableAfter: number;
+  doors: CampaignDoor[];
+}
+export interface BathsState {
+  intake: boolean;
+  drained: boolean;
+  shortcut: boolean;
+}
 export interface PuzzleState {
   solved: boolean;
   values: number[];
@@ -68,7 +82,8 @@ export interface PuzzleState {
 export type FarahState =
   "unknown" | "following" | "separated" | "gone" | "dead" | "restored";
 export interface CampaignState {
-  version: 1;
+  version: 2;
+  baths: BathsState;
   completed: string[];
   dagger: boolean;
   sword: 1 | 2 | 3;

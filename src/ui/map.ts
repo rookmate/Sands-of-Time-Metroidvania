@@ -1,10 +1,11 @@
+import { CampaignGame } from "../campaign/CampaignGame";
+import { campaignMap } from "./campaignMap";
 import type { Game } from "../game/Game";
 import { hasRequirement } from "../game/progression";
 export function mapMarkup(game: Game): string {
   const ROOMS = game.rooms;
   const rooms = Object.values(ROOMS);
-  if (game.campaignProgress)
-    return `<ol class="chapter-route">${rooms.map((room, i) => `<li class="${game.room.id === room.id ? "current" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><span>${game.visited.has(room.id) ? room.name : "Unexplored"}</span><span>${game.room.id === room.id ? "You are here" : room.id === game.quest.room ? "Next objective" : game.visited.has(room.id) ? "Visited" : ""}</span></li>`).join("")}</ol>`;
+  if (game instanceof CampaignGame) return campaignMap(game);
   const visible = new Set(game.visited);
   for (const id of game.visited)
     ROOMS[id].doors.forEach((door) => visible.add(door.to));

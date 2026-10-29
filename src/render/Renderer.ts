@@ -16,6 +16,8 @@ import {
   star,
   type Context,
 } from "./shapes";
+import { CampaignGame } from "../campaign/CampaignGame";
+import { CAMPAIGN_ROOMS } from "../campaign/world";
 import { drawEnemy, drawPrince } from "./actors";
 import {
   drawCampaignObjects,
@@ -115,7 +117,18 @@ export class Renderer {
       drawPalm(c, 1700, 650, 1.1, pal.foliage + "aa");
     }
     for (const door of room.doors) {
-      const open = hasRequirement(door.requires, g.abilities, g.flags);
+      if (g instanceof CampaignGame && room.region === "Baths and Waterworks") {
+        c.save();
+        c.fillStyle = "#e4d1a4";
+        c.font = "13px Georgia";
+        c.textAlign = "center";
+        c.fillText(CAMPAIGN_ROOMS[door.to].mapLabel, door.x, door.y - 125);
+        c.restore();
+      }
+      const open =
+        g instanceof CampaignGame
+          ? !g.doorBlock(door)
+          : hasRequirement(door.requires, g.abilities, g.flags);
       arch(c, door.x - 34, door.y - 108, 68, 108, pal.light, "#bda776");
       arch(c, door.x - 27, door.y - 99, 54, 99, open ? "#243e40" : "#34454b");
       if (!open) {

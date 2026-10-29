@@ -62,7 +62,7 @@ const EXPECTED = [
 
 it("represents every original walkthrough milestone in order with connected areas", () => {
   expect(SECTIONS.map((s) => s.id)).toEqual(EXPECTED);
-  expect(Object.keys(CAMPAIGN_ROOMS)).toEqual(EXPECTED);
+  expect(Object.keys(CAMPAIGN_ROOMS)).toEqual(expect.arrayContaining(EXPECTED));
   for (const room of Object.values(CAMPAIGN_ROOMS))
     for (const door of room.doors)
       expect(CAMPAIGN_ROOMS[door.to].doors.some((d) => d.to === room.id)).toBe(
@@ -76,7 +76,7 @@ it("plays the entire adaptation with real inputs, puzzles, Farah, Dagger loss, a
   console.info("Expanded campaign", JSON.stringify(report));
   expect(report.status, report.error ?? JSON.stringify(report)).toBe("passed");
   expect(report.milestones).toEqual(EXPECTED);
-  expect(report.rooms).toHaveLength(40);
+  expect(report.rooms).toHaveLength(43);
   expect(report.deaths).toBe(0);
   for (const id of ["tomb", "pursuit", "dawn-climb"])
     expect(report.scenes.find((s) => s.id === id)?.dagger).toBe(false);
