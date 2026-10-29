@@ -1,3 +1,4 @@
+import { cooperationActive, stairPosition } from "./cooperation";
 import type { Companion, Vec } from "../game/types";
 import { clamp, distance, overlap } from "../game/physics";
 import type { CampaignGame } from "./CampaignGame";
@@ -28,11 +29,26 @@ export class Farah {
             holding: null,
           }
         : null;
+    if (cooperationActive(g)) this.step(0);
   }
   step(dt: number) {
     const f = this.actor,
       g = this.game;
     if (!f) return;
+    if (cooperationActive(g)) {
+      const s = g.journey.cooperation;
+      const location = s.phase === "scouting" ? "bathworks" : "valve-loft";
+      if (g.room.id !== location) {
+        this.actor = null;
+        return;
+      }
+      const point =
+        s.phase === "scouting" ? stairPosition(s.travel) : { x: 650, y: 650 };
+      f.x = point.x - 15;
+      f.y = point.y - f.h;
+      f.face = 1;
+      return;
+    }
     if (g.journey.farah === "restored") {
       f.face = g.player.x > f.x ? 1 : -1;
       return;

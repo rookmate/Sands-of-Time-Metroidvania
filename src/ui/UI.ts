@@ -14,7 +14,7 @@ export class UI {
   private resumeAfterRotate = false;
   constructor(
     private root: HTMLElement,
-    private game: Game,
+    private readonly currentGame: () => Game,
   ) {
     root.innerHTML = `
       <header class="site-header"><a class="brand" href="#" aria-label="Sands of Time title screen">${icons.dagger}<span>SANDS <i>OF</i> TIME</span></a>
@@ -29,19 +29,19 @@ export class UI {
     this.hud = root.querySelector("#hud")!;
     root.querySelector(".brand")!.addEventListener("click", (e) => {
       e.preventDefault();
-      if (game.screen === "playing") game.setScreen("pause");
-      else if (game.screen === "title") return;
+      if (this.game.screen === "playing") this.game.setScreen("pause");
+      else if (this.game.screen === "title") return;
     });
     root.querySelector("#sound-toggle")!.addEventListener("click", () => {
-      const on = !(game.options.music || game.options.sfx);
-      game.setOption("music", on);
-      game.setOption("sfx", on);
-      game.sound.start();
+      const on = !(this.game.options.music || this.game.options.sfx);
+      this.game.setOption("music", on);
+      this.game.setOption("sfx", on);
+      this.game.sound.start();
       this.updateAudio();
     });
     root.querySelector("#help-open")!.addEventListener("click", () => {
-      if (game.screen === "playing") game.setScreen("pause");
-      game.openSubmenu("help");
+      if (this.game.screen === "playing") this.game.setScreen("pause");
+      this.game.openSubmenu("help");
     });
     root.querySelector("#fullscreen")!.addEventListener("click", () => {
       if (document.fullscreenElement) void document.exitFullscreen();
@@ -49,18 +49,21 @@ export class UI {
         void root
           .requestFullscreen()
           .catch(() =>
-            game.notify("Fullscreen is unavailable in this browser."),
+            this.game.notify("Fullscreen is unavailable in this browser."),
           );
     });
     root
       .querySelector("#footer-pause")!
-      .addEventListener("click", () => game.menuKey("pause"));
+      .addEventListener("click", () => this.game.menuKey("pause"));
     this.overlay.addEventListener("click", (event) => this.handleClick(event));
     this.hud.addEventListener("click", (event) => this.handleClick(event));
     this.overlay.addEventListener("change", (event) => {
       const target = event.target;
       if (target instanceof HTMLInputElement && target.dataset.option) {
-        game.setOption(target.dataset.option as keyof Options, target.checked);
+        this.game.setOption(
+          target.dataset.option as keyof Options,
+          target.checked,
+        );
         this.updateAudio();
       }
     });
@@ -72,10 +75,10 @@ export class UI {
         button.addEventListener("pointerdown", (event) => {
           event.preventDefault();
           button.setPointerCapture(event.pointerId);
-          game.input.press(action);
+          this.game.input.press(action);
         });
         for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
-          button.addEventListener(type, () => game.input.release(action));
+          button.addEventListener(type, () => this.game.input.release(action));
       });
     root.insertAdjacentHTML(
       "beforeend",
@@ -92,6 +95,9 @@ export class UI {
     syncOrientation();
     this.updateAudio();
     this.update(0);
+  }
+  private get game() {
+    return this.currentGame();
   }
   private syncOrientation(coarsePointer: boolean) {
     const portrait = window.innerHeight > window.innerWidth;
@@ -291,6 +297,6 @@ export class UI {
     this.hud.innerHTML = markup;
     this.hud
       .querySelector('[data-action="interact"]')
-      ?.addEventListener("click", () => g.interaction?.action());
+      ?.addEventListener("click", () => this.game.interaction?.action());
   }
 }

@@ -3,9 +3,11 @@ import type { CampaignSave, CampaignState, Puzzle, PuzzleState } from "./types";
 import { CAMPAIGN_ROOMS } from "./world";
 import { SECTIONS } from "./sections";
 import type { Ability } from "../game/types";
+import { freshCooperation } from "./cooperation";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 3,
+  version: 4,
+  cooperation: freshCooperation(),
   rewards: { attunement: null, inscription: false },
   baths: { intake: false, drained: false, shortcut: false },
   completed: [],
@@ -73,11 +75,36 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
       data.journey.version = 3;
       data.journey.rewards = { attunement: null, inscription: false };
     }
+    if (data?.journey?.version === 3) {
+      data.journey.version = 4;
+      data.journey.cooperation = freshCooperation();
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 3 ||
+      state.version !== 4 ||
+      !state.cooperation ||
+      !["idle", "scouting", "ready", "primed", "crossed", "reunited"].includes(
+        state.cooperation.phase,
+      ) ||
+      !Number.isFinite(state.cooperation.travel) ||
+      state.cooperation.travel < 0 ||
+      state.cooperation.travel > 1 ||
+      !Number.isFinite(state.cooperation.remaining) ||
+      state.cooperation.remaining < 0 ||
+      state.cooperation.remaining > 8 ||
+      (state.cooperation.phase !== "idle" &&
+        (!state.baths?.drained || state.completed.length < 15)) ||
+      (state.cooperation.phase === "idle" && state.cooperation.travel !== 0) ||
+      (state.cooperation.phase === "scouting" &&
+        state.cooperation.travel >= 1) ||
+      (!["idle", "scouting"].includes(state.cooperation.phase) &&
+        state.cooperation.travel !== 1) ||
+      (!["idle", "reunited"].includes(state.cooperation.phase) &&
+        (state.farah !== "following" || state.completed.length > 16)) ||
+      (state.cooperation.phase !== "primed" &&
+        state.cooperation.remaining !== 0) ||
       !state.rewards ||
       ![null, "patience", "stillness"].includes(state.rewards.attunement) ||
       typeof state.rewards.inscription !== "boolean" ||

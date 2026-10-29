@@ -58,7 +58,7 @@ export interface Section {
 }
 export interface CampaignDoor extends Door {
   milestone?: string;
-  gate?: "drained" | "sword-dash" | "shortcut";
+  gate?: "drained" | "sword-dash" | "shortcut" | "spillway" | "loft-shortcut";
 }
 export interface CampaignRoom extends Room {
   content: Section;
@@ -81,8 +81,14 @@ export interface PuzzleState {
 }
 export type FarahState =
   "unknown" | "following" | "separated" | "gone" | "dead" | "restored";
+export interface CooperationState {
+  phase: "idle" | "scouting" | "ready" | "primed" | "crossed" | "reunited";
+  travel: number;
+  remaining: number;
+}
 export interface CampaignState {
-  version: 3;
+  version: 4;
+  cooperation: CooperationState;
   rewards: {
     attunement: import("./rewards").Attunement | null;
     inscription: boolean;

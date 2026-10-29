@@ -29,6 +29,10 @@ export class BrowserHarness {
                 ? this.selection
                 : "campaign",
             immortal: params.get("immortal") !== "0",
+            resilienceSeed: params.has("seed")
+              ? Number(params.get("seed"))
+              : undefined,
+            cooperate: params.get("cooperate") !== "0",
             exploreBaths: params.get("explore") !== "0",
             optionalRewards:
               params.get("rewards") === "patience"

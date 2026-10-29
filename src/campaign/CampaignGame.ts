@@ -1,3 +1,10 @@
+import {
+  cooperationActive,
+  cooperationControls,
+  cooperationPlatforms,
+  cooperationStatus,
+  stepCooperation,
+} from "./cooperation";
 import { Game, type GameConfig } from "../game/Game";
 import type { Ability, Enemy, Options, Pickup } from "../game/types";
 import { distance } from "../game/physics";
@@ -84,6 +91,15 @@ export class CampaignGame extends Game {
     };
   }
   override get quest() {
+    if (cooperationActive(this))
+      return {
+        title: "Farah and the bell spillway",
+        text: cooperationStatus(this),
+        room:
+          this.journey.cooperation.phase === "crossed"
+            ? "valve-loft"
+            : "spillway",
+      };
     if (this.room.id === "honor" && this.puzzles?.state.solved)
       return {
         title: "Return the Dagger to Farah",
@@ -151,7 +167,10 @@ export class CampaignGame extends Game {
     const base = super.roomPlatforms(time);
     return this.puzzles
       ? this.puzzles.platforms(
-          bathsPlatforms(this.room.id, this.journey.baths, base),
+          cooperationPlatforms(
+            this,
+            bathsPlatforms(this.room.id, this.journey.baths, base),
+          ),
         )
       : base;
   }
@@ -228,7 +247,10 @@ export class CampaignGame extends Game {
   override update(dt: number) {
     this.syncRoom();
     const active = this.screen === "playing" && !this.orientationBlocked;
-    if (active) this.puzzles.step(dt);
+    if (active) {
+      this.puzzles.step(dt);
+      stepCooperation(this, dt);
+    }
     super.update(dt);
     if (active && this.screen === "playing") {
       this.farah.step(dt);
@@ -297,6 +319,18 @@ export class CampaignGame extends Game {
     return true;
   }
   doorBlock(door: CampaignDoor): string | null {
+    if (door.milestone === "upper-baths" && cooperationActive(this))
+      return "Reunite with Farah in the valve loft before leaving the Baths";
+    if (
+      door.gate === "spillway" &&
+      !["crossed", "reunited"].includes(this.journey.cooperation.phase)
+    )
+      return "Latch the far-bank spillway bridge first";
+    if (
+      door.gate === "loft-shortcut" &&
+      this.journey.cooperation.phase !== "reunited"
+    )
+      return "Reunite with Farah at the valve before opening the service shortcut";
     if (
       CAMPAIGN_ROOMS[door.to].availableAfter >
       this.journey.completed.length +
@@ -321,6 +355,10 @@ export class CampaignGame extends Game {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
     const control = this.puzzles?.controls.find((c) => distance(feet, c) < 85);
     if (control) return control;
+    const cooperative = cooperationControls(this).find(
+      (c) => distance(feet, c) < 70,
+    );
+    if (cooperative) return cooperative;
     const reward = rewardControls(this).find((c) => distance(feet, c) < 85);
     if (reward) return reward;
     const regional = this.regionalControl;

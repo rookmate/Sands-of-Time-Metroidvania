@@ -9,12 +9,13 @@ const playback =
     ? new (await import("./harness/browser")).BrowserHarness(params)
     : null;
 const game: Game = playback?.harness.game ?? new CampaignGame();
+const currentGame = () => playback?.harness.game ?? game;
 const root = document.querySelector<HTMLElement>("#app")!;
-const ui = new UI(root, game);
+const ui = new UI(root, currentGame);
 playback?.mount(root);
 const renderer = new Renderer(
   document.querySelector<HTMLCanvasElement>("#game")!,
-  game,
+  currentGame,
 );
 // A fixed simulation step keeps jumps, coyote time, and rewind consistent at any refresh rate.
 const STEP = 1 / 120;
@@ -35,4 +36,5 @@ function frame(now: number) {
 }
 requestAnimationFrame(frame);
 // Development-only inspection for reproducible route and physics checks. Excluded from production.
-if (import.meta.env.DEV) Object.assign(window, { __sands: game });
+if (import.meta.env.DEV)
+  Object.defineProperty(window, "__sands", { get: currentGame });

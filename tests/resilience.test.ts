@@ -99,6 +99,7 @@ it.skipIf(!!replayPath).each(seeds)(
         "vizier",
         "grip-reload",
         "lift-reload",
+        "cooperation-recovery",
       ]),
     );
     expect(h.trace.events.some((e) => e.kind === "reload")).toBe(true);

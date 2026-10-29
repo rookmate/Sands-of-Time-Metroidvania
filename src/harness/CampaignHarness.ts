@@ -1,3 +1,8 @@
+import {
+  cooperationApproach,
+  cooperationClimb,
+  cooperationFinish,
+} from "./cooperationRoute";
 import { cisternRoute, galleryRoute, type RewardStep } from "./rewardsRoute";
 import { VESSEL_ID, type Attunement } from "../campaign/rewards";
 import { CampaignGame } from "../campaign/CampaignGame";
@@ -16,6 +21,7 @@ export class CampaignHarness {
   readonly scenario: "campaign" | "king" | "vizier";
   readonly immortal: boolean;
   readonly exploreBaths: boolean;
+  readonly cooperate: boolean;
   readonly optionalRewards: Attunement | false;
   status: HarnessStatus = "running";
   frames = 0;
@@ -53,9 +59,11 @@ export class CampaignHarness {
       immortal?: boolean;
       resilienceSeed?: number;
       exploreBaths?: boolean;
+      cooperate?: boolean;
       optionalRewards?: Attunement | false;
     } = {},
   ) {
+    this.cooperate = options.cooperate ?? true;
     this.optionalRewards = options.optionalRewards ?? false;
     this.exploreBaths = options.exploreBaths ?? true;
     this.resilienceSeed = options.resilienceSeed ?? null;
@@ -161,6 +169,7 @@ export class CampaignHarness {
       flags: [...g.flags],
       collected: [...g.collected],
       baths: { ...g.journey.baths },
+      cooperation: { ...g.journey.cooperation },
       rewards: { ...g.journey.rewards, maxSand: g.player.maxSand },
       milestones: [...g.journey.completed],
       scenes: [...this.scenes],
@@ -780,6 +789,33 @@ export class CampaignHarness {
         "Reload lost regional drainage",
       );
       this.disruptions.push({ room: "bathworks", kind: "sluice" });
+    }
+    if (this.cooperate) {
+      yield* this.rewardRoute(cooperationApproach);
+      if (this.resilienceSeed !== null) {
+        this.recover("respawn");
+        this.recover("reload");
+        this.require(
+          this.game.journey.cooperation.phase === "primed",
+          "Lost Farah's raised step",
+        );
+      }
+      yield* this.rewardRoute(cooperationClimb);
+      if (this.resilienceSeed !== null) {
+        this.game.input.clear();
+        for (let i = 0; i < 1000; i++) yield* this.tick();
+        yield* this.jump(860, 650); // Expired span: miss onto the safe floor.
+        yield* this.rewardRoute(cooperationClimb);
+        this.disruptions.push({
+          room: "spillway",
+          kind: "cooperation-recovery",
+        });
+      }
+      yield* this.rewardRoute(cooperationFinish);
+      this.require(
+        this.game.journey.cooperation.phase === "reunited",
+        "Farah did not reunite",
+      );
     }
     // Use the permanent drained stair, then climb through the changed pool.
     yield* this.walk(855);

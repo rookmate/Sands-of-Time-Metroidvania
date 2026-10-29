@@ -76,7 +76,7 @@ it("plays the entire adaptation with real inputs, puzzles, Farah, Dagger loss, a
   console.info("Expanded campaign", JSON.stringify(report));
   expect(report.status, report.error ?? JSON.stringify(report)).toBe("passed");
   expect(report.milestones).toEqual(EXPECTED);
-  expect(report.rooms).toHaveLength(43);
+  expect(report.rooms).toHaveLength(45);
   expect(report.deaths).toBe(0);
   for (const id of ["tomb", "pursuit", "dawn-climb"])
     expect(report.scenes.find((s) => s.id === id)?.dagger).toBe(false);

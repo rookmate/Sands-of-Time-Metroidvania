@@ -1,3 +1,4 @@
+import { drawCooperation } from "./cooperation";
 import { drawRewards } from "./rewards";
 import { drawBaths } from "./baths";
 import { CampaignGame } from "../campaign/CampaignGame";
@@ -118,6 +119,7 @@ function gate(c: Context, x: number, y: number, w: number, h: number) {
 export function drawCampaignObjects(c: Context, game: Game) {
   if (!(game instanceof CampaignGame)) return;
   drawBaths(c, game);
+  drawCooperation(c, game);
   drawRewards(c, game);
   const g = game,
     p = g.puzzles.definition,
