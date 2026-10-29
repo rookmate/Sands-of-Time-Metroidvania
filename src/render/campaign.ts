@@ -1,3 +1,4 @@
+import { drawFinale } from "./finale";
 import { drawDepths, drawDepthsScenery } from "./depths";
 import { drawConsequences } from "./consequences";
 import { drawMastery } from "./mastery";
@@ -139,6 +140,7 @@ export function drawCampaignObjects(c: Context, game: Game) {
   drawEnemyTraversal(c, game);
   drawConsequences(c, game);
   drawDepths(c, game);
+  drawFinale(c, game);
   const g = game,
     p = g.puzzles.definition,
     s = g.puzzles.state;

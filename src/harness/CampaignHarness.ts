@@ -1,3 +1,4 @@
+import { FinaleRoute } from "./FinaleRoute";
 import { RivalRoute } from "./RivalRoute";
 import { RIVAL_IDS, type RivalOutcome } from "../campaign/rival";
 import { EnemyTraversalRoute } from "./EnemyTraversalRoute";
@@ -881,6 +882,10 @@ export class CampaignHarness {
         g.journey.completed[index] === section.id,
         "Milestone did not complete",
       );
+      if (index === 33) {
+        yield* new FinaleRoute(this).play();
+        g = this.game;
+      }
     }
     if (this.scenario !== "king") {
       this.require(
