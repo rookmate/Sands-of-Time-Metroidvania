@@ -120,7 +120,8 @@ export interface PalaceState {
   prisonOpen: boolean;
 }
 export interface CampaignState {
-  version: 13;
+  version: 14;
+  mapMarkers: Partial<Record<string, import("./cartography").MapMarker>>;
   depths: import("./depths").DepthsState;
   consequences: { nimaRescued: boolean; liftRepaired: boolean };
   mastery: { solved: string[] };

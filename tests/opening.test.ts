@@ -58,7 +58,7 @@ it("keeps Continue and v13 saves free of opening instructions; Retry remembers l
   expect(g.opening.cue(g) ?? "").not.toContain("Move toward");
   g.save(false);
   const legacy = parseCampaign(JSON.stringify(g.saved));
-  expect(legacy?.journey.version).toBe(13);
+  expect(legacy?.journey.version).toBe(14);
   const resumed = reloadCampaign(g);
   expect(resumed.opening.cue(resumed)).toBeNull();
   expect(resumed.journey).toEqual(g.journey);

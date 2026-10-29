@@ -275,7 +275,7 @@ it("migrates v11 and ending saves without inventing rescues or repairs, and reje
   old.journey.version = 11;
   delete old.journey.consequences;
   const migrated = parseCampaign(JSON.stringify(old))!;
-  expect(migrated.journey.version).toBe(13);
+  expect(migrated.journey.version).toBe(14);
   expect(migrated.journey.consequences).toEqual({
     nimaRescued: false,
     liftRepaired: false,

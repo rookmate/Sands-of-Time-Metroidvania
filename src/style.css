@@ -4,3 +4,5 @@
 @import "./ui/styles/panels.css";
 @import "./ui/styles/responsive.css";
 @import "./ui/styles/orientation.css";
+
+@import "./ui/styles/explorerMap.css";

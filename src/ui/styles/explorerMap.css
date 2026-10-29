@@ -1,0 +1,228 @@
+/* A room atlas stays readable without shrinking the whole palace to fit. */
+.atlas-backdrop {
+  background: #10292bfa;
+  padding: 20px;
+  align-items: flex-start;
+}
+.explorer-panel {
+  width: 1100px;
+  color: #d7d5be;
+  font-size: 14px;
+}
+.explorer-panel .panel-heading {
+  margin-bottom: 12px;
+}
+.explorer-panel button,
+.explorer-panel select,
+.explorer-panel summary {
+  touch-action: manipulation;
+}
+.explorer-panel button,
+.explorer-panel select {
+  color: #e1dbc1;
+  border: 1px solid #657f72;
+  background: #193738;
+  border-radius: 2px;
+  min-height: 44px;
+  padding: 8px;
+  font: inherit;
+}
+.explorer-panel button:hover,
+.explorer-panel button[aria-pressed="true"] {
+  background: #36594c;
+  border-color: #e3c789;
+}
+.explorer-panel button:disabled {
+  opacity: 0.5;
+}
+.explorer-panel :focus-visible {
+  outline: 2px solid #f0d28d;
+  outline-offset: 2px;
+}
+.atlas-toolbar {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.atlas-toolbar label {
+  display: grid;
+  gap: 5px;
+  flex: 1;
+  min-width: 220px;
+}
+.atlas-toolbar select {
+  width: 100%;
+  max-width: 100%;
+}
+.atlas-toolbar > span {
+  padding-bottom: 10px;
+  color: #c0c9b4;
+}
+.atlas-location {
+  color: #e4cf9b;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #586b5e;
+}
+.atlas-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 2fr);
+  gap: 20px;
+}
+.atlas-caption,
+.atlas-key,
+.atlas-help {
+  font-size: 12px;
+  color: #bdc9ba;
+  line-height: 1.6;
+}
+.atlas-drawing {
+  position: relative;
+  height: var(--atlas-height);
+  min-height: 180px;
+}
+.atlas-drawing svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+.atlas-edge {
+  fill: none;
+  stroke: #aac5a7;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+.atlas-edge.restricted {
+  stroke: #d2b57f;
+  stroke-dasharray: 5 5;
+}
+.atlas-room {
+  position: absolute;
+  transform: translateY(-50%);
+  width: 32%;
+  background: #10292b;
+  text-align: center;
+}
+.atlas-room.left {
+  left: 0;
+}
+.atlas-room.right {
+  right: 0;
+}
+.atlas-room.selected {
+  left: 35%;
+  width: 30%;
+  padding: 12px 6px;
+  border: 2px solid #dcbe80;
+}
+.atlas-room.here {
+  border-color: #bfe3b1;
+}
+.atlas-room button {
+  width: 100%;
+  line-height: 1.3;
+}
+.atlas-room.unknown button {
+  border-style: dashed;
+}
+.atlas-room span {
+  display: block;
+  font-size: 11px;
+  line-height: 1.4;
+  margin-top: 4px;
+  color: #bdc9ba;
+}
+.atlas-detail {
+  border-left: 1px solid #586b5e;
+  padding-left: 20px;
+}
+.atlas-detail h3 {
+  font-size: 18px;
+  margin: 0 0 8px;
+  font-weight: 400;
+}
+.atlas-detail h4 {
+  margin: 18px 0 8px;
+  font-weight: 400;
+}
+.atlas-landmarks {
+  padding-left: 18px;
+  line-height: 1.7;
+}
+.atlas-era {
+  border-left: 2px solid #d3b67e;
+  padding-left: 10px;
+  line-height: 1.6;
+}
+.atlas-marker-tools {
+  border: 0;
+  padding: 0;
+  margin: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.atlas-marker-tools legend {
+  padding: 0 0 8px;
+}
+.atlas-passages {
+  padding: 0;
+  list-style: none;
+}
+.atlas-passages li {
+  padding: 10px 0;
+  border-top: 1px solid #586b5e;
+}
+.atlas-passages li > button {
+  text-align: left;
+  width: 100%;
+}
+.atlas-passages p {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+.passage-blocked,
+.passage-descent {
+  color: #e4bd88;
+}
+.passage-open {
+  color: #c3dfba;
+}
+.atlas-notes {
+  padding: 12px 0;
+  border-top: 1px solid #586b5e;
+}
+.atlas-notes summary {
+  cursor: pointer;
+  min-height: 30px;
+}
+.atlas-notes li {
+  margin: 8px 0;
+}
+@media (max-width: 700px), (max-height: 520px) {
+  .atlas-backdrop {
+    padding: 12px;
+  }
+  .atlas-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .atlas-detail {
+    border-left: 0;
+    border-top: 1px solid #586b5e;
+    padding: 12px 0 0;
+  }
+  .atlas-drawing {
+    height: var(--compact-height);
+  }
+  .atlas-toolbar {
+    gap: 8px;
+  }
+  .atlas-toolbar > span {
+    font-size: 12px;
+  }
+  .atlas-room {
+    font-size: 13px;
+  }
+}

@@ -435,3 +435,47 @@ This completes the nine additional expansion stages after the four regional
 foundations. Blind human discoverability, difficulty and first-playthrough
 pacing remain unmeasured. Room counts and automated route times do not establish
 a four-to-six-hour playthrough.
+
+### Explorer map
+
+M opens a paused room atlas for the expanded campaign. Choose a charted room
+in the index, or select a connected passage to inspect it. The diagram shows
+the selected room's immediate connections; positions are schematic, not compass
+directions, distances or doorway heights. The player stays put while you browse.
+A separate ◆ location line and a green room border identify your actual room;
+the gold border identifies a selected room elsewhere. Fountain, climb, machinery,
+mirror and echo symbols come from the room's authored content. Regional notes
+remember restored mechanisms, optional outcomes and recorded history.
+
+Only entered rooms expose names, landmarks and onward passages. Visible exits
+lead to anonymous unexplored stubs. The concealed Cypress facing does not appear
+until opened. Each passage lists outward and return conditions separately,
+including repairs, water, ability requirements, story mechanisms and the current
+local mirror era. The Hourglass descent warns before committing; its sealed
+return and the restored timeline remain sealed when inspected from another room.
+There is no objective arrow, automatic pathfinder or second campaign graph.
+
+Use Tab and Enter, native room selection, or touch to chart a place with a
+return flag, unfinished-puzzle mark or treasure-search mark. Remove marker clears
+it explicitly. Markers attach to shared room identities in both wing eras. They
+save through the existing campaign slot and fountain checkpoint, without healing,
+refilling sand or moving the player. Journey v14 migrates v13 and older saves
+with their discovered rooms and rewards intact and an empty marker collection.
+New Game clears markers. The map keeps simulation, power and echo timers paused;
+map input does not reach gameplay. Its native buttons and public select/mark
+actions are ready for the later controller pass; physical controller support is
+not established by this stage.
+
+Validation includes 218 passing tests and one existing conditional skip, with
+focused map regressions plus complete mortal gardens-first and sky-first
+campaigns and independent input replay. A rendered seeded sky-first route visited
+the optional opening, echoes, both wing eras, reservoir depths, history, pens,
+rival, mastery, lamp keeper and service crown before completing all forty anchors.
+Map checks at 23 route states covered water and irrigation changes, broken,
+repaired-but-locked and open lifts, era gates and both sides of the Hourglass
+boundary. Ordinary keyboard and emulated touch exercised add/remove markers,
+death/Retry, title Continue, reload, v13 migration, focus containment and frozen
+position/health/sand/clocks at 1440×960, 932×430 and 667×375. Chromium reported no
+page errors. Local ignored `artifacts/explorer-map/` contains scripts, reports,
+screenshots and route videos. These are source-informed software checks, not a
+blind human playtest, physical-device certification or a measured play duration.

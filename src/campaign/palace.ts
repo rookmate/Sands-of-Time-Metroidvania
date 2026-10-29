@@ -379,12 +379,16 @@ export function buildPalace(rooms: Record<string, CampaignRoom>) {
   rooms["warden-loft"].fountain = { x: 350, y: 650 };
 }
 
-export function palaceBlock(g: CampaignGame, d: CampaignDoor): string | null {
+export function palaceBlock(
+  g: CampaignGame,
+  d: CampaignDoor,
+  source = g.room.id,
+): string | null {
   const s = g.journey.palace;
   // The Hourglass descent is the explicit boundary. Rewound India has no return to Azad either.
   if (
     g.journey.completed.length >= 35 &&
-    g.room.id === "tomb" &&
+    source === "tomb" &&
     d.to === "hourglass"
   )
     return "Point of no return · the Hourglass descent sealed the old palace";

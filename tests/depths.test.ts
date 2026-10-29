@@ -306,7 +306,7 @@ it("migrates v12 and ending saves with predecessor state intact, rejects inconsi
   old.journey.version = 12;
   delete old.journey.depths;
   const migrated = parseCampaign(JSON.stringify(old))!;
-  expect(migrated.journey.version).toBe(13);
+  expect(migrated.journey.version).toBe(14);
   expect(migrated.journey.depths).toEqual({
     diverted: false,
     seals: 0,
