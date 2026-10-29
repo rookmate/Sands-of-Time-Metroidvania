@@ -143,7 +143,7 @@ it.each(["baths-main", "bathworks", "upper-baths"])(
     if (room !== "baths-main") raw.collected.push("bathworks-sand");
     const migrated = parseCampaign(JSON.stringify(raw));
     expect(migrated).not.toBeNull();
-    expect(migrated!.journey.version).toBe(2);
+    expect(migrated!.journey.version).toBe(3);
     expect(migrated!.journey.completed).toEqual(h.game.journey.completed);
     expect(migrated!.collected).toEqual(raw.collected);
     expect(migrated!.checkpoint.x).toBeLessThan(CAMPAIGN_ROOMS[room].width);
@@ -156,6 +156,12 @@ it("finishes the mortal campaign while declining the optional maintenance route"
   const report = h.step(240000);
   expect(report.status, report.error ?? "").toBe("passed");
   expect(report.rooms).not.toContain("maintenance");
+  expect(report.collected).not.toContain("keeper-cistern-vessel");
+  expect(report.rewards).toEqual({
+    attunement: null,
+    inscription: false,
+    maxSand: 6,
+  });
   expect(report.baths).toEqual({
     intake: true,
     drained: true,

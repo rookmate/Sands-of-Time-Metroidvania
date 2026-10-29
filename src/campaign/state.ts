@@ -5,7 +5,8 @@ import { SECTIONS } from "./sections";
 import type { Ability } from "../game/types";
 const KEY = "sands-of-time:campaign:v2";
 export const freshJourney = (): CampaignState => ({
-  version: 2,
+  version: 3,
+  rewards: { attunement: null, inscription: false },
   baths: { intake: false, drained: false, shortcut: false },
   completed: [],
   dagger: false,
@@ -67,11 +68,23 @@ export function parseCampaign(raw: string | null): CampaignSave | null {
         };
       }
     }
+    // Both earlier journey schemas keep their existing save slot and pickups.
+    if (data?.journey?.version === 2) {
+      data.journey.version = 3;
+      data.journey.rewards = { attunement: null, inscription: false };
+    }
     if (!parseSave(JSON.stringify(data), CAMPAIGN_ROOMS)) return null;
     const state: CampaignState = data.journey;
     if (
       !state ||
-      state.version !== 2 ||
+      state.version !== 3 ||
+      !state.rewards ||
+      ![null, "patience", "stillness"].includes(state.rewards.attunement) ||
+      typeof state.rewards.inscription !== "boolean" ||
+      ((state.rewards.attunement !== null ||
+        state.rewards.inscription ||
+        data.collected.includes("keeper-cistern-vessel")) &&
+        state.completed.length < 17) ||
       !state.baths ||
       ![state.baths.intake, state.baths.drained, state.baths.shortcut].every(
         (v) => typeof v === "boolean",

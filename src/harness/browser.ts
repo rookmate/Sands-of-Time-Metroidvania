@@ -29,6 +29,13 @@ export class BrowserHarness {
                 ? this.selection
                 : "campaign",
             immortal: params.get("immortal") !== "0",
+            exploreBaths: params.get("explore") !== "0",
+            optionalRewards:
+              params.get("rewards") === "patience"
+                ? "patience"
+                : params.get("rewards") === "stillness"
+                  ? "stillness"
+                  : false,
           });
     const speed = Number(params.get("speed") ?? 1);
     this.speed = [1, 4, 16].includes(speed) ? speed : 1;

@@ -1,5 +1,5 @@
 import { Game, type GameConfig } from "../game/Game";
-import type { Enemy, Options, Pickup } from "../game/types";
+import type { Ability, Enemy, Options, Pickup } from "../game/types";
 import { distance } from "../game/physics";
 import { loadOptions, writeOptions } from "../game/storage";
 import { isBoss } from "../game/enemies";
@@ -14,6 +14,7 @@ import {
 } from "./state";
 import { Puzzles } from "./puzzles";
 import { Farah } from "./companion";
+import { powerCost, rewardControls, sandCapacity } from "./rewards";
 import { bathsControl, bathsPlatforms } from "./baths";
 import type { CampaignDoor, CampaignSave } from "./types";
 
@@ -54,6 +55,12 @@ export class CampaignGame extends Game {
   }
   override get hasDagger() {
     return this.journey?.dagger ?? false;
+  }
+  override abilityCost(ability: Ability) {
+    return powerCost(ability, this.journey.rewards.attunement);
+  }
+  protected override get slowDuration() {
+    return this.journey.rewards.attunement === "patience" ? 9 : 6;
   }
   override get swordPower() {
     return this.journey.sword === 3 ? 12 : this.journey.sword === 2 ? 2 : 1;
@@ -97,6 +104,8 @@ export class CampaignGame extends Game {
         : freshJourney();
     this.activeRoom = "";
     super.start(continueJourney);
+    this.player.maxSand = sandCapacity(this.collected);
+    this.player.sand = this.hasDagger ? this.player.maxSand : 0;
     this.syncRoom();
     this.notify(
       continueJourney
@@ -147,7 +156,17 @@ export class CampaignGame extends Game {
       : base;
   }
   protected override claimItem(pickup: Pickup) {
-    if (pickup.kind === "dagger") {
+    if (pickup.kind === "vessel") {
+      this.player.maxSand = sandCapacity(this.collected);
+      this.player.sand = this.player.maxSand;
+      this.history = [];
+      this.showStory(
+        "Waterkeeper's vessel",
+        "Maximum sand increased from 6 to 8. The vessel fills your Dagger now; fountains and Retry restore the larger capacity.",
+        "The keepers saved two measures for the journey home. Time powers keep their usual reach.",
+        "ability",
+      );
+    } else if (pickup.kind === "dagger") {
       this.journey.dagger = true;
       this.abilities.add("rewind");
       this.player.sand = this.player.maxSand;
@@ -302,6 +321,8 @@ export class CampaignGame extends Game {
     const feet = { x: this.player.x + 15, y: this.player.y + this.player.h };
     const control = this.puzzles?.controls.find((c) => distance(feet, c) < 85);
     if (control) return control;
+    const reward = rewardControls(this).find((c) => distance(feet, c) < 85);
+    if (reward) return reward;
     const regional = this.regionalControl;
     if (regional && distance(feet, regional) < 85) return regional;
     const index = SECTIONS.findIndex((s) => s.id === this.room.id);

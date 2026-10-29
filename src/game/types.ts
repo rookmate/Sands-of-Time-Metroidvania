@@ -39,7 +39,15 @@ export interface Door extends Vec {
   hint?: string;
 }
 export type PickupKind =
-  "rewind" | "slow" | "freeze" | "dash" | "sand" | "heart" | "dagger" | "sword";
+  | "rewind"
+  | "slow"
+  | "freeze"
+  | "dash"
+  | "sand"
+  | "heart"
+  | "dagger"
+  | "sword"
+  | "vessel";
 export interface Pickup extends Vec {
   id: string;
   kind: PickupKind;

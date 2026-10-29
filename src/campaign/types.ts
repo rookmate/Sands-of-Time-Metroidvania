@@ -82,7 +82,11 @@ export interface PuzzleState {
 export type FarahState =
   "unknown" | "following" | "separated" | "gone" | "dead" | "restored";
 export interface CampaignState {
-  version: 2;
+  version: 3;
+  rewards: {
+    attunement: import("./rewards").Attunement | null;
+    inscription: boolean;
+  };
   baths: BathsState;
   completed: string[];
   dagger: boolean;

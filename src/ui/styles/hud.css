@@ -38,15 +38,21 @@
 }
 .sand-grains {
   display: flex;
+  flex: 1;
+  min-width: 0;
+  max-width: 140px;
   gap: 4px;
 }
 .sand-grains > span {
+  flex: 1;
+  min-width: 0;
   width: 20px;
   height: 5px;
   background: linear-gradient(90deg, #88c6b7 var(--fill), #163b3e var(--fill));
   border: 1px solid #acd4b84d;
 }
 .sand-count {
+  white-space: nowrap;
   font: 9px var(--mono);
   color: #cfddca;
 }

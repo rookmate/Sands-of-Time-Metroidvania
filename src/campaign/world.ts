@@ -1,6 +1,7 @@
 import type { EnemySpawn, Pickup } from "../game/types";
 import { geometry } from "./layouts";
 import type { CampaignRoom } from "./types";
+import { buildRewardRooms } from "./rewards";
 import { buildBaths } from "./baths";
 import { SECTIONS } from "./sections";
 
@@ -110,3 +111,5 @@ export const CAMPAIGN_ROOMS: Record<string, CampaignRoom> = Object.fromEntries(
 
 // This is the campaign graph. Story anchors remain in SECTIONS.
 buildBaths(CAMPAIGN_ROOMS);
+
+buildRewardRooms(CAMPAIGN_ROOMS);

@@ -201,11 +201,13 @@ export class Renderer {
           ? "#eac582"
           : pickup.kind === "heart"
             ? "#e1a296"
-            : pickup.kind === "dagger"
-              ? "#78e2d4"
-              : pickup.kind === "sword"
-                ? "#e8e2cf"
-                : ABILITIES[pickup.kind].color;
+            : pickup.kind === "vessel"
+              ? "#eac582"
+              : pickup.kind === "dagger"
+                ? "#78e2d4"
+                : pickup.kind === "sword"
+                  ? "#e8e2cf"
+                  : ABILITIES[pickup.kind].color;
       glow(
         c,
         pickup.x,
@@ -234,7 +236,29 @@ export class Renderer {
         c.lineWidth = 1;
         c.strokeRect(-19, -19, 38, 38);
         c.restore();
-        if (pickup.kind === "heart")
+        if (pickup.kind === "vessel") {
+          polygon(
+            c,
+            [
+              [pickup.x - 6, pickup.y + bob - 15],
+              [pickup.x + 6, pickup.y + bob - 15],
+              [pickup.x + 12, pickup.y + bob + 7],
+              [pickup.x + 6, pickup.y + bob + 17],
+              [pickup.x - 6, pickup.y + bob + 17],
+              [pickup.x - 12, pickup.y + bob + 7],
+            ],
+            color,
+          );
+          line(
+            c,
+            [
+              [pickup.x - 9, pickup.y + bob - 15],
+              [pickup.x + 9, pickup.y + bob - 15],
+            ],
+            "#f0dfb6",
+            3,
+          );
+        } else if (pickup.kind === "heart")
           polygon(
             c,
             [
