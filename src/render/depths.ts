@@ -1,5 +1,5 @@
 import type { CampaignGame } from "../campaign/CampaignGame";
-import type { Game } from "../game/Game";
+import type { Room } from "../game/types";
 import { DEPTHS_IDS } from "../campaign/depthsRooms";
 import { ellipse, line, polygon, type Context } from "./shapes";
 
@@ -42,9 +42,9 @@ function wheel(c: Context, x: number, y: number, done: boolean, label: string) {
 }
 // Opaque room-local walls cover the shared outdoor water backdrop before doors,
 // terrain and actors are drawn. Nothing in the simulation depends on this art.
-export function drawDepthsBackdrop(c: Context, g: Game) {
-  if (!DEPTHS_IDS.includes(g.room.id)) return;
-  const { width, height } = g.room;
+export function drawDepthsBackdrop(c: Context, room: Room) {
+  if (!DEPTHS_IDS.includes(room.id)) return;
+  const { width, height } = room;
   c.fillStyle = "#152d31";
   c.fillRect(0, 0, width, height);
   for (let y = 50; y < height; y += 72) {

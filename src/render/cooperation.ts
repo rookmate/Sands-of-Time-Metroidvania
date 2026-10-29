@@ -2,7 +2,7 @@ import type { CampaignGame } from "../campaign/CampaignGame";
 import { cooperationStatus, FARAH_STAIR } from "../campaign/cooperation";
 import { ellipse, line, type Context } from "./shapes";
 
-export function drawCooperation(c: Context, g: CampaignGame) {
+export function drawCooperation(c: Context, g: CampaignGame, time: number) {
   const id = g.room.id,
     s = g.journey.cooperation;
   if (!["bathworks", "spillway", "valve-loft"].includes(id)) return;
@@ -37,7 +37,7 @@ export function drawCooperation(c: Context, g: CampaignGame) {
     for (let n = 0; n < 5; n++)
       ellipse(
         c,
-        967 + Math.sin(g.visualTime * 2 + n) * 8,
+        967 + Math.sin(time * 2 + n) * 8,
         630 - n * 12,
         20,
         9,
