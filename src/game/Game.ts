@@ -15,6 +15,7 @@ import type {
   StoryFlag,
   Vec,
 } from "./types";
+import { SWORD, swordDuration, swordHitbox, swordPhase } from "./combat";
 import { Input } from "./input";
 import { Sound } from "./audio";
 import {
@@ -92,6 +93,7 @@ export class Game {
   checkpoint = { room: START.room, x: START.x, y: START.y };
   saved: SaveData | null;
   attackId = 0;
+  private attackBuffer = 0;
   private footstep = 0;
   private sandRefill = 0;
   constructor(readonly config: GameConfig = {}) {
@@ -205,6 +207,7 @@ export class Game {
   }
   setScreen(screen: Screen) {
     this.screen = screen;
+    this.attackBuffer = 0;
     this.input.clear();
   }
   menuKey(action: "map" | "pause") {
@@ -274,6 +277,8 @@ export class Game {
     this.player.invincible = 1;
     this.player.dashTime = 0;
     this.player.attack = 0;
+    this.player.attackCooldown = 0;
+    this.attackBuffer = 0;
     this.player.grounded = false;
     this.worldTime = 0;
     this.slowTime = 0;
@@ -381,6 +386,8 @@ export class Game {
     )
       return;
     this.player.health -= this.options.assist ? 1 : amount;
+    this.player.attack = 0;
+    this.attackBuffer = 0;
     this.player.invincible = this.options.assist ? 1.8 : 1.1;
     this.player.vx = direction * 280;
     this.player.vy = -230;
@@ -477,6 +484,8 @@ export class Game {
       this.player.sand > dt &&
       this.history.length > 2;
     if (this.rewinding) {
+      this.player.attack = 0;
+      this.attackBuffer = 0;
       for (let i = 0; i < 2 && this.history.length > 0; i++) {
         const memory = this.history.pop()!;
         this.ghosts.push({
@@ -510,21 +519,20 @@ export class Game {
     player.comboWindow = Math.max(0, player.comboWindow - dt);
     player.attack = Math.max(0, player.attack - dt);
     player.attackCooldown = Math.max(0, player.attackCooldown - dt);
-    if (this.input.consume("attack") && player.attackCooldown <= 0) {
+    this.attackBuffer = Math.max(0, this.attackBuffer - dt);
+    if (this.input.consume("attack")) this.attackBuffer = SWORD.buffer;
+    if (this.attackBuffer > 0 && player.attackCooldown <= 0) {
+      this.attackBuffer = 0;
       player.combo = player.comboWindow > 0 ? (player.combo + 1) % 3 : 1;
       player.comboWindow = 0.8;
-      player.attack = 0.24;
-      player.attackCooldown = player.combo === 0 ? 0.4 : 0.3;
+      player.attack = swordDuration(player.combo);
+      player.attackCooldown = player.attack;
       this.attackId++;
       this.sound.play("attack");
     }
-    if (player.attack <= 0) return;
-    const hitbox = {
-      x: player.face > 0 ? player.x + 10 : player.x - 72,
-      y: player.y - 8,
-      w: 94,
-      h: 76,
-    };
+    if (swordPhase(player) !== "active") return;
+    const hitbox = swordHitbox(player);
+    let contacted = false;
     for (const enemy of this.enemies) {
       if (
         enemy.dead ||
@@ -540,15 +548,20 @@ export class Game {
         (["king", "double", "vizier", "rival"].includes(enemy.kind)
           ? Math.min(2, this.swordPower)
           : this.swordPower);
-      enemy.hitFlash = 0.15;
-      enemy.x += player.face * (isBoss(enemy.kind) ? 4 : 15);
-      if (!isBoss(enemy.kind)) {
+      contacted = true;
+      enemy.hitFlash = 0.12;
+      if (!isBoss(enemy.kind) && enemy.behavior !== "ram") {
+        enemy.hitStun = SWORD.recoil;
+        enemy.vx = player.face * 125;
         enemy.telegraph = 0;
         enemy.cooldown = Math.max(enemy.cooldown, 0.45);
       }
-      this.burst(enemy.x + 17, enemy.y + 20, "#e9c778", 12);
-      this.shake = 0.1;
-      this.sound.play("hit");
+      this.burst(
+        player.face > 0 ? enemy.x : enemy.x + enemy.w,
+        Math.max(enemy.y + 8, Math.min(player.y + 24, enemy.y + enemy.h - 8)),
+        "#fff0bf",
+        8,
+      );
       if (enemy.health > 0) continue;
       enemy.dead = true;
       this.burst(enemy.x + 17, enemy.y + 20, "#7de0d0", 30);
@@ -559,6 +572,11 @@ export class Game {
         );
       this.sound.play("sand");
       this.enemyDefeated(enemy);
+    }
+    // One impact per simulation step, even when a crowd shares the blade.
+    if (contacted) {
+      this.shake = Math.max(this.shake, 0.075);
+      this.sound.play("impact");
     }
   }
   protected enemySandReward(enemy: Enemy) {

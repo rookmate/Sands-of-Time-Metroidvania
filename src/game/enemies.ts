@@ -80,6 +80,12 @@ export function stepEnemies(
       stepRam(enemy, player, platforms, tier, dt, damage);
       continue;
     }
+    if ((enemy.hitStun ?? 0) > 0) {
+      enemy.hitStun = Math.max(0, enemy.hitStun! - dt);
+      enemy.vy += GRAVITY * dt;
+      moveBody(enemy, platforms, dt);
+      continue;
+    }
     const stats = enemyStats(tier, enemy.kind);
     const dx = player.x - enemy.x,
       dy = Math.abs(player.y + player.h - enemy.y - enemy.h);

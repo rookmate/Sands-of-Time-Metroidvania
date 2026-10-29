@@ -1,3 +1,4 @@
+import { spawnEnemies, stepEnemies } from "../src/game/enemies";
 import { setMaxListeners } from "node:events";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { CampaignGame } from "../src/campaign/CampaignGame";
@@ -210,3 +211,74 @@ it.each(["freezeTime", "slowTime"] as const)(
     );
   },
 );
+
+it("bounds impact shake during Freeze and suppresses it for menus and motion settings", () => {
+  const g = new CampaignGame({ persist: false });
+  g.begin();
+  g.freezeTime = 2;
+  g.shake = 0.075;
+  g.options.shake = true;
+  const r = new Renderer(canvas(), () => g);
+  r.draw();
+  const cameraX = () => {
+    calls.length = 0;
+    r.draw();
+    return Number(calls.find((call) => call.name === "translate")?.args[0]);
+  };
+  g.visualTime = 0.01;
+  const first = cameraX();
+  g.visualTime = 0.03;
+  expect(cameraX()).not.toBe(first);
+  expect(Math.abs(cameraX() + g.camera.x)).toBeLessThan(1);
+  reduced = true;
+  expect(cameraX()).toBeCloseTo(-g.camera.x);
+  reduced = false;
+  g.options.shake = false;
+  expect(cameraX()).toBeCloseTo(-g.camera.x);
+  g.options.shake = true;
+  g.setScreen("pause");
+  expect(cameraX()).toBeCloseTo(-g.camera.x);
+});
+
+it("keeps ordinary windup warnings nondirectional when the Prince crosses sides", () => {
+  const g = new CampaignGame({ persist: false });
+  g.begin();
+  g.enterRoom("release");
+  const e = spawnEnemies(
+    [{ kind: "guard", x: 500, y: 650, patrol: [0, 1280] }],
+    0,
+    false,
+    false,
+  )[0];
+  Object.assign(e, { face: 1, cooldown: 0 });
+  Object.assign(g.player, { x: 550, y: 594 });
+  const hurt = vi.fn();
+  stepEnemies([e], g.player, g.platforms, [], g.tier, 1 / 120, false, hurt);
+  expect(e.telegraph).toBeGreaterThan(0);
+  const c = canvas().getContext("2d")!;
+  const cue = () => {
+    calls.length = 0;
+    actors.drawEnemy(c, e, g.worldTime, false);
+    // The underfoot brace marks the source. It has no arrowhead or safe side.
+    return calls.filter(
+      (call) =>
+        ["moveTo", "lineTo"].includes(call.name) && Number(call.args[1]) > 640,
+    );
+  };
+  const before = cue();
+  expect(before.map((call) => call.args)).toEqual([
+    [503, 644],
+    [517, 648],
+    [531, 644],
+  ]);
+  g.player.x = 450;
+  for (let i = 0; i < 30; i++)
+    stepEnemies([e], g.player, g.platforms, [], g.tier, 1 / 120, false, hurt);
+  expect(e.face).toBe(1); // The simulation tracks the target without changing this pose.
+  expect(cue()).toEqual(before);
+  e.face = -1;
+  expect(cue()).toEqual(before);
+  for (let i = 0; i < 30; i++)
+    stepEnemies([e], g.player, g.platforms, [], g.tier, 1 / 120, false, hurt);
+  expect(hurt).toHaveBeenCalledWith(1, -1);
+});

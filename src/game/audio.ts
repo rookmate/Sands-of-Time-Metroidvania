@@ -42,7 +42,15 @@ export class Sound {
   }
   play(
     kind:
-      "jump" | "attack" | "hit" | "sand" | "power" | "save" | "death" | "step",
+      | "jump"
+      | "attack"
+      | "impact"
+      | "hit"
+      | "sand"
+      | "power"
+      | "save"
+      | "death"
+      | "step",
   ) {
     if (!this.options.sfx) return;
     switch (kind) {
@@ -51,6 +59,10 @@ export class Sound {
         break;
       case "attack":
         this.tone(390, 0.12, "triangle", 0.25, 70);
+        break;
+      case "impact":
+        this.tone(850, 0.065, "triangle", 0.23, 180);
+        this.tone(165, 0.1, "sine", 0.3, 60);
         break;
       case "hit":
         this.tone(100, 0.17, "sawtooth", 0.25, 38);

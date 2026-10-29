@@ -109,7 +109,14 @@ it.each(RIVAL_IDS)(
         ]),
       );
     else run(h.walk(770));
-    input(g, "attack");
+    input(
+      g,
+      g.enemies[0].x + g.enemies[0].w / 2 > g.player.x + g.player.w / 2
+        ? "right"
+        : "left",
+      "attack",
+    );
+    for (let i = 0; i < 6; i++) g.update(1 / 120);
     expect(g.enemies[0].health).toBeLessThan(g.enemies[0].maxHealth);
     g.save(false);
     h.game = reloadCampaign(g);
@@ -268,6 +275,7 @@ it("lets ordinary jump inputs evade the committed thrust and punish its recovery
   expect(e.cooldown).toBeGreaterThan(0.3);
   run(h.walk(e.x + 55));
   input(g, "left", "attack");
+  for (let i = 0; i < 6; i++) g.update(1 / 120);
   expect(e.health).toBeLessThan(e.maxHealth);
 });
 it("casts at gallery height with a full warning and safe shelter below; a missed muster jump can recover", () => {

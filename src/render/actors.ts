@@ -1,3 +1,4 @@
+import { SWORD, swordDuration, swordPhase } from "../game/combat";
 import { drawRival } from "./rival";
 import type { Enemy, Player } from "../game/types";
 import { ellipse, line, polygon, type Context } from "./shapes";
@@ -134,8 +135,11 @@ export function drawPrince(
   c.fillStyle = "#e0be71";
   c.fillRect(1, 3, 4, 5);
   // Arms and sword change with the combat pose.
-  const attacking = player.attack > 0;
-  const armX = attacking ? 28 : airborne ? 18 : 13 + stride * 5;
+  const phase = swordPhase(player);
+  const attacking = phase !== "idle";
+  const elapsed = swordDuration(player.combo) - player.attack;
+  const armX =
+    phase === "windup" ? 7 : attacking ? 28 : airborne ? 18 : 13 + stride * 5;
   const armY = attacking
     ? player.combo === 2
       ? -20
@@ -166,14 +170,20 @@ export function drawPrince(
   c.fillStyle = "#526c6c";
   c.fillRect(armX - 3, armY - 4, 5, 7);
   if (attacking) {
-    const swing = (0.24 - player.attack) / 0.24;
+    const swing = Math.max(
+      0,
+      Math.min(1, (elapsed - SWORD.windup) / SWORD.active),
+    );
+    const angle =
+      phase === "windup"
+        ? -1.25
+        : phase === "active"
+          ? -0.45 + swing * 1.1
+          : 0.65 +
+            Math.min(1, (elapsed - SWORD.windup - SWORD.active) / 0.16) * 0.8;
     c.save();
     c.translate(armX, armY);
-    c.rotate(
-      player.combo === 2
-        ? 1.3 - swing * 2.5
-        : -0.9 + swing * (player.combo === 0 ? 3.6 : 2.4),
-    );
+    c.rotate(angle);
     polygon(
       c,
       [
@@ -195,16 +205,18 @@ export function drawPrince(
       3,
     );
     c.restore();
-    c.beginPath();
-    c.ellipse(20, -2, 58, 45, 0, -1.4 + swing, 0.2 + swing);
-    c.strokeStyle = "#f1e0ad99";
-    c.lineWidth = 4;
-    c.stroke();
-    c.beginPath();
-    c.ellipse(20, -2, 65, 49, 0, -1.2 + swing, 0.1 + swing);
-    c.strokeStyle = "#faf7d540";
-    c.lineWidth = 2;
-    c.stroke();
+    if (phase === "active") {
+      c.beginPath();
+      c.ellipse(20, -2, 58, 38, 0, -0.6 + swing, 0.55 + swing);
+      c.strokeStyle = "#f1e0ad99";
+      c.lineWidth = 4;
+      c.stroke();
+      c.beginPath();
+      c.ellipse(20, -2, 65, 49, 0, -1.2 + swing, 0.1 + swing);
+      c.strokeStyle = "#faf7d540";
+      c.lineWidth = 2;
+      c.stroke();
+    }
   } else {
     polygon(
       c,
@@ -293,6 +305,7 @@ export function drawEnemy(
   if (enemy.kind === "bird") {
     c.save();
     c.translate(enemy.x + 15, enemy.y + 15);
+    if (enemy.hitFlash > 0) c.filter = "brightness(2.5)";
     const flap = Math.sin(time * 12) * 15;
     polygon(
       c,
@@ -310,6 +323,7 @@ export function drawEnemy(
     c.fillStyle = "#ebc777";
     c.fillRect(2, -5, 3, 2);
     c.restore();
+    drawEnemyStatus(c, enemy, frozen);
     return;
   }
   if (enemy.kind === "scarab" || enemy.behavior === "ram") {
@@ -322,6 +336,7 @@ export function drawEnemy(
   c.save();
   c.translate(enemy.x + enemy.w / 2, enemy.y + enemy.h - 29 * scale);
   c.scale(enemy.face * scale, scale);
+  if ((enemy.hitStun ?? 0) > 0) c.rotate(-0.16);
   if (enemy.hitFlash > 0) c.filter = "brightness(2.5)";
   const color = frozen ? "#75a9bc" : boss ? "#544a60" : "#74776b";
   const stride =
@@ -458,6 +473,39 @@ export function drawEnemy(
   drawEnemyStatus(c, enemy, frozen);
 }
 function drawEnemyStatus(c: Context, enemy: Enemy, frozen: boolean) {
+  if (!isBoss(enemy.kind) && enemy.behavior !== "ram") {
+    const x = enemy.x + enemy.w / 2,
+      feet = enemy.y + enemy.h;
+    if (enemy.telegraph > 0) {
+      // Ordinary strikes track the Prince until release. Mark the attacker,
+      // rather than promising a committed direction or a safe side.
+      line(
+        c,
+        [
+          [x - 14, feet - 6],
+          [x, feet - 2],
+          [x + 14, feet - 6],
+        ],
+        "#ffe1a3",
+        2,
+      );
+      const ready = Math.max(0, Math.min(1, 1 - enemy.telegraph / 0.48));
+      c.fillStyle = "#273334";
+      c.fillRect(x - 13, enemy.y - 22, 26, 4);
+      c.fillStyle = "#ffe1a3";
+      c.fillRect(x - 13, enemy.y - 22, 26 * ready, 4);
+    } else if ((enemy.hitStun ?? 0) > 0) {
+      line(
+        c,
+        [
+          [x - 10, feet - 3],
+          [x + 10, feet - 3],
+        ],
+        "#fff0bf",
+        3,
+      );
+    }
+  }
   if (enemy.health < enemy.maxHealth && !isBoss(enemy.kind)) {
     c.fillStyle = "#182b2a";
     c.fillRect(enemy.x - 6, enemy.y - 13, enemy.w + 12, 3);
